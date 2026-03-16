@@ -9,6 +9,7 @@ import com.company.aifactory.repository.FactoryTaskRepository;
 import com.company.aifactory.repository.FactoryTaskStepRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -217,7 +218,11 @@ public class TaskService {
 
         if (StepStatus.SUCCESS.name().equalsIgnoreCase(request.getStatus())) {
             step.setStepStatus(StepStatus.SUCCESS.name());
-            task.setCurrentStatus(TaskStatus.CODE_SUCCESS.name());
+            if (isPrepareOrPlanPhase(request.getOutputPayload())) {
+                task.setCurrentStatus(TaskStatus.PLANNED.name());
+            } else {
+                task.setCurrentStatus(TaskStatus.CODE_SUCCESS.name());
+            }
         } else {
             step.setStepStatus(StepStatus.FAILED.name());
             step.setErrorCode(request.getErrorCode());
@@ -292,6 +297,23 @@ public class TaskService {
             return first;
         }
         return second;
+    }
+
+    private boolean isPrepareOrPlanPhase(String outputPayload) {
+        if (outputPayload == null || outputPayload.isBlank()) {
+            return false;
+        }
+        try {
+            JsonNode root = objectMapper.readTree(outputPayload);
+            JsonNode phase = root.get("phase");
+            if (phase == null || phase.isNull()) {
+                return false;
+            }
+            String value = phase.asText();
+            return "prepare".equalsIgnoreCase(value) || "plan".equalsIgnoreCase(value);
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     private String buildJson(Map<String, Object> map) {
