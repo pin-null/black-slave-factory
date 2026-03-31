@@ -1,0 +1,24 @@
+{
+  "name": "@openclaw/imessage",
+  "version": "2026.3.14",
+  "private": true,
+  "description": "OpenClaw iMessage channel plugin",
+  "type": "module",
+  "openclaw": {
+    "extensions": [
+      "./index.ts"
+    ],
+    "setupEntry": "./setup-entry.ts",
+    "channel": {
+      "id": "imessage",
+      "label": "iMessage (Legacy)",
+      "selectionLabel": "iMessage (Legacy)",
+      "detailLabel": "iMessage (Legacy)",
+      "docsPath": "/gateway/configuration-reference#imessage",
+      "docsLabel": "imessage",
+      "blurb": "Legacy macOS-only iMessage/SMS bridge retained for compatibility.",
+      "systemImage": "message.fill",
+      "deprecated": true
+    }
+  }
+}

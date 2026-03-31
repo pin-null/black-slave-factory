@@ -1,0 +1,123 @@
+import fs from "node:fs/promises";
+import path from "node:path";
+import { expect, it } from "vitest";
+import type { ChannelPlugin } from "../channels/plugins/types.plugin.js";
+import { createEmptyPluginRegistry } from "../plugins/registry-empty.js";
+import type { PluginRegistry } from "../plugins/registry.js";
+import { setActivePluginRegistry } from "../plugins/runtime.js";
+
+// Narrow public testing surface for plugin authors.
+// Keep this list additive and limited to helpers we are willing to support.
+
+export { removeAckReactionAfterReply, shouldAckReaction } from "../channels/ack-reactions.js";
+export type { ChannelAccountSnapshot, ChannelGatewayContext } from "../channels/plugins/types.js";
+export type { OpenClawConfig } from "../config/config.js";
+export type { PluginRuntime } from "../plugins/runtime/types.js";
+export type { RuntimeEnv } from "../runtime.js";
+export type { MockFn } from "../test-utils/vitest-mock-fn.js";
+
+export type TestChannelRegistration = {
+  pluginId: string;
+  plugin: ChannelPlugin;
+  source: string;
+};
+
+export function createTestPluginRegistry(channels: TestChannelRegistration[] = []): PluginRegistry {
+  const registry = createEmptyPluginRegistry();
+  registry.channels = channels.map((entry) => ({
+    pluginId: entry.pluginId,
+    plugin: entry.plugin,
+    source: entry.source,
+  }));
+  registry.channelSetups = channels.map((entry) => ({
+    pluginId: entry.pluginId,
+    plugin: entry.plugin,
+    source: entry.source,
+    enabled: true,
+  }));
+  return registry;
+}
+
+export function setActiveTestPluginRegistry(
+  channels: TestChannelRegistration[] = [],
+): PluginRegistry {
+  const registry = createTestPluginRegistry(channels);
+  setActivePluginRegistry(registry);
+  return registry;
+}
+
+export async function createWindowsCmdShimFixture(params: {
+  shimPath: string;
+  scriptPath: string;
+  shimLine: string;
+}): Promise<void> {
+  await fs.mkdir(path.dirname(params.scriptPath), { recursive: true });
+  await fs.mkdir(path.dirname(params.shimPath), { recursive: true });
+  await fs.writeFile(params.scriptPath, "module.exports = {};\n", "utf8");
+  await fs.writeFile(params.shimPath, `@echo off\r\n${params.shimLine}\r\n`, "utf8");
+}
+
+type ResolveTargetMode = "explicit" | "implicit" | "heartbeat";
+
+type ResolveTargetResult = {
+  ok: boolean;
+  to?: string;
+  error?: unknown;
+};
+
+type ResolveTargetFn = (params: {
+  to?: string;
+  mode: ResolveTargetMode;
+  allowFrom: string[];
+}) => ResolveTargetResult;
+
+export function installCommonResolveTargetErrorCases(params: {
+  resolveTarget: ResolveTargetFn;
+  implicitAllowFrom: string[];
+}) {
+  const { resolveTarget, implicitAllowFrom } = params;
+
+  it("should error on normalization failure with allowlist (implicit mode)", () => {
+    const result = resolveTarget({
+      to: "invalid-target",
+      mode: "implicit",
+      allowFrom: implicitAllowFrom,
+    });
+
+    expect(result.ok).toBe(false);
+    expect(result.error).toBeDefined();
+  });
+
+  it("should error when no target provided with allowlist", () => {
+    const result = resolveTarget({
+      to: undefined,
+      mode: "implicit",
+      allowFrom: implicitAllowFrom,
+    });
+
+    expect(result.ok).toBe(false);
+    expect(result.error).toBeDefined();
+  });
+
+  it("should error when no target and no allowlist", () => {
+    const result = resolveTarget({
+      to: undefined,
+      mode: "explicit",
+      allowFrom: [],
+    });
+
+    expect(result.ok).toBe(false);
+    expect(result.error).toBeDefined();
+  });
+
+  it("should handle whitespace-only target", () => {
+    const result = resolveTarget({
+      to: "   ",
+      mode: "explicit",
+      allowFrom: [],
+    });
+
+    expect(result.ok).toBe(false);
+    expect(result.error).toBeDefined();
+  });
+}
