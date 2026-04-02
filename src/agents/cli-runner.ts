@@ -2,6 +2,7 @@ import type { ImageContent } from "@mariozechner/pi-ai";
 import { resolveHeartbeatPrompt } from "../auto-reply/heartbeat.js";
 import type { ThinkLevel } from "../auto-reply/thinking.js";
 import type { OpenClawConfig } from "../config/config.js";
+import type { PermissionTier } from "../config/types.tools.js";
 import { shouldLogVerbose } from "../globals.js";
 import { isTruthyEnvValue } from "../infra/env.js";
 import { requestHeartbeatNow } from "../infra/heartbeat-wake.js";
@@ -38,6 +39,10 @@ import {
 import { resolveOpenClawDocsPath } from "./docs-path.js";
 import { FailoverError, resolveFailoverStatus } from "./failover-error.js";
 import {
+  appendPermissionSnapshotToSystemPrompt,
+  buildPermissionSnapshot,
+} from "./permission-snapshot.js";
+import {
   classifyFailoverReason,
   isFailoverErrorMessage,
   resolveBootstrapMaxChars,
@@ -53,6 +58,7 @@ const log = createSubsystemLogger("agent/claude-cli");
 export async function runCliAgent(params: {
   sessionId: string;
   sessionKey?: string;
+  sessionPermissionTier?: PermissionTier;
   agentId?: string;
   sessionFile: string;
   workspaceDir: string;
@@ -153,18 +159,23 @@ export async function runCliAgent(params: {
     cwd: process.cwd(),
     moduleUrl: import.meta.url,
   });
-  const systemPrompt = buildSystemPrompt({
-    workspaceDir,
-    config: params.config,
-    defaultThinkLevel: params.thinkLevel,
-    extraSystemPrompt,
-    ownerNumbers: params.ownerNumbers,
-    heartbeatPrompt,
-    docsPath: docsPath ?? undefined,
-    tools: [],
-    contextFiles,
-    modelDisplay,
-    agentId: sessionAgentId,
+  const systemPrompt = appendPermissionSnapshotToSystemPrompt({
+    systemPrompt: buildSystemPrompt({
+      workspaceDir,
+      config: params.config,
+      defaultThinkLevel: params.thinkLevel,
+      extraSystemPrompt,
+      ownerNumbers: params.ownerNumbers,
+      heartbeatPrompt,
+      docsPath: docsPath ?? undefined,
+      tools: [],
+      contextFiles,
+      modelDisplay,
+      agentId: sessionAgentId,
+    }),
+    permissionSnapshot: buildPermissionSnapshot({
+      configuredTier: params.sessionPermissionTier,
+    }),
   });
   const systemPromptReport = buildSystemPromptReport({
     source: "run",

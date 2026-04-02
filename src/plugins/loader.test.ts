@@ -223,25 +223,7 @@ function setupBundledTelegramPlugin() {
 function expectTelegramLoaded(registry: ReturnType<typeof loadOpenClawPlugins>) {
   const telegram = registry.plugins.find((entry) => entry.id === "telegram");
   expect(telegram?.status).toBe("loaded");
-  expectSuppressedChannelRegistration(registry, "telegram");
-}
-
-function expectSuppressedChannelRegistration(
-  registry: ReturnType<typeof loadOpenClawPlugins>,
-  channelId: string,
-  pluginId = channelId,
-) {
-  expect(registry.channels.some((entry) => entry.plugin.id === channelId)).toBe(false);
-  expect(registry.channelSetups.some((entry) => entry.plugin.id === channelId)).toBe(false);
-  expect(
-    registry.diagnostics.some(
-      (entry) =>
-        entry.level === "warn" &&
-        entry.pluginId === pluginId &&
-        entry.message ===
-          `channel registration ignored: ${channelId} (only internal webchat is retained)`,
-    ),
-  ).toBe(true);
+  expect(registry.channels.some((entry) => entry.plugin.id === "telegram")).toBe(true);
 }
 
 function useNoBundledPlugins() {
@@ -1678,7 +1660,7 @@ module.exports = { id: "skipped-scoped-only", register() { throw new Error("skip
     useNoBundledPlugins();
     const scenarios = [
       {
-        label: "loads channel plugins but suppresses external channel surfaces",
+        label: "registers channel plugins",
         pluginId: "channel-demo",
         body: `module.exports = { id: "channel-demo", register(api) {
   api.registerChannel({
@@ -1701,14 +1683,12 @@ module.exports = { id: "skipped-scoped-only", register() { throw new Error("skip
   });
 } };`,
         assert: (registry: ReturnType<typeof loadOpenClawPlugins>) => {
-          expect(registry.plugins.find((entry) => entry.id === "channel-demo")?.status).toBe(
-            "loaded",
-          );
-          expectSuppressedChannelRegistration(registry, "demo", "channel-demo");
+          const channel = registry.channels.find((entry) => entry.plugin.id === "demo");
+          expect(channel).toBeDefined();
         },
       },
       {
-        label: "emits warnings for duplicate suppressed channel registrations",
+        label: "rejects duplicate channel ids during plugin registration",
         pluginId: "channel-dup",
         body: `module.exports = { id: "channel-dup", register(api) {
   api.registerChannel({
@@ -1749,19 +1729,15 @@ module.exports = { id: "skipped-scoped-only", register() { throw new Error("skip
   });
 } };`,
         assert: (registry: ReturnType<typeof loadOpenClawPlugins>) => {
-          expect(registry.channels.filter((entry) => entry.plugin.id === "demo")).toHaveLength(0);
-          expect(registry.channelSetups.filter((entry) => entry.plugin.id === "demo")).toHaveLength(
-            0,
-          );
+          expect(registry.channels.filter((entry) => entry.plugin.id === "demo")).toHaveLength(1);
           expect(
-            registry.diagnostics.filter(
+            registry.diagnostics.some(
               (entry) =>
-                entry.level === "warn" &&
+                entry.level === "error" &&
                 entry.pluginId === "channel-dup" &&
-                entry.message ===
-                  "channel registration ignored: demo (only internal webchat is retained)",
+                entry.message === "channel already registered: demo (channel-dup)",
             ),
-          ).toHaveLength(2);
+          ).toBe(true);
         },
       },
       {
@@ -2238,9 +2214,8 @@ module.exports = {
     });
 
     expect(fs.existsSync(marker)).toBe(true);
-    expect(setupRegistry.channelSetups).toHaveLength(0);
+    expect(setupRegistry.channelSetups).toHaveLength(1);
     expect(setupRegistry.channels).toHaveLength(0);
-    expectSuppressedChannelRegistration(setupRegistry, "lazy-channel");
     expect(setupRegistry.plugins.find((entry) => entry.id === "lazy-channel")?.status).toBe(
       "disabled",
     );
@@ -2273,6 +2248,7 @@ module.exports = {
         }),
       expectFullLoaded: false,
       expectSetupLoaded: true,
+      expectedChannels: 0,
     },
     {
       name: "uses package setupEntry for enabled but unconfigured channel loads",
@@ -2296,6 +2272,7 @@ module.exports = {
         }),
       expectFullLoaded: false,
       expectSetupLoaded: true,
+      expectedChannels: 1,
     },
     {
       name: "can prefer setupEntry for configured channel loads during startup",
@@ -2327,6 +2304,7 @@ module.exports = {
         }),
       expectFullLoaded: false,
       expectSetupLoaded: true,
+      expectedChannels: 1,
     },
     {
       name: "does not prefer setupEntry for configured channel loads without startup opt-in",
@@ -2357,16 +2335,16 @@ module.exports = {
         }),
       expectFullLoaded: true,
       expectSetupLoaded: false,
+      expectedChannels: 1,
     },
-  ])("$name", ({ fixture, load, expectFullLoaded, expectSetupLoaded }) => {
+  ])("$name", ({ fixture, load, expectFullLoaded, expectSetupLoaded, expectedChannels }) => {
     const built = createSetupEntryChannelPluginFixture(fixture);
     const registry = load({ pluginDir: built.pluginDir });
 
     expect(fs.existsSync(built.fullMarker)).toBe(expectFullLoaded);
     expect(fs.existsSync(built.setupMarker)).toBe(expectSetupLoaded);
-    expect(registry.channelSetups).toHaveLength(0);
-    expect(registry.channels).toHaveLength(0);
-    expectSuppressedChannelRegistration(registry, fixture.id);
+    expect(registry.channelSetups).toHaveLength(1);
+    expect(registry.channels).toHaveLength(expectedChannels);
   });
 
   it("blocks before_prompt_build but preserves legacy model overrides when prompt injection is disabled", async () => {

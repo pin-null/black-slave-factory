@@ -3,10 +3,12 @@ import { createOpenClawTools } from "../agents/openclaw-tools.js";
 import { runBeforeToolCallHook } from "../agents/pi-tools.before-tool-call.js";
 import { resolveToolLoopDetectionConfig } from "../agents/pi-tools.js";
 import {
+  resolveEffectivePermissionTier,
   resolveEffectiveToolPolicy,
   resolveGroupToolPolicy,
   resolveSubagentToolPolicy,
 } from "../agents/pi-tools.policy.js";
+import { filterToolsByPermissionTier } from "../agents/tool-permission-tier.js";
 import {
   applyToolPolicyPipeline,
   buildDefaultToolPolicyPipelineSteps,
@@ -35,6 +37,7 @@ import {
   sendMethodNotAllowed,
 } from "./http-common.js";
 import { getBearerToken, getHeader } from "./http-utils.js";
+import { loadSessionEntry } from "./session-utils.js";
 
 const DEFAULT_BODY_BYTES = 2 * 1024 * 1024;
 const MEMORY_TOOL_NAMES = new Set(["memory_search", "memory_get"]);
@@ -246,6 +249,18 @@ export async function handleToolsInvokeHttpRequest(
   const subagentPolicy = isSubagentSessionKey(sessionKey)
     ? resolveSubagentToolPolicy(cfg)
     : undefined;
+  const sessionEntry = loadSessionEntry(sessionKey).entry;
+  const effectivePermissionTier = resolveEffectivePermissionTier({
+    globalPolicy,
+    globalProviderPolicy,
+    agentPolicy,
+    agentProviderPolicy,
+    sessionPolicy: sessionEntry?.permissionTier
+      ? { permissionTier: sessionEntry.permissionTier }
+      : undefined,
+    groupPolicy,
+    subagentPolicy,
+  });
 
   // Build tool list (core + plugin tools).
   const allTools = createOpenClawTools({
@@ -270,11 +285,15 @@ export async function handleToolsInvokeHttpRequest(
     ]),
   });
 
+  const permissionTierFiltered = filterToolsByPermissionTier({
+    tools: allTools,
+    allowedTier: effectivePermissionTier,
+    toolMeta: (tool) => getPluginToolMeta(tool),
+  });
+
   const subagentFiltered = applyToolPolicyPipeline({
-    // oxlint-disable-next-line typescript/no-explicit-any
-    tools: allTools as any,
-    // oxlint-disable-next-line typescript/no-explicit-any
-    toolMeta: (tool) => getPluginToolMeta(tool as any),
+    tools: permissionTierFiltered,
+    toolMeta: (tool) => getPluginToolMeta(tool),
     warn: logWarn,
     steps: [
       ...buildDefaultToolPolicyPipelineSteps({
@@ -329,7 +348,10 @@ export async function handleToolsInvokeHttpRequest(
         agentId,
         sessionKey,
         loopDetection: resolveToolLoopDetectionConfig({ cfg, agentId }),
+        permissionTier: effectivePermissionTier,
       },
+      // oxlint-disable-next-line typescript/no-explicit-any
+      declaredPermissionTier: (tool as any).permissionTier,
     });
     if (hookResult.blocked) {
       sendJson(res, 403, {

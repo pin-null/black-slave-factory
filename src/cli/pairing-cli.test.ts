@@ -12,6 +12,9 @@ const normalizeChannelId = vi.fn((raw: string) => {
   if (!raw) {
     return null;
   }
+  if (raw === "imsg") {
+    return "imessage";
+  }
   if (["telegram", "discord", "imessage"].includes(raw)) {
     return raw;
   }
@@ -151,12 +154,12 @@ describe("pairing cli", () => {
     expect(listChannelPairingRequests).toHaveBeenCalledWith("telegram", process.env, "yy");
   });
 
-  it("accepts the explicit imessage channel id", async () => {
+  it("normalizes channel aliases", async () => {
     listChannelPairingRequests.mockResolvedValueOnce([]);
 
-    await runPairing(["pairing", "list", "imessage"]);
+    await runPairing(["pairing", "list", "imsg"]);
 
-    expect(normalizeChannelId).toHaveBeenCalledWith("imessage");
+    expect(normalizeChannelId).toHaveBeenCalledWith("imsg");
     expect(listChannelPairingRequests).toHaveBeenCalledWith("imessage");
   });
 

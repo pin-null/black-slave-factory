@@ -23,6 +23,7 @@ const GUARDED_CHANNEL_EXTENSIONS = new Set([
   "bluebubbles",
   "discord",
   "feishu",
+  "googlechat",
   "imessage",
   "irc",
   "line",

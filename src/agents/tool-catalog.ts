@@ -1,3 +1,5 @@
+import type { PermissionTier } from "../config/types.tools.js";
+
 export type ToolProfileId = "minimal" | "coding" | "messaging" | "full";
 
 type ToolProfilePolicy = {
@@ -20,6 +22,7 @@ type CoreToolDefinition = {
   label: string;
   description: string;
   sectionId: string;
+  permissionTier: PermissionTier;
   profiles: ToolProfileId[];
   includeInOpenClawGroup?: boolean;
 };
@@ -44,6 +47,7 @@ const CORE_TOOL_DEFINITIONS: CoreToolDefinition[] = [
     label: "read",
     description: "Read file contents",
     sectionId: "fs",
+    permissionTier: "readonly",
     profiles: ["coding"],
   },
   {
@@ -51,6 +55,7 @@ const CORE_TOOL_DEFINITIONS: CoreToolDefinition[] = [
     label: "write",
     description: "Create or overwrite files",
     sectionId: "fs",
+    permissionTier: "readwrite",
     profiles: ["coding"],
   },
   {
@@ -58,6 +63,7 @@ const CORE_TOOL_DEFINITIONS: CoreToolDefinition[] = [
     label: "edit",
     description: "Make precise edits",
     sectionId: "fs",
+    permissionTier: "readwrite",
     profiles: ["coding"],
   },
   {
@@ -65,6 +71,7 @@ const CORE_TOOL_DEFINITIONS: CoreToolDefinition[] = [
     label: "apply_patch",
     description: "Patch files (OpenAI)",
     sectionId: "fs",
+    permissionTier: "readwrite",
     profiles: ["coding"],
   },
   {
@@ -72,6 +79,7 @@ const CORE_TOOL_DEFINITIONS: CoreToolDefinition[] = [
     label: "exec",
     description: "Run shell commands",
     sectionId: "runtime",
+    permissionTier: "readwrite",
     profiles: ["coding"],
   },
   {
@@ -79,6 +87,7 @@ const CORE_TOOL_DEFINITIONS: CoreToolDefinition[] = [
     label: "process",
     description: "Manage background processes",
     sectionId: "runtime",
+    permissionTier: "readwrite",
     profiles: ["coding"],
   },
   {
@@ -86,6 +95,7 @@ const CORE_TOOL_DEFINITIONS: CoreToolDefinition[] = [
     label: "web_search",
     description: "Search the web",
     sectionId: "web",
+    permissionTier: "dangerous",
     profiles: ["coding"],
     includeInOpenClawGroup: true,
   },
@@ -94,6 +104,7 @@ const CORE_TOOL_DEFINITIONS: CoreToolDefinition[] = [
     label: "web_fetch",
     description: "Fetch web content",
     sectionId: "web",
+    permissionTier: "dangerous",
     profiles: ["coding"],
     includeInOpenClawGroup: true,
   },
@@ -102,6 +113,7 @@ const CORE_TOOL_DEFINITIONS: CoreToolDefinition[] = [
     label: "memory_search",
     description: "Semantic search",
     sectionId: "memory",
+    permissionTier: "readonly",
     profiles: ["coding"],
     includeInOpenClawGroup: true,
   },
@@ -110,6 +122,7 @@ const CORE_TOOL_DEFINITIONS: CoreToolDefinition[] = [
     label: "memory_get",
     description: "Read memory files",
     sectionId: "memory",
+    permissionTier: "readonly",
     profiles: ["coding"],
     includeInOpenClawGroup: true,
   },
@@ -118,6 +131,7 @@ const CORE_TOOL_DEFINITIONS: CoreToolDefinition[] = [
     label: "sessions_list",
     description: "List sessions",
     sectionId: "sessions",
+    permissionTier: "readonly",
     profiles: ["coding", "messaging"],
     includeInOpenClawGroup: true,
   },
@@ -126,6 +140,7 @@ const CORE_TOOL_DEFINITIONS: CoreToolDefinition[] = [
     label: "sessions_history",
     description: "Session history",
     sectionId: "sessions",
+    permissionTier: "readonly",
     profiles: ["coding", "messaging"],
     includeInOpenClawGroup: true,
   },
@@ -134,6 +149,7 @@ const CORE_TOOL_DEFINITIONS: CoreToolDefinition[] = [
     label: "sessions_send",
     description: "Send to session",
     sectionId: "sessions",
+    permissionTier: "dangerous",
     profiles: ["coding", "messaging"],
     includeInOpenClawGroup: true,
   },
@@ -142,6 +158,7 @@ const CORE_TOOL_DEFINITIONS: CoreToolDefinition[] = [
     label: "sessions_spawn",
     description: "Spawn sub-agent",
     sectionId: "sessions",
+    permissionTier: "dangerous",
     profiles: ["coding"],
     includeInOpenClawGroup: true,
   },
@@ -150,6 +167,7 @@ const CORE_TOOL_DEFINITIONS: CoreToolDefinition[] = [
     label: "sessions_yield",
     description: "End turn to receive sub-agent results",
     sectionId: "sessions",
+    permissionTier: "dangerous",
     profiles: ["coding"],
     includeInOpenClawGroup: true,
   },
@@ -158,6 +176,7 @@ const CORE_TOOL_DEFINITIONS: CoreToolDefinition[] = [
     label: "subagents",
     description: "Manage sub-agents",
     sectionId: "sessions",
+    permissionTier: "dangerous",
     profiles: ["coding"],
     includeInOpenClawGroup: true,
   },
@@ -166,6 +185,7 @@ const CORE_TOOL_DEFINITIONS: CoreToolDefinition[] = [
     label: "session_status",
     description: "Session status",
     sectionId: "sessions",
+    permissionTier: "readonly",
     profiles: ["minimal", "coding", "messaging"],
     includeInOpenClawGroup: true,
   },
@@ -174,6 +194,7 @@ const CORE_TOOL_DEFINITIONS: CoreToolDefinition[] = [
     label: "browser",
     description: "Control web browser",
     sectionId: "ui",
+    permissionTier: "dangerous",
     profiles: [],
     includeInOpenClawGroup: true,
   },
@@ -182,6 +203,7 @@ const CORE_TOOL_DEFINITIONS: CoreToolDefinition[] = [
     label: "canvas",
     description: "Control canvases",
     sectionId: "ui",
+    permissionTier: "dangerous",
     profiles: [],
     includeInOpenClawGroup: true,
   },
@@ -190,6 +212,7 @@ const CORE_TOOL_DEFINITIONS: CoreToolDefinition[] = [
     label: "message",
     description: "Send messages",
     sectionId: "messaging",
+    permissionTier: "dangerous",
     profiles: ["messaging"],
     includeInOpenClawGroup: true,
   },
@@ -198,6 +221,7 @@ const CORE_TOOL_DEFINITIONS: CoreToolDefinition[] = [
     label: "cron",
     description: "Schedule tasks",
     sectionId: "automation",
+    permissionTier: "dangerous",
     profiles: ["coding"],
     includeInOpenClawGroup: true,
   },
@@ -206,6 +230,7 @@ const CORE_TOOL_DEFINITIONS: CoreToolDefinition[] = [
     label: "gateway",
     description: "Gateway control",
     sectionId: "automation",
+    permissionTier: "dangerous",
     profiles: [],
     includeInOpenClawGroup: true,
   },
@@ -214,6 +239,7 @@ const CORE_TOOL_DEFINITIONS: CoreToolDefinition[] = [
     label: "nodes",
     description: "Nodes + devices",
     sectionId: "nodes",
+    permissionTier: "dangerous",
     profiles: [],
     includeInOpenClawGroup: true,
   },
@@ -222,6 +248,7 @@ const CORE_TOOL_DEFINITIONS: CoreToolDefinition[] = [
     label: "agents_list",
     description: "List agents",
     sectionId: "agents",
+    permissionTier: "readonly",
     profiles: [],
     includeInOpenClawGroup: true,
   },
@@ -230,6 +257,7 @@ const CORE_TOOL_DEFINITIONS: CoreToolDefinition[] = [
     label: "image",
     description: "Image understanding",
     sectionId: "media",
+    permissionTier: "dangerous",
     profiles: ["coding"],
     includeInOpenClawGroup: true,
   },
@@ -238,6 +266,7 @@ const CORE_TOOL_DEFINITIONS: CoreToolDefinition[] = [
     label: "image_generate",
     description: "Image generation",
     sectionId: "media",
+    permissionTier: "dangerous",
     profiles: ["coding"],
     includeInOpenClawGroup: true,
   },
@@ -246,6 +275,7 @@ const CORE_TOOL_DEFINITIONS: CoreToolDefinition[] = [
     label: "tts",
     description: "Text-to-speech conversion",
     sectionId: "media",
+    permissionTier: "dangerous",
     profiles: [],
     includeInOpenClawGroup: true,
   },
@@ -335,6 +365,10 @@ export function resolveCoreToolProfiles(toolId: string): ToolProfileId[] {
     return [];
   }
   return [...tool.profiles];
+}
+
+export function resolveCoreToolPermissionTier(toolId: string): PermissionTier | undefined {
+  return CORE_TOOL_BY_ID.get(toolId)?.permissionTier;
 }
 
 export function isKnownCoreToolId(toolId: string): boolean {

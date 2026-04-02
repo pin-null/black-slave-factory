@@ -1,6 +1,7 @@
 import type { SandboxToolPolicy } from "./sandbox/types.js";
 
 type SandboxToolPolicyConfig = {
+  permissionTier?: import("../config/types.tools.js").PermissionTier;
   allow?: string[];
   alsoAllow?: string[];
   deny?: string[];
@@ -24,14 +25,15 @@ export function pickSandboxToolPolicy(
   if (!config) {
     return undefined;
   }
+  const permissionTier = config.permissionTier;
   const allow = Array.isArray(config.allow)
     ? unionAllow(config.allow, config.alsoAllow)
     : Array.isArray(config.alsoAllow) && config.alsoAllow.length > 0
       ? unionAllow(undefined, config.alsoAllow)
       : undefined;
   const deny = Array.isArray(config.deny) ? config.deny : undefined;
-  if (!allow && !deny) {
+  if (!permissionTier && !allow && !deny) {
     return undefined;
   }
-  return { allow, deny };
+  return { permissionTier, allow, deny };
 }

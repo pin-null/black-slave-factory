@@ -483,7 +483,6 @@ export function createPluginRegistry(registryParams: PluginRegistryParams) {
         : { plugin: registration as ChannelPlugin };
     const plugin = normalized.plugin;
     const id = typeof plugin?.id === "string" ? plugin.id.trim() : String(plugin?.id ?? "").trim();
-    void mode;
     if (!id) {
       pushDiagnostic({
         level: "error",
@@ -493,13 +492,45 @@ export function createPluginRegistry(registryParams: PluginRegistryParams) {
       });
       return;
     }
-    pushDiagnostic({
-      level: "warn",
+    const existingRuntime = registry.channels.find((entry) => entry.plugin.id === id);
+    if (mode !== "setup-only" && existingRuntime) {
+      pushDiagnostic({
+        level: "error",
+        pluginId: record.id,
+        source: record.source,
+        message: `channel already registered: ${id} (${existingRuntime.pluginId})`,
+      });
+      return;
+    }
+    const existingSetup = registry.channelSetups.find((entry) => entry.plugin.id === id);
+    if (existingSetup) {
+      pushDiagnostic({
+        level: "error",
+        pluginId: record.id,
+        source: record.source,
+        message: `channel setup already registered: ${id} (${existingSetup.pluginId})`,
+      });
+      return;
+    }
+    record.channelIds.push(id);
+    registry.channelSetups.push({
       pluginId: record.id,
+      pluginName: record.name,
+      plugin,
       source: record.source,
-      message: `channel registration ignored: ${id} (only internal webchat is retained)`,
+      enabled: record.enabled,
+      rootDir: record.rootDir,
     });
-    return;
+    if (mode === "setup-only") {
+      return;
+    }
+    registry.channels.push({
+      pluginId: record.id,
+      pluginName: record.name,
+      plugin,
+      source: record.source,
+      rootDir: record.rootDir,
+    });
   };
 
   const registerProvider = (record: PluginRecord, provider: ProviderPlugin) => {

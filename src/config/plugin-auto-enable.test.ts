@@ -426,48 +426,47 @@ describe("applyPluginAutoEnable", () => {
     });
   });
 
-  describe("Apple channel auto-enable suppression", () => {
-    it("does not auto-enable bluebubbles or imessage when both are configured", () => {
+  describe("preferOver channel prioritization", () => {
+    it("prefers bluebubbles: skips imessage auto-configure when both are configured", () => {
       const result = applyWithBluebubblesImessageConfig();
 
-      expect(result.config.plugins?.entries?.bluebubbles?.enabled).toBeUndefined();
+      expect(result.config.plugins?.entries?.bluebubbles?.enabled).toBe(true);
       expect(result.config.plugins?.entries?.imessage?.enabled).toBeUndefined();
-      expect(result.config.channels?.bluebubbles?.enabled).toBeUndefined();
-      expect(result.config.channels?.imessage?.enabled).toBeUndefined();
-      expect(result.changes).toEqual([]);
+      expect(result.changes.join("\n")).toContain("bluebubbles configured, enabled automatically.");
+      expect(result.changes.join("\n")).not.toContain(
+        "iMessage configured, enabled automatically.",
+      );
     });
 
-    it("keeps explicit imessage enablement untouched", () => {
+    it("keeps imessage enabled if already explicitly enabled (non-destructive)", () => {
       const result = applyWithBluebubblesImessageConfig({
         plugins: { entries: { imessage: { enabled: true } } },
       });
 
+      expect(result.config.plugins?.entries?.bluebubbles?.enabled).toBe(true);
       expect(result.config.plugins?.entries?.imessage?.enabled).toBe(true);
-      expect(result.config.plugins?.entries?.bluebubbles?.enabled).toBeUndefined();
-      expect(result.changes).toEqual([]);
     });
 
-    it("keeps explicit bluebubbles disablement without promoting imessage", () => {
+    it("allows imessage auto-configure when bluebubbles is explicitly disabled", () => {
       const result = applyWithBluebubblesImessageConfig({
         plugins: { entries: { bluebubbles: { enabled: false } } },
       });
 
       expect(result.config.plugins?.entries?.bluebubbles?.enabled).toBe(false);
-      expect(result.config.channels?.imessage?.enabled).toBeUndefined();
-      expect(result.changes).toEqual([]);
+      expect(result.config.channels?.imessage?.enabled).toBe(true);
+      expect(result.changes.join("\n")).toContain("iMessage configured, enabled automatically.");
     });
 
-    it("keeps bluebubbles denylist without promoting imessage", () => {
+    it("allows imessage auto-configure when bluebubbles is in deny list", () => {
       const result = applyWithBluebubblesImessageConfig({
         plugins: { deny: ["bluebubbles"] },
       });
 
       expect(result.config.plugins?.entries?.bluebubbles?.enabled).toBeUndefined();
-      expect(result.config.channels?.imessage?.enabled).toBeUndefined();
-      expect(result.changes).toEqual([]);
+      expect(result.config.channels?.imessage?.enabled).toBe(true);
     });
 
-    it("does not auto-enable imessage when only imessage is configured", () => {
+    it("auto-enables imessage when only imessage is configured", () => {
       const result = applyPluginAutoEnable({
         config: {
           channels: { imessage: { cliPath: "/usr/local/bin/imsg" } },
@@ -475,33 +474,8 @@ describe("applyPluginAutoEnable", () => {
         env: {},
       });
 
-      expect(result.config.channels?.imessage?.enabled).toBeUndefined();
-      expect(result.changes).toEqual([]);
-    });
-
-    it("does not auto-enable bluebubbles when only bluebubbles is configured", () => {
-      const result = applyPluginAutoEnable({
-        config: {
-          channels: { bluebubbles: { serverUrl: "http://localhost:1234", password: "x" } },
-        },
-        env: {},
-      });
-
-      expect(result.config.channels?.bluebubbles?.enabled).toBeUndefined();
-      expect(result.changes).toEqual([]);
-    });
-
-    it("does not auto-enable removed googlechat config into plugins entries", () => {
-      const result = applyPluginAutoEnable({
-        config: {
-          channels: { googlechat: { serviceAccountFile: "/tmp/googlechat-service-account.json" } },
-        },
-        env: {},
-      });
-
-      expect(result.config.plugins?.entries?.googlechat?.enabled).toBeUndefined();
-      expect(result.config.channels?.googlechat?.enabled).toBeUndefined();
-      expect(result.changes).toEqual([]);
+      expect(result.config.channels?.imessage?.enabled).toBe(true);
+      expect(result.changes.join("\n")).toContain("iMessage configured, enabled automatically.");
     });
 
     it("uses the provided env when loading installed plugin manifests", () => {

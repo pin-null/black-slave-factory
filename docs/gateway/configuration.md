@@ -74,16 +74,20 @@ When validation fails:
 ## Common tasks
 
 <AccordionGroup>
-  <Accordion title="Set up messaging ingress">
-    This Windows-first build exposes WebChat and the Control UI directly. If you later re-enable external channels, their config still lives under `channels.<provider>`.
+  <Accordion title="Set up a channel (WhatsApp, Telegram, Discord, etc.)">
+    Each channel has its own config section under `channels.<provider>`. See the dedicated channel page for setup steps:
 
-    Start here:
+    - [WhatsApp](/channels/whatsapp) — `channels.whatsapp`
+    - [Telegram](/channels/telegram) — `channels.telegram`
+    - [Discord](/channels/discord) — `channels.discord`
+    - [Slack](/channels/slack) — `channels.slack`
+    - [Signal](/channels/signal) — `channels.signal`
+    - [iMessage](/channels/imessage) — `channels.imessage`
+    - [Google Chat](/channels/googlechat) — `channels.googlechat`
+    - [Mattermost](/channels/mattermost) — `channels.mattermost`
+    - [MS Teams](/channels/msteams) — `channels.msteams`
 
-    - [WebChat](/web/webchat) — built-in browser chat surface
-    - [Channels hub](/channels) — current integration overview
-    - [Channel integration conditions](/channels/integration-conditions) — shared enable/configure/connect/allowlist checklist
-
-    Channel configs still follow the same DM policy pattern:
+    All channels share the same DM policy pattern:
 
     ```json5
     {
@@ -602,7 +606,15 @@ Rules:
       },
     },
   },
-  channels: {},
+  channels: {
+    googlechat: {
+      serviceAccountRef: {
+        source: "exec",
+        provider: "vault",
+        id: "channels/googlechat/serviceAccount",
+      },
+    },
+  },
 }
 ```
 

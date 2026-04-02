@@ -3,7 +3,13 @@ import { promises as fs } from "node:fs";
 import { formatThinkingLevels, normalizeThinkLevel } from "../auto-reply/thinking.js";
 import { DEFAULT_SUBAGENT_MAX_SPAWN_DEPTH } from "../config/agent-limits.js";
 import { loadConfig } from "../config/config.js";
-import { mergeSessionEntry, updateSessionStore } from "../config/sessions.js";
+import {
+  loadSessionStore,
+  mergeSessionEntry,
+  resolveStorePath,
+  updateSessionStore,
+} from "../config/sessions.js";
+import type { PermissionTier } from "../config/types.tools.js";
 import { callGateway } from "../gateway/call.js";
 import {
   pruneLegacyStoreKeys,
@@ -149,6 +155,21 @@ async function persistInitialChildSessionRuntimeModel(params: {
     return undefined;
   } catch (err) {
     return err instanceof Error ? err.message : typeof err === "string" ? err : "error";
+  }
+}
+
+function loadRequesterPermissionTier(
+  cfg: ReturnType<typeof loadConfig>,
+  requesterSessionKey: string,
+): PermissionTier | undefined {
+  try {
+    const storePath = resolveStorePath(cfg.session?.store, {
+      agentId: parseAgentSessionKey(requesterSessionKey)?.agentId,
+    });
+    const store = loadSessionStore(storePath);
+    return store[requesterSessionKey]?.permissionTier;
+  } catch {
+    return undefined;
   }
 }
 
@@ -390,6 +411,7 @@ export async function spawnSubagentDirect(
   const requesterAgentId = normalizeAgentId(
     ctx.requesterAgentIdOverride ?? parseAgentSessionKey(requesterInternalKey)?.agentId,
   );
+  const requesterPermissionTier = loadRequesterPermissionTier(cfg, requesterInternalKey);
   const targetAgentId = requestedAgentId ? normalizeAgentId(requestedAgentId) : requesterAgentId;
   if (targetAgentId !== requesterAgentId) {
     const allowAgents = resolveAgentConfig(cfg, requesterAgentId)?.subagents?.allowAgents ?? [];
@@ -485,6 +507,9 @@ export async function spawnSubagentDirect(
   }
   if (thinkingOverride !== undefined) {
     initialChildSessionPatch.thinkingLevel = thinkingOverride === "off" ? null : thinkingOverride;
+  }
+  if (requesterPermissionTier) {
+    initialChildSessionPatch.permissionTier = requesterPermissionTier;
   }
 
   const initialPatchError = await patchChildSession(initialChildSessionPatch);

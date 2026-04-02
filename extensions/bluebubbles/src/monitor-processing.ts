@@ -655,7 +655,7 @@ export async function processMessage(
     if (accessDecision.decision === "pairing") {
       await pairing.issueChallenge({
         senderId: message.senderId,
-        senderIdLine: `Your BlueBubbles (Legacy) sender id: ${message.senderId}`,
+        senderIdLine: `Your BlueBubbles sender id: ${message.senderId}`,
         meta: { name: message.senderName },
         onCreated: () => {
           runtime.log?.(`[bluebubbles] pairing request sender=${message.senderId} created=true`);
@@ -915,7 +915,7 @@ export async function processMessage(
     sessionKey: route.sessionKey,
   });
   const body = core.channel.reply.formatInboundEnvelope({
-    channel: "BlueBubbles (Legacy)",
+    channel: "BlueBubbles",
     from: fromLabel,
     timestamp: message.timestamp,
     previousTimestamp,
@@ -1386,7 +1386,7 @@ export async function processMessage(
         onReplyStart: typingCallbacks?.onReplyStart,
         onIdle: typingCallbacks?.onIdle,
         onError: (err, info) => {
-          runtime.error?.(`BlueBubbles (Legacy) ${info.kind} reply failed: ${String(err)}`);
+          runtime.error?.(`BlueBubbles ${info.kind} reply failed: ${String(err)}`);
         },
       },
       replyOptions: {

@@ -2,6 +2,7 @@ import "./isolated-agent.mocks.js";
 import { beforeEach, describe, expect, it } from "vitest";
 import {
   discordOutbound,
+  imessageOutbound,
   signalOutbound,
   slackOutbound,
   telegramOutbound,
@@ -23,9 +24,12 @@ import { setupIsolatedAgentTurnMocks } from "./isolated-agent.test-setup.js";
 
 type ChannelCase = {
   name: string;
-  channel: "slack" | "discord" | "whatsapp";
+  channel: "slack" | "discord" | "whatsapp" | "imessage";
   to: string;
-  sendKey: keyof Pick<CliDeps, "sendMessageSlack" | "sendMessageDiscord" | "sendMessageWhatsApp">;
+  sendKey: keyof Pick<
+    CliDeps,
+    "sendMessageSlack" | "sendMessageDiscord" | "sendMessageWhatsApp" | "sendMessageIMessage"
+  >;
   expectedTo: string;
 };
 
@@ -50,6 +54,13 @@ const CASES: ChannelCase[] = [
     to: "+15551234567",
     sendKey: "sendMessageWhatsApp",
     expectedTo: "+15551234567",
+  },
+  {
+    name: "iMessage",
+    channel: "imessage",
+    to: "friend@example.com",
+    sendKey: "sendMessageIMessage",
+    expectedTo: "friend@example.com",
   },
 ];
 
@@ -105,6 +116,11 @@ describe("runCronIsolatedAgentTurn core-channel direct delivery", () => {
         {
           pluginId: "whatsapp",
           plugin: createOutboundTestPlugin({ id: "whatsapp", outbound: whatsappOutbound }),
+          source: "test",
+        },
+        {
+          pluginId: "imessage",
+          plugin: createOutboundTestPlugin({ id: "imessage", outbound: imessageOutbound }),
           source: "test",
         },
       ]),

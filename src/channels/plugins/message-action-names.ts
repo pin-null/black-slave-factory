@@ -21,7 +21,6 @@ export const CHANNEL_MESSAGE_ACTION_NAMES = [
   "unpin",
   "list-pins",
   "permissions",
-  "set-profile",
   "thread-create",
   "thread-list",
   "thread-reply",
@@ -52,6 +51,7 @@ export const CHANNEL_MESSAGE_ACTION_NAMES = [
   "timeout",
   "kick",
   "ban",
+  "set-profile",
   "set-presence",
   "download-file",
 ] as const;

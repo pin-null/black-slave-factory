@@ -1,19 +1,11 @@
 ---
 name: skill-creator
-description: Create, edit, improve, or audit office productivity AgentSkills. Use when creating a new skill from scratch or when asked to improve, review, audit, tidy up, or clean up an existing office-oriented skill or SKILL.md file. Also use when editing or restructuring an office skill directory (moving files to references/ or scripts/, removing stale content, validating against the AgentSkills spec). Triggers on phrases like "create a skill", "author a skill", "tidy up a skill", "improve this skill", "review the skill", "clean up the skill", or "audit the skill" when the requested skill is for calendars, reminders, meetings, notes, documents, approvals, or similar office workflows. Refuse requests for system-admin, permissions, device-control, entertainment, or arbitrary-code skills.
-metadata: { "openclaw": { "categories": ["office"] } }
+description: Create, edit, improve, or audit AgentSkills. Use when creating a new skill from scratch or when asked to improve, review, audit, tidy up, or clean up an existing skill or SKILL.md file. Also use when editing or restructuring a skill directory (moving files to references/ or scripts/, removing stale content, validating against the AgentSkills spec). Triggers on phrases like "create a skill", "author a skill", "tidy up a skill", "improve this skill", "review the skill", "clean up the skill", "audit the skill".
 ---
 
 # Skill Creator
 
 This skill provides guidance for creating effective skills.
-
-## Office Boundary
-
-- Only create or revise skills for office productivity workflows such as calendars, meeting notices, reminders, task tracking, note capture, document drafting, approvals, reporting, or similar back-office operations.
-- Refuse requests to create skills for system administration, permissions changes, shell execution, security testing, device control, home automation, entertainment/media, gaming, or unrestricted code execution.
-- Every newly authored skill must include `metadata: {"openclaw":{"categories":["office"]}}` or a more specific category list that still includes `office`.
-- If a request mixes office and non-office behavior, narrow the skill to the office-safe subset and explicitly reject the non-office portion.
 
 ## About Skills
 

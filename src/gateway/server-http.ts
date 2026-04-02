@@ -10,6 +10,7 @@ import type { TlsOptions } from "node:tls";
 import { handleSlackHttpRequest } from "openclaw/plugin-sdk/slack";
 import type { WebSocketServer } from "ws";
 import { resolveAgentAvatar } from "../agents/identity-avatar.js";
+import { minPermissionTier } from "../agents/tool-permission-tier.js";
 import { CANVAS_WS_PATH, handleA2uiHttpRequest } from "../canvas-host/a2ui.js";
 import type { CanvasHostHandler } from "../canvas-host/server.js";
 import { loadConfig } from "../config/config.js";
@@ -586,6 +587,7 @@ export function createHooksRequestHandler(
           model: normalized.value.model ?? null,
           thinking: normalized.value.thinking ?? null,
           timeoutSeconds: normalized.value.timeoutSeconds ?? null,
+          permissionTier: hooksConfig.permissionTier ?? null,
         },
       });
       const cachedRunId = resolveCachedHookRunId(replayKey, now);
@@ -602,6 +604,7 @@ export function createHooksRequestHandler(
         idempotencyKey,
         sessionKey: normalizedDispatchSessionKey,
         agentId: targetAgentId,
+        permissionTier: hooksConfig.permissionTier,
       });
       rememberHookRunId(replayKey, runId, now);
       sendJson(res, 200, { ok: true, runId });
@@ -657,6 +660,10 @@ export function createHooksRequestHandler(
             sessionKey: sessionKey.value,
             targetAgentId,
           });
+          const effectivePermissionTier = minPermissionTier(
+            hooksConfig.permissionTier,
+            mapped.action.permissionTier,
+          );
           const replayKey = buildHookReplayCacheKey({
             pathKey: subPath || "mapping",
             token,
@@ -674,6 +681,7 @@ export function createHooksRequestHandler(
               model: mapped.action.model ?? null,
               thinking: mapped.action.thinking ?? null,
               timeoutSeconds: mapped.action.timeoutSeconds ?? null,
+              permissionTier: effectivePermissionTier ?? null,
             },
           });
           const cachedRunId = resolveCachedHookRunId(replayKey, now);
@@ -695,6 +703,7 @@ export function createHooksRequestHandler(
             thinking: mapped.action.thinking,
             timeoutSeconds: mapped.action.timeoutSeconds,
             allowUnsafeExternalContent: mapped.action.allowUnsafeExternalContent,
+            permissionTier: effectivePermissionTier,
           });
           rememberHookRunId(replayKey, runId, now);
           sendJson(res, 200, { ok: true, runId });

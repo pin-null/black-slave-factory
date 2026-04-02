@@ -3,6 +3,7 @@ import os from "node:os";
 import path from "node:path";
 import { afterAll, beforeAll, describe, expect, test, vi } from "vitest";
 import type { ChannelPlugin } from "../channels/plugins/types.js";
+import { writeConfigFile } from "../config/config.js";
 import { createChannelTestPluginBase } from "../test-utils/channel-plugins.js";
 import { setRegistry } from "./server.agent.gateway-server-agent.mocks.js";
 import { createRegistry } from "./server.e2e-registry-helpers.js";
@@ -58,6 +59,27 @@ async function setTestSessionStore(params: {
   await writeSessionStore({
     entries: params.entries,
     agentId: params.agentId,
+  });
+  await syncGatewayConfigFile();
+}
+
+async function syncGatewayConfigFile() {
+  const channels =
+    testState.allowFrom !== undefined
+      ? {
+          whatsapp: {
+            allowFrom: testState.allowFrom,
+          },
+        }
+      : undefined;
+
+  await writeConfigFile({
+    ...(testState.agentsConfig ? { agents: testState.agentsConfig } : {}),
+    session: {
+      mainKey: "main",
+      ...(testState.sessionStorePath ? { store: testState.sessionStorePath } : {}),
+    },
+    ...(channels ? { channels } : {}),
   });
 }
 
@@ -244,6 +266,49 @@ describe("gateway server agent", () => {
     expect(persisted["agent:main:subagent:depth"]?.spawnedBy).toBe("agent:main:main");
   });
 
+  test("agent persists permissionTier on the session entry when provided", async () => {
+    setRegistry(defaultRegistry);
+    testState.sessionStorePath = sharedSessionStorePath;
+    await syncGatewayConfigFile();
+
+    const res = await rpcReq(ws, "agent", {
+      message: "hi",
+      sessionKey: "agent:main:subagent:tier",
+      permissionTier: "readonly",
+      idempotencyKey: "idem-agent-subtier",
+    });
+    expect(res.ok).toBe(true);
+
+    const raw = await fs.readFile(sharedSessionStorePath, "utf-8");
+    const persisted = JSON.parse(raw) as Record<string, { permissionTier?: string }>;
+    expect(persisted["agent:main:subagent:tier"]?.permissionTier).toBe("readonly");
+  });
+
+  test("agent does not elevate an existing session permissionTier", async () => {
+    setRegistry(defaultRegistry);
+    await setTestSessionStore({
+      entries: {
+        "agent:main:subagent:tier-cap": {
+          sessionId: "sess-tier-cap",
+          updatedAt: Date.now(),
+          permissionTier: "readonly",
+        },
+      },
+    });
+
+    const res = await rpcReq(ws, "agent", {
+      message: "hi",
+      sessionKey: "agent:main:subagent:tier-cap",
+      permissionTier: "dangerous",
+      idempotencyKey: "idem-agent-tier-cap",
+    });
+    expect(res.ok).toBe(true);
+
+    const raw = await fs.readFile(sharedSessionStorePath, "utf-8");
+    const persisted = JSON.parse(raw) as Record<string, { permissionTier?: string }>;
+    expect(persisted["agent:main:subagent:tier-cap"]?.permissionTier).toBe("readonly");
+  });
+
   test("agent derives sessionKey from agentId", async () => {
     setRegistry(defaultRegistry);
     await setTestSessionStore({
@@ -256,6 +321,7 @@ describe("gateway server agent", () => {
       },
     });
     testState.agentsConfig = { list: [{ id: "ops" }] };
+    await syncGatewayConfigFile();
     const res = await rpcReq(ws, "agent", {
       message: "hi",
       agentId: "ops",
@@ -285,6 +351,7 @@ describe("gateway server agent", () => {
   test("agent rejects mismatched agentId and sessionKey", async () => {
     setRegistry(defaultRegistry);
     testState.agentsConfig = { list: [{ id: "ops" }] };
+    await syncGatewayConfigFile();
     const res = await rpcReq(ws, "agent", {
       message: "hi",
       agentId: "ops",

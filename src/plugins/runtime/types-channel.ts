@@ -199,6 +199,11 @@ export type PluginRuntimeChannel = {
     monitorSignalProvider: typeof import("../../../extensions/signal/runtime-api.js").monitorSignalProvider;
     messageActions: typeof import("../../../extensions/signal/runtime-api.js").signalMessageActions;
   };
+  imessage: {
+    monitorIMessageProvider: typeof import("../../../extensions/imessage/runtime-api.js").monitorIMessageProvider;
+    probeIMessage: typeof import("../../../extensions/imessage/runtime-api.js").probeIMessage;
+    sendMessageIMessage: typeof import("../../../extensions/imessage/runtime-api.js").sendMessageIMessage;
+  };
   whatsapp: {
     getActiveWebListener: typeof import("./runtime-whatsapp-boundary.js").getActiveWebListener;
     getWebAuthAgeMs: typeof import("./runtime-whatsapp-boundary.js").getWebAuthAgeMs;

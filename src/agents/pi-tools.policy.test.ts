@@ -7,6 +7,7 @@ import {
   filterToolsByPolicy,
   isToolAllowedByPolicyName,
   resolveEffectiveToolPolicy,
+  resolveEffectivePermissionTier,
   resolveSubagentToolPolicy,
   resolveSubagentToolPolicyForSession,
 } from "./pi-tools.policy.js";
@@ -33,6 +34,16 @@ describe("pi-tools.policy", () => {
   it("keeps apply_patch when exec is allowlisted", () => {
     expect(isToolAllowedByPolicyName("apply_patch", { allow: ["exec"] })).toBe(true);
   });
+
+  it("uses the most restrictive configured permission tier", () => {
+    expect(
+      resolveEffectivePermissionTier({
+        globalPolicy: { permissionTier: "dangerous" },
+        agentPolicy: { permissionTier: "readwrite" },
+        groupPolicy: { permissionTier: "readonly" },
+      }),
+    ).toBe("readonly");
+  });
 });
 
 describe("resolveSubagentToolPolicy depth awareness", () => {
@@ -51,9 +62,14 @@ describe("resolveSubagentToolPolicy depth awareness", () => {
   it("applies subagent tools.alsoAllow to re-enable default-denied tools", () => {
     const cfg = {
       agents: { defaults: { subagents: { maxSpawnDepth: 2 } } },
-      tools: { subagents: { tools: { alsoAllow: ["sessions_send"] } } },
+      tools: {
+        subagents: {
+          tools: { permissionTier: "readonly", alsoAllow: ["sessions_send"] },
+        },
+      },
     } as unknown as OpenClawConfig;
     const policy = resolveSubagentToolPolicy(cfg, 1);
+    expect(policy.permissionTier).toBe("readonly");
     expect(isToolAllowedByPolicyName("sessions_send", policy)).toBe(true);
     expect(isToolAllowedByPolicyName("cron", policy)).toBe(false);
   });

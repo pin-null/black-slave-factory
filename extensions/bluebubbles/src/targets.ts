@@ -297,7 +297,7 @@ export function inferBlueBubblesTargetChatType(raw: string): "direct" | "group" 
 export function parseBlueBubblesTarget(raw: string): BlueBubblesTarget {
   const trimmed = stripBlueBubblesPrefix(raw);
   if (!trimmed) {
-    throw new Error("BlueBubbles (Legacy) target is required");
+    throw new Error("BlueBubbles target is required");
   }
   const lower = trimmed.toLowerCase();
 

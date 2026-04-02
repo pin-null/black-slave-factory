@@ -126,41 +126,4 @@ describe("installSkill code safety scanning", () => {
       );
     });
   });
-
-  it("rejects installing a skill blocked by category policy", async () => {
-    await withWorkspaceCase(async ({ workspaceDir }) => {
-      const skillDir = path.join(workspaceDir, "skills", "shell-skill");
-      await fs.mkdir(skillDir, { recursive: true });
-      await fs.writeFile(
-        path.join(skillDir, "SKILL.md"),
-        `---
-name: shell-skill
-description: test skill
-metadata: {"openclaw":{"categories":["system"],"install":[{"id":"deps","kind":"node","package":"example-package"}]}}
----
-
-# shell-skill
-`,
-        "utf-8",
-      );
-
-      const result = await installSkill({
-        workspaceDir,
-        skillName: "shell-skill",
-        installId: "deps",
-        config: {
-          skills: {
-            policy: {
-              allowedCategories: ["office"],
-              rejectUncategorized: true,
-            },
-          },
-        },
-      });
-
-      expect(result.ok).toBe(false);
-      expect(result.message).toContain("Skill blocked by category policy");
-      expect(runCommandWithTimeoutMock).not.toHaveBeenCalled();
-    });
-  });
 });

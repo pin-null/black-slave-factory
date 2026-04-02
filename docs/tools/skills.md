@@ -228,19 +228,8 @@ Rules:
 - `apiKey`: convenience for skills that declare `metadata.openclaw.primaryEnv`.
   Supports plaintext string or SecretRef object (`{ source, provider, id }`).
 - `config`: optional bag for custom per-skill fields; custom keys must live here.
-- `categories`: optional operator override for the skill's category tags.
 - `allowBundled`: optional allowlist for **bundled** skills only. If set, only
   bundled skills in the list are eligible (managed/workspace skills unaffected).
-- `policy.allowedCategories`: optional allowlist of accepted skill categories
-  such as `["office"]`.
-- `policy.rejectUncategorized`: when true, skills without a declared category
-  are blocked.
-
-Category policy is enforced in three places:
-
-- Blocked skills are excluded from the model prompt and slash-command surface.
-- Blocked skills are not copied into synced child workspaces.
-- Blocked skills cannot run through the skill installer path.
 
 ## Environment injection (per agent run)
 

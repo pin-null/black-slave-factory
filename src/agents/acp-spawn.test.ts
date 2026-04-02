@@ -16,6 +16,7 @@ import * as heartbeatWake from "../infra/heartbeat-wake.js";
 import {
   __testing as sessionBindingServiceTesting,
   registerSessionBindingAdapter,
+  type SessionBindingAdapterCapabilities,
   type SessionBindingRecord,
 } from "../infra/outbound/session-binding-service.js";
 import * as acpSpawnParentStream from "./acp-spawn-parent-stream.js";
@@ -103,12 +104,11 @@ function replaceSpawnConfig(next: OpenClawConfig): void {
   setRuntimeConfigSnapshot(hoisted.state.cfg);
 }
 
-function createSessionBindingCapabilities() {
+function createSessionBindingCapabilities(): SessionBindingAdapterCapabilities {
   return {
-    adapterAvailable: true,
     bindSupported: true,
     unbindSupported: true,
-    placements: ["current", "child"] as const,
+    placements: ["current", "child"],
   };
 }
 
@@ -380,6 +380,45 @@ describe("spawnAcpDirect", () => {
     expect(transcriptCalls).toHaveLength(2);
     expect(transcriptCalls[0]?.threadId).toBeUndefined();
     expect(transcriptCalls[1]?.threadId).toBe("child-thread");
+  });
+
+  it("inherits requester permission tier onto the child ACP session", async () => {
+    hoisted.loadSessionStoreMock.mockImplementation(() => {
+      const store: Record<
+        string,
+        { sessionId?: string; updatedAt: number; permissionTier?: string }
+      > = {
+        "agent:main:main": {
+          sessionId: "sess-main",
+          updatedAt: Date.now(),
+          permissionTier: "readonly",
+        },
+      };
+      return new Proxy(store, {
+        get(target, prop) {
+          if (typeof prop === "string" && prop.startsWith("agent:codex:acp:")) {
+            return { sessionId: "sess-123", updatedAt: Date.now() };
+          }
+          return target[prop as keyof typeof target];
+        },
+      });
+    });
+
+    await spawnAcpDirect(
+      {
+        task: "Investigate flaky tests",
+        agentId: "codex",
+        mode: "run",
+      },
+      {
+        agentSessionKey: "agent:main:main",
+      },
+    );
+
+    const patchCall = hoisted.callGatewayMock.mock.calls.find(
+      ([request]) => (request as { method?: string }).method === "sessions.patch",
+    )?.[0] as { params?: { permissionTier?: string } } | undefined;
+    expect(patchCall?.params?.permissionTier).toBe("readonly");
   });
 
   it("spawns Matrix thread-bound ACP sessions from top-level room targets", async () => {

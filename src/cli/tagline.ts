@@ -66,7 +66,7 @@ const TAGLINES: string[] = [
   "If it's repetitive, I'll automate it; if it's hard, I'll bring jokes and a rollback plan.",
   "The only crab in your contacts you actually want to hear from. 🦞",
   'WhatsApp automation without the "please accept our new privacy policy".',
-  "WebChat energy, but for everyone.",
+  "iMessage green bubble energy, but for everyone.",
   "No $999 stand required.",
   "We ship features faster than Apple ships calculator updates.",
   "Your AI assistant, now without the $3,499 headset.",

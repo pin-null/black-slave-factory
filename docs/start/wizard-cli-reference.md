@@ -19,7 +19,7 @@ Local mode (default) walks you through:
 - Model and auth setup (OpenAI Code subscription OAuth, Anthropic API key or setup token, plus MiniMax, GLM, Ollama, Moonshot, and AI Gateway options)
 - Workspace location and bootstrap files
 - Gateway settings (port, bind, auth, tailscale)
-- Channels and providers (Telegram, WhatsApp, Discord, Mattermost plugin, Signal)
+- Channels and providers (Telegram, WhatsApp, Discord, Google Chat, Mattermost plugin, Signal)
 - Daemon install (LaunchAgent or systemd user unit)
 - Health check
 - Skills setup
@@ -62,9 +62,14 @@ It does not install or modify anything on the remote host.
     - Non-loopback binds still require auth.
   </Step>
   <Step title="Channels">
-    - [WebChat](/web/webchat): built in, no third-party channel setup required
-    - [Channels hub](/channels): integration overview for optional messaging surfaces
-    - [Channel integration conditions](/channels/integration-conditions): shared enable/configure/connect/allowlist checklist
+    - [WhatsApp](/channels/whatsapp): optional QR login
+    - [Telegram](/channels/telegram): bot token
+    - [Discord](/channels/discord): bot token
+    - [Google Chat](/channels/googlechat): service account JSON + webhook audience
+    - [Mattermost](/channels/mattermost) plugin: bot token + base URL
+    - [Signal](/channels/signal): optional `signal-cli` install + account config
+    - [BlueBubbles](/channels/bluebubbles): recommended for iMessage; server URL + password + webhook
+    - [iMessage](/channels/imessage): legacy `imsg` CLI path + DB access
     - DM security: default is pairing. First DM sends a code; approve via
       `openclaw pairing approve <channel> <code>` or use allowlists.
   </Step>
@@ -83,10 +88,10 @@ It does not install or modify anything on the remote host.
   <Step title="Skills">
     - Reads available skills and checks requirements.
     - Lets you choose node manager: npm or pnpm (bun not recommended).
-    - Installs optional dependencies when required.
+    - Installs optional dependencies (some use Homebrew on macOS).
   </Step>
   <Step title="Finish">
-    - Summary and next steps, including Control UI plus iOS and Android app options.
+    - Summary and next steps, including iOS, Android, and macOS app options.
   </Step>
 </Steps>
 
@@ -250,7 +255,7 @@ Typical fields in `~/.openclaw/openclaw.json`:
 - `tools.profile` (local onboarding defaults to `"coding"` when unset; existing explicit values are preserved)
 - `gateway.*` (mode, bind, auth, tailscale)
 - `session.dmScope` (local onboarding defaults this to `per-channel-peer` when unset; existing explicit values are preserved)
-- `channels.telegram.botToken`, `channels.discord.token`, `channels.signal.*`
+- `channels.telegram.botToken`, `channels.discord.token`, `channels.signal.*`, `channels.imessage.*`
 - Channel allowlists (Slack, Discord, Matrix, Microsoft Teams) when you opt in during prompts (names resolve to IDs when possible)
 - `skills.install.nodeManager`
 - `wizard.lastRunAt`
@@ -276,7 +281,7 @@ Gateway wizard RPC:
 - `wizard.cancel`
 - `wizard.status`
 
-Clients (Control UI and other shells) can render steps without re-implementing onboarding logic.
+Clients (macOS app and Control UI) can render steps without re-implementing onboarding logic.
 
 Signal setup behavior:
 

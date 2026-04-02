@@ -46,7 +46,7 @@ function registerTestPlugin(params: {
 }
 
 describe("plugin shape compatibility matrix", () => {
-  it("keeps legacy hook-only, capability, and ignored-channel shapes explicit", () => {
+  it("keeps legacy hook-only, plain capability, and hybrid capability shapes explicit", () => {
     const config = {} as OpenClawConfig;
     const registry = createPluginRegistry({
       logger: {
@@ -171,8 +171,8 @@ describe("plugin shape compatibility matrix", () => {
       },
       {
         id: "channel-demo",
-        shape: "non-capability",
-        capabilityMode: "none",
+        shape: "plain-capability",
+        capabilityMode: "plain",
       },
     ]);
 
@@ -182,6 +182,6 @@ describe("plugin shape compatibility matrix", () => {
       "text-inference",
       "web-search",
     ]);
-    expect(inspect[3]?.capabilities).toEqual([]);
+    expect(inspect[3]?.capabilities.map((entry) => entry.kind)).toEqual(["channel"]);
   });
 });

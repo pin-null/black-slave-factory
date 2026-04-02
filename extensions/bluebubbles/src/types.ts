@@ -107,7 +107,7 @@ const DEFAULT_TIMEOUT_MS = 10_000;
 export function normalizeBlueBubblesServerUrl(raw: string): string {
   const trimmed = raw.trim();
   if (!trimmed) {
-    throw new Error("BlueBubbles (Legacy) serverUrl is required");
+    throw new Error("BlueBubbles serverUrl is required");
   }
   const withScheme = /^https?:\/\//i.test(trimmed) ? trimmed : `http://${trimmed}`;
   return withScheme.replace(/\/+$/, "");

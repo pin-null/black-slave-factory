@@ -14,6 +14,7 @@ import type {
   OpenClawPluginConfigSchema,
   OpenClawPluginDefinition,
   PluginInteractiveTelegramHandlerContext,
+  PluginCommandContext,
 } from "../plugins/types.js";
 
 export type {
@@ -45,6 +46,7 @@ export type {
   ProviderWrapStreamFnContext,
   OpenClawPluginService,
   OpenClawPluginServiceContext,
+  PluginCommandContext,
   ProviderAuthContext,
   ProviderAuthDoctorHintContext,
   ProviderAuthMethodNonInteractiveContext,
@@ -53,7 +55,6 @@ export type {
   OpenClawPluginCommandDefinition,
   OpenClawPluginDefinition,
   PluginLogger,
-  PluginCommandContext,
   PluginInteractiveTelegramHandlerContext,
 } from "../plugins/types.js";
 export type { OpenClawConfig } from "../config/config.js";
@@ -108,8 +109,6 @@ export type { SecretFileReadOptions, SecretFileReadResult } from "../infra/secre
 export { resolveGatewayBindUrl } from "../shared/gateway-bind-url.js";
 export type { GatewayBindUrlResult } from "../shared/gateway-bind-url.js";
 export { normalizeAtHashSlug, normalizeHyphenSlug } from "../shared/string-normalization.js";
-export { stripMarkdown } from "../line/markdown-to-line.js";
-export { parseFiniteNumber } from "../infra/parse-finite-number.js";
 
 export { resolveTailnetHostWithRunner } from "../shared/tailscale-status.js";
 export type {

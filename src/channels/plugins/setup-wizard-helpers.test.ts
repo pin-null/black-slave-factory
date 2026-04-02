@@ -1237,14 +1237,14 @@ describe("setNestedChannelAllowFrom", () => {
   it("writes nested allowFrom and can force enabled state", () => {
     const next = setNestedChannelAllowFrom({
       cfg: {},
-      channel: "matrix",
+      channel: "googlechat",
       section: "dm",
-      allowFrom: ["@alice:example.org"],
+      allowFrom: ["users/123"],
       enabled: true,
     });
 
-    expect(next.channels?.matrix?.enabled).toBe(true);
-    expect(next.channels?.matrix?.dm?.allowFrom).toEqual(["@alice:example.org"]);
+    expect(next.channels?.googlechat?.enabled).toBe(true);
+    expect(next.channels?.googlechat?.dm?.allowFrom).toEqual(["users/123"]);
   });
 });
 
@@ -1307,28 +1307,28 @@ describe("createNestedChannelDmPolicy", () => {
 describe("createNestedChannelDmPolicySetter", () => {
   it("reuses the shared nested dmPolicy writer", () => {
     const setPolicy = createNestedChannelDmPolicySetter({
-      channel: "matrix",
+      channel: "googlechat",
       section: "dm",
       enabled: true,
     });
     const next = setPolicy({}, "disabled");
 
-    expect(next.channels?.matrix?.enabled).toBe(true);
-    expect(next.channels?.matrix?.dm?.policy).toBe("disabled");
+    expect(next.channels?.googlechat?.enabled).toBe(true);
+    expect(next.channels?.googlechat?.dm?.policy).toBe("disabled");
   });
 });
 
 describe("createNestedChannelAllowFromSetter", () => {
   it("reuses the shared nested allowFrom writer", () => {
     const setAllowFrom = createNestedChannelAllowFromSetter({
-      channel: "matrix",
+      channel: "googlechat",
       section: "dm",
       enabled: true,
     });
-    const next = setAllowFrom({}, ["@alice:example.org"]);
+    const next = setAllowFrom({}, ["users/123"]);
 
-    expect(next.channels?.matrix?.enabled).toBe(true);
-    expect(next.channels?.matrix?.dm?.allowFrom).toEqual(["@alice:example.org"]);
+    expect(next.channels?.googlechat?.enabled).toBe(true);
+    expect(next.channels?.googlechat?.dm?.allowFrom).toEqual(["users/123"]);
   });
 });
 

@@ -1,5 +1,4 @@
 import { resolveAgentWorkspaceDir, resolveDefaultAgentId } from "../../agents/agent-scope.js";
-import { shouldExposeChannelInEntryPoints } from "../../channels/entry-point-visibility.js";
 import {
   listChannelPluginCatalogEntries,
   type ChannelPluginCatalogEntry,
@@ -65,36 +64,20 @@ export function resolveChannelSetupEntries(params: {
   });
   const installedPluginIds = new Set(params.installedPlugins.map((plugin) => plugin.id));
   const catalogEntries = listChannelPluginCatalogEntries({ workspaceDir });
-  const includeInEntryPoints = (meta: Pick<ChannelMeta, "id" | "deprecated">) =>
-    shouldExposeChannelInEntryPoints({
-      cfg: params.cfg,
-      meta,
-      env: params.env,
-    });
   const installedCatalogEntries = catalogEntries.filter(
     (entry) =>
-      includeInEntryPoints(entry.meta) &&
-      !installedPluginIds.has(entry.id) &&
-      manifestInstalledIds.has(entry.id as ChannelChoice),
+      !installedPluginIds.has(entry.id) && manifestInstalledIds.has(entry.id as ChannelChoice),
   );
   const installableCatalogEntries = catalogEntries.filter(
     (entry) =>
-      includeInEntryPoints(entry.meta) &&
-      !installedPluginIds.has(entry.id) &&
-      !manifestInstalledIds.has(entry.id as ChannelChoice),
+      !installedPluginIds.has(entry.id) && !manifestInstalledIds.has(entry.id as ChannelChoice),
   );
 
   const metaById = new Map<string, ChannelMeta>();
   for (const meta of listChatChannels()) {
-    if (!includeInEntryPoints(meta)) {
-      continue;
-    }
     metaById.set(meta.id, meta);
   }
   for (const plugin of params.installedPlugins) {
-    if (!includeInEntryPoints(plugin.meta)) {
-      continue;
-    }
     metaById.set(plugin.id, plugin.meta);
   }
   for (const entry of installedCatalogEntries) {

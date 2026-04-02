@@ -19,6 +19,7 @@ import {
 } from "../auto-reply/thinking.js";
 import type { OpenClawConfig } from "../config/config.js";
 import type { SessionEntry } from "../config/sessions.js";
+import type { PermissionTier } from "../config/types.tools.js";
 import {
   isAcpSessionKey,
   isSubagentSessionKey,
@@ -79,6 +80,19 @@ function normalizeSubagentRole(raw: string): "orchestrator" | "leaf" | undefined
 function normalizeSubagentControlScope(raw: string): "children" | "none" | undefined {
   const normalized = raw.trim().toLowerCase();
   if (normalized === "children" || normalized === "none") {
+    return normalized;
+  }
+  return undefined;
+}
+
+function normalizePermissionTier(raw: string): PermissionTier | undefined {
+  const normalized = raw.trim().toLowerCase();
+  if (
+    normalized === "chat" ||
+    normalized === "readonly" ||
+    normalized === "readwrite" ||
+    normalized === "dangerous"
+  ) {
     return normalized;
   }
   return undefined;
@@ -250,6 +264,21 @@ export async function applySessionsPatchToStore(params: {
         );
       }
       next.thinkingLevel = normalized;
+    }
+  }
+
+  if ("permissionTier" in patch) {
+    const raw = patch.permissionTier;
+    if (raw === null) {
+      delete next.permissionTier;
+    } else if (raw !== undefined) {
+      const normalized = normalizePermissionTier(String(raw));
+      if (!normalized) {
+        return invalid(
+          'invalid permissionTier (use "chat", "readonly", "readwrite", or "dangerous")',
+        );
+      }
+      next.permissionTier = normalized;
     }
   }
 

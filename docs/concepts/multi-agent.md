@@ -88,9 +88,17 @@ Each agent gets its own workspace with `SOUL.md`, `AGENTS.md`, and optional `USE
 
   <Step title="Create channel accounts">
 
-Choose one ingress path per agent. In this webchat-first build, the simplest option is to keep separate agent bindings and sessions behind WebChat or the Control UI. If you later re-enable external channels, bind one account per agent for clean separation.
+Create one account per agent on your preferred channels:
 
-See [Channels](/channels), [Channel integration conditions](/channels/integration-conditions), and [WebChat](/web/webchat).
+- Discord: one bot per agent, enable Message Content Intent, copy each token.
+- Telegram: one bot per agent via BotFather, copy each token.
+- WhatsApp: link each phone number per account.
+
+```bash
+openclaw channels login --channel whatsapp --account work
+```
+
+See channel guides: [Discord](/channels/discord), [Telegram](/channels/telegram), [WhatsApp](/channels/whatsapp).
 
   </Step>
 
@@ -195,9 +203,9 @@ to `default` if present, otherwise the first configured account id (sorted).
 
 Common channels supporting this pattern include:
 
-- `whatsapp`, `telegram`, `discord`, `slack`, `signal`
-- `irc`, `line`, `mattermost`, `matrix`, `nextcloud-talk`
-- `zalo`, `zalouser`, `nostr`, `feishu`
+- `whatsapp`, `telegram`, `discord`, `slack`, `signal`, `imessage`
+- `irc`, `line`, `googlechat`, `mattermost`, `matrix`, `nextcloud-talk`
+- `bluebubbles`, `zalo`, `zalouser`, `nostr`, `feishu`
 
 ## Concepts
 

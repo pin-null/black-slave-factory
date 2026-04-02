@@ -48,12 +48,8 @@ export * from "../channels/plugins/status-issues/shared.js";
 export * from "../channels/plugins/whatsapp-heartbeat.js";
 export {
   buildComputedAccountStatusSnapshot,
-  buildProbeChannelStatusSummary,
   buildTokenChannelStatusSummary,
-  collectStatusIssuesFromLastError,
 } from "./status-helpers.js";
-export { resolveAckReaction } from "../agents/identity.js";
-export { resolveChannelMediaMaxBytes } from "../channels/plugins/media-limits.js";
 export {
   projectCredentialSnapshotFields,
   resolveConfiguredFromCredentialStatuses,
@@ -62,13 +58,7 @@ export * from "../infra/outbound/send-deps.js";
 export * from "../polls.js";
 export * from "../utils/message-channel.js";
 export * from "../whatsapp/normalize.js";
-export {
-  createActionGate,
-  jsonResult,
-  readNumberParam,
-  readReactionParams,
-  readStringParam,
-} from "../agents/tools/common.js";
+export { createActionGate, jsonResult, readStringParam } from "../agents/tools/common.js";
 export * from "./channel-send-result.js";
 export * from "./channel-lifecycle.js";
 export * from "./directory-runtime.js";

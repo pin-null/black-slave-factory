@@ -73,7 +73,7 @@ export const de: TranslationMap = {
       tickInterval: "Tick-Intervall",
       lastChannelsRefresh: "Letzte Kanalaktualisierung",
       channelsHint:
-        "Verwenden Sie Kanäle, um WhatsApp, Telegram, Discord oder Signal zu verknüpfen.",
+        "Verwenden Sie Kanäle, um WhatsApp, Telegram, Discord, Signal oder iMessage zu verknüpfen.",
     },
     stats: {
       instances: "Instanzen",

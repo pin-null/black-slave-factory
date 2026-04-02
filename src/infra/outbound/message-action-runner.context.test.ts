@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { slackPlugin } from "../../../extensions/slack/src/channel.js";
 import { telegramPlugin } from "../../../extensions/telegram/src/channel.js";
 import { whatsappPlugin } from "../../../extensions/whatsapp/src/channel.js";
@@ -55,8 +55,32 @@ const runDrySend = (params: {
     action: "send",
   });
 
+let createPluginRuntime: typeof import("../../plugins/runtime/index.js").createPluginRuntime;
+let setSlackRuntime: typeof import("../../../extensions/slack/src/runtime.js").setSlackRuntime;
+let setTelegramRuntime: typeof import("../../../extensions/telegram/src/runtime.js").setTelegramRuntime;
+let setWhatsAppRuntime: typeof import("../../../extensions/whatsapp/src/runtime.js").setWhatsAppRuntime;
+
+function installChannelRuntimes(params?: { includeTelegram?: boolean; includeWhatsApp?: boolean }) {
+  const runtime = createPluginRuntime();
+  setSlackRuntime(runtime);
+  if (params?.includeTelegram !== false) {
+    setTelegramRuntime(runtime);
+  }
+  if (params?.includeWhatsApp !== false) {
+    setWhatsAppRuntime(runtime);
+  }
+}
+
 describe("runMessageAction context isolation", () => {
+  beforeAll(async () => {
+    ({ createPluginRuntime } = await import("../../plugins/runtime/index.js"));
+    ({ setSlackRuntime } = await import("../../../extensions/slack/src/runtime.js"));
+    ({ setTelegramRuntime } = await import("../../../extensions/telegram/src/runtime.js"));
+    ({ setWhatsAppRuntime } = await import("../../../extensions/whatsapp/src/runtime.js"));
+  });
+
   beforeEach(() => {
+    installChannelRuntimes();
     setActivePluginRegistry(
       createTestRegistry([
         {

@@ -6,19 +6,19 @@ import {
 } from "./registry.js";
 
 describe("channel registry helpers", () => {
-  it("keeps a minimal legacy built-in normalization surface for internal compatibility", () => {
-    expect(normalizeChatChannelId(" imsg ")).toBeNull();
-    expect(normalizeChatChannelId("googlechat")).toBeNull();
-    expect(normalizeChatChannelId("gchat")).toBeNull();
-    expect(normalizeChatChannelId("google-chat")).toBeNull();
+  it("normalizes aliases + trims whitespace", () => {
+    expect(normalizeChatChannelId(" imsg ")).toBe("imessage");
+    expect(normalizeChatChannelId("gchat")).toBe("googlechat");
+    expect(normalizeChatChannelId("google-chat")).toBe("googlechat");
     expect(normalizeChatChannelId("internet-relay-chat")).toBe("irc");
     expect(normalizeChatChannelId("telegram")).toBe("telegram");
     expect(normalizeChatChannelId("web")).toBeNull();
     expect(normalizeChatChannelId("nope")).toBeNull();
   });
 
-  it("exposes no built-in external channels in the default order", () => {
-    expect(listChatChannels()).toEqual([]);
+  it("keeps Telegram first in the default order", () => {
+    const channels = listChatChannels();
+    expect(channels[0]?.id).toBe("telegram");
   });
 
   it("does not include MS Teams by default", () => {
@@ -26,18 +26,17 @@ describe("channel registry helpers", () => {
     expect(channels.some((channel) => channel.id === "msteams")).toBe(false);
   });
 
-  it("formats selection lines for retained metadata entries", () => {
-    const line = formatChannelSelectionLine(
-      {
-        id: "webchat",
-        label: "WebChat",
-        selectionLabel: "WebChat",
-        docsPath: "/web/webchat",
-        blurb: "internal Gateway chat surface",
-      },
-      (path, label) => [label, path].filter(Boolean).join(":"),
+  it("formats selection lines with docs labels + website extras", () => {
+    const channels = listChatChannels();
+    const first = channels[0];
+    if (!first) {
+      throw new Error("Missing channel metadata.");
+    }
+    const line = formatChannelSelectionLine(first, (path, label) =>
+      [label, path].filter(Boolean).join(":"),
     );
-    expect(line).toContain("Docs: webchat:/web/webchat");
-    expect(line).toContain("WebChat");
+    expect(line).not.toContain("Docs:");
+    expect(line).toContain("/channels/telegram");
+    expect(line).toContain("https://openclaw.ai");
   });
 });

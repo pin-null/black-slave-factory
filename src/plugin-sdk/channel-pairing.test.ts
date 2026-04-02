@@ -24,7 +24,7 @@ describe("createChannelPairingController", () => {
 
     const pairing = createChannelPairingController({
       core: runtime,
-      channel: "matrix",
+      channel: "googlechat",
       accountId: "Primary",
     });
 
@@ -36,11 +36,11 @@ describe("createChannelPairingController", () => {
     });
 
     expect(readAllowFromStore).toHaveBeenCalledWith({
-      channel: "matrix",
+      channel: "googlechat",
       accountId: "primary",
     });
     expect(upsertPairingRequest).toHaveBeenCalledWith({
-      channel: "matrix",
+      channel: "googlechat",
       accountId: "primary",
       id: "user-1",
       meta: undefined,

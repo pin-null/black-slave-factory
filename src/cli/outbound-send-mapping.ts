@@ -12,6 +12,7 @@ const LEGACY_SOURCE_TO_CHANNEL = {
   sendMessageDiscord: "discord",
   sendMessageSlack: "slack",
   sendMessageSignal: "signal",
+  sendMessageIMessage: "imessage",
 } as const;
 
 const CHANNEL_TO_LEGACY_DEP_KEY = {
@@ -20,6 +21,7 @@ const CHANNEL_TO_LEGACY_DEP_KEY = {
   discord: "sendDiscord",
   slack: "sendSlack",
   signal: "sendSignal",
+  imessage: "sendIMessage",
 } as const;
 
 /**

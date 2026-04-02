@@ -1,5 +1,4 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { shouldExposeChannelInEntryPoints } from "../channels/entry-point-visibility.js";
 import type { OpenClawConfig } from "../config/config.js";
 import type { WizardPrompter } from "../wizard/prompts.js";
 import {
@@ -12,11 +11,6 @@ import {
   setupChannels,
 } from "./onboard-channels.js";
 import { createExitThrowingRuntime, createWizardPrompter } from "./test-wizard-helpers.js";
-
-const EXTERNAL_CHANNEL_SETUP_RETAINED = shouldExposeChannelInEntryPoints({
-  cfg: {},
-  meta: { id: "telegram", deprecated: false },
-});
 
 function createPrompter(overrides: Partial<WizardPrompter>): WizardPrompter {
   return createWizardPrompter(
@@ -49,7 +43,7 @@ function createUnexpectedQuickstartPrompter(select: WizardPrompter["select"]) {
   });
 }
 
-describe.skipIf(!EXTERNAL_CHANNEL_SETUP_RETAINED)("setupChannels post-write hooks", () => {
+describe("setupChannels post-write hooks", () => {
   beforeEach(() => {
     setDefaultChannelPluginRegistryForTests();
   });

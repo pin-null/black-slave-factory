@@ -245,37 +245,6 @@ describe("buildWorkspaceSkillsPrompt", () => {
     expect(prompt).toContain("Does demo things");
     expect(prompt).toContain(path.join(skillDir, "SKILL.md"));
   });
-
-  it("excludes skills blocked by the category policy", async () => {
-    const workspaceDir = await makeWorkspace();
-    await writeSkill({
-      dir: path.join(workspaceDir, "skills", "calendar-helper"),
-      name: "calendar-helper",
-      description: "Manage calendars",
-      metadata: '{"openclaw":{"categories":["office"]}}',
-    });
-    await writeSkill({
-      dir: path.join(workspaceDir, "skills", "shell-helper"),
-      name: "shell-helper",
-      description: "Shell control",
-      metadata: '{"openclaw":{"categories":["system"]}}',
-    });
-
-    const prompt = buildWorkspaceSkillsPrompt(workspaceDir, {
-      ...resolveTestSkillDirs(workspaceDir),
-      config: {
-        skills: {
-          policy: {
-            allowedCategories: ["office"],
-            rejectUncategorized: true,
-          },
-        },
-      },
-    });
-
-    expect(prompt).toContain("calendar-helper");
-    expect(prompt).not.toContain("shell-helper");
-  });
 });
 
 describe("applySkillEnvOverrides", () => {

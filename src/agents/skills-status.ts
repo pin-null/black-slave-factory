@@ -7,9 +7,7 @@ import {
   hasBinary,
   isBundledSkillAllowed,
   isConfigPathTruthy,
-  isSkillAllowedByCategoryPolicy,
   loadWorkspaceSkillEntries,
-  resolveSkillCategories,
   resolveBundledAllowlist,
   resolveSkillConfig,
   resolveSkillsInstallPreferences,
@@ -37,14 +35,12 @@ export type SkillStatusEntry = {
   filePath: string;
   baseDir: string;
   skillKey: string;
-  categories: string[];
   primaryEnv?: string;
   emoji?: string;
   homepage?: string;
   always: boolean;
   disabled: boolean;
   blockedByAllowlist: boolean;
-  blockedByCategoryPolicy: boolean;
   eligible: boolean;
   requirements: Requirements;
   missing: Requirements;
@@ -182,8 +178,6 @@ function buildSkillStatus(
   const disabled = skillConfig?.enabled === false;
   const allowBundled = resolveBundledAllowlist(config);
   const blockedByAllowlist = !isBundledSkillAllowed(entry, allowBundled);
-  const categories = resolveSkillCategories(entry, config) ?? [];
-  const blockedByCategoryPolicy = !isSkillAllowedByCategoryPolicy({ entry, config });
   const always = entry.metadata?.always === true;
   const isEnvSatisfied = (envName: string) =>
     Boolean(
@@ -206,8 +200,7 @@ function buildSkillStatus(
       isEnvSatisfied,
       isConfigSatisfied,
     });
-  const eligible =
-    !disabled && !blockedByAllowlist && !blockedByCategoryPolicy && requirementsSatisfied;
+  const eligible = !disabled && !blockedByAllowlist && requirementsSatisfied;
 
   return {
     name: entry.skill.name,
@@ -217,14 +210,12 @@ function buildSkillStatus(
     filePath: entry.skill.filePath,
     baseDir: entry.skill.baseDir,
     skillKey,
-    categories,
     primaryEnv: entry.metadata?.primaryEnv,
     emoji,
     homepage,
     always,
     disabled,
     blockedByAllowlist,
-    blockedByCategoryPolicy,
     eligible,
     requirements: required,
     missing,

@@ -319,7 +319,7 @@ describe("gateway plugin HTTP auth boundary", () => {
       if (pathname === "/plugin/routed") {
         return respondJsonRoute(res, "routed");
       }
-      if (pathname === "/plugin-public") {
+      if (pathname === "/googlechat") {
         return respondJsonRoute(res, "wildcard-handler");
       }
       return false;
@@ -338,7 +338,7 @@ describe("gateway plugin HTTP auth boundary", () => {
         const unauthenticatedRouted = await sendRequest(server, { path: "/plugin/routed" });
         expectUnauthorizedResponse(unauthenticatedRouted);
 
-        const unauthenticatedWildcard = await sendRequest(server, { path: "/plugin-public" });
+        const unauthenticatedWildcard = await sendRequest(server, { path: "/googlechat" });
         expect(unauthenticatedWildcard.res.statusCode).toBe(200);
         expect(unauthenticatedWildcard.getBody()).toContain('"route":"wildcard-handler"');
 
@@ -358,7 +358,7 @@ describe("gateway plugin HTTP auth boundary", () => {
       if (canonicalizePluginPath(pathname) === "/api/channels/nostr/default/profile") {
         return respondJsonRoute(res, "channel-default");
       }
-      if (pathname === "/plugin-public") {
+      if (pathname === "/googlechat") {
         return respondJsonRoute(res, "wildcard-default");
       }
       return false;
@@ -369,7 +369,7 @@ describe("gateway plugin HTTP auth boundary", () => {
       resolvedAuth: AUTH_TOKEN,
       overrides: { handlePluginRequest },
       run: async (server) => {
-        const unauthenticated = await sendRequest(server, { path: "/plugin-public" });
+        const unauthenticated = await sendRequest(server, { path: "/googlechat" });
         expect(unauthenticated.res.statusCode).toBe(200);
         expect(unauthenticated.getBody()).toContain('"route":"wildcard-default"');
 
@@ -384,7 +384,7 @@ describe("gateway plugin HTTP auth boundary", () => {
         expectUnauthorizedResponse(unauthenticatedDeepEncodedChannel);
 
         const authenticated = await sendRequest(server, {
-          path: "/plugin-public",
+          path: "/googlechat",
           authorization: "Bearer test-token",
         });
         expect(authenticated.res.statusCode).toBe(200);

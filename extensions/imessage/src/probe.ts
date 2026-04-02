@@ -40,7 +40,7 @@ async function probeRpcSupport(cliPath: string, timeoutMs: number): Promise<RpcS
       const fatal = {
         supported: false,
         fatal: true,
-        error: 'legacy imsg CLI does not support the "rpc" subcommand (update imsg)',
+        error: 'imsg CLI does not support the "rpc" subcommand (update imsg)',
       };
       rpcSupportCache.set(cliPath, fatal);
       return fatal;
@@ -60,7 +60,7 @@ async function probeRpcSupport(cliPath: string, timeoutMs: number): Promise<RpcS
 }
 
 /**
- * Probe legacy iMessage RPC availability.
+ * Probe iMessage RPC availability.
  * @param timeoutMs - Explicit timeout in ms. If undefined, uses config or default.
  * @param opts - Additional options (cliPath, dbPath, runtime).
  */
@@ -77,14 +77,14 @@ export async function probeIMessage(
 
   const detected = await detectBinary(cliPath);
   if (!detected) {
-    return { ok: false, error: `legacy imsg not found (${cliPath})` };
+    return { ok: false, error: `imsg not found (${cliPath})` };
   }
 
   const rpcSupport = await probeRpcSupport(cliPath, effectiveTimeout);
   if (!rpcSupport.supported) {
     return {
       ok: false,
-      error: rpcSupport.error ?? "legacy imsg rpc unavailable",
+      error: rpcSupport.error ?? "imsg rpc unavailable",
       fatal: rpcSupport.fatal,
     };
   }

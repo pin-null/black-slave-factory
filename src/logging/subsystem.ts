@@ -103,6 +103,7 @@ const CHANNEL_SUBSYSTEM_PREFIXES = new Set<string>([
   "whatsapp",
   "discord",
   "irc",
+  "googlechat",
   "slack",
   "signal",
   "imessage",

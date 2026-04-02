@@ -353,12 +353,10 @@ export async function createChatForHandle(params: {
       errorText.toLowerCase().includes("private api")
     ) {
       throw new Error(
-        `BlueBubbles (Legacy) send failed: Cannot create new chat - Private API must be enabled. Original error: ${errorText || res.status}`,
+        `BlueBubbles send failed: Cannot create new chat - Private API must be enabled. Original error: ${errorText || res.status}`,
       );
     }
-    throw new Error(
-      `BlueBubbles (Legacy) create chat failed (${res.status}): ${errorText || "unknown"}`,
-    );
+    throw new Error(`BlueBubbles create chat failed (${res.status}): ${errorText || "unknown"}`);
   }
   const body = await res.text();
   let messageId = "ok";
@@ -427,14 +425,12 @@ export async function sendMessageBlueBubbles(
 ): Promise<BlueBubblesSendResult> {
   const trimmedText = text ?? "";
   if (!trimmedText.trim()) {
-    throw new Error("BlueBubbles (Legacy) send requires text");
+    throw new Error("BlueBubbles send requires text");
   }
   // Strip markdown early and validate - ensures messages like "***" or "---" don't become empty
   const strippedText = stripMarkdown(trimmedText);
   if (!strippedText.trim()) {
-    throw new Error(
-      "BlueBubbles (Legacy) send requires text (message was empty after markdown removal)",
-    );
+    throw new Error("BlueBubbles send requires text (message was empty after markdown removal)");
   }
 
   const account = resolveBlueBubblesAccount({
@@ -448,10 +444,10 @@ export async function sendMessageBlueBubbles(
     normalizeSecretInputString(opts.password) ||
     normalizeSecretInputString(account.config.password);
   if (!baseUrl) {
-    throw new Error("BlueBubbles (Legacy) serverUrl is required");
+    throw new Error("BlueBubbles serverUrl is required");
   }
   if (!password) {
-    throw new Error("BlueBubbles (Legacy) password is required");
+    throw new Error("BlueBubbles password is required");
   }
   const privateApiStatus = getCachedBlueBubblesPrivateApiStatus(account.accountId);
 
@@ -475,7 +471,7 @@ export async function sendMessageBlueBubbles(
       });
     }
     throw new Error(
-      "BlueBubbles (Legacy) send failed: chatGuid not found for target. Use a chat_guid target or ensure the chat exists.",
+      "BlueBubbles send failed: chatGuid not found for target. Use a chat_guid target or ensure the chat exists.",
     );
   }
   const effectId = resolveEffectId(opts.effectId);
@@ -488,7 +484,7 @@ export async function sendMessageBlueBubbles(
   });
   if (privateApiDecision.throwEffectDisabledError) {
     throw new Error(
-      "BlueBubbles (Legacy) send failed: reply/effect requires Private API, but it is disabled on the BlueBubbles server.",
+      "BlueBubbles send failed: reply/effect requires Private API, but it is disabled on the BlueBubbles server.",
     );
   }
   if (privateApiDecision.warningMessage) {
@@ -530,7 +526,7 @@ export async function sendMessageBlueBubbles(
   );
   if (!res.ok) {
     const errorText = await res.text();
-    throw new Error(`BlueBubbles (Legacy) send failed (${res.status}): ${errorText || "unknown"}`);
+    throw new Error(`BlueBubbles send failed (${res.status}): ${errorText || "unknown"}`);
   }
   return parseBlueBubblesMessageResponse(res);
 }

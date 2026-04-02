@@ -32,6 +32,7 @@ import {
   listDescendantRunsForRequester,
 } from "../../agents/subagent-registry.js";
 import { resolveAgentTimeoutMs } from "../../agents/timeout.js";
+import { minPermissionTier } from "../../agents/tool-permission-tier.js";
 import { deriveSessionTotalTokens, hasNonzeroUsage } from "../../agents/usage.js";
 import { ensureAgentWorkspace } from "../../agents/workspace.js";
 import {
@@ -47,6 +48,7 @@ import {
   updateSessionStore,
 } from "../../config/sessions.js";
 import type { AgentDefaultsConfig } from "../../config/types.js";
+import type { PermissionTier } from "../../config/types.tools.js";
 import { registerAgentRunContext } from "../../infra/agent-events.js";
 import { logWarn } from "../../logger.js";
 import { normalizeAgentId } from "../../routing/session-key.js";
@@ -147,6 +149,23 @@ function buildCronAgentDefaultsConfig(params: {
     defaults: Object.assign({}, params.defaults, definedOverrides),
     overrideModel,
   });
+}
+
+function applyCronPermissionTierCap(
+  cfg: OpenClawConfig,
+  permissionTier?: PermissionTier,
+): OpenClawConfig {
+  if (!permissionTier) {
+    return cfg;
+  }
+  const nextTier = minPermissionTier(cfg.tools?.permissionTier, permissionTier) ?? permissionTier;
+  return {
+    ...cfg,
+    tools: {
+      ...cfg.tools,
+      permissionTier: nextTier,
+    },
+  };
 }
 
 type ResolvedCronDeliveryTarget = Awaited<ReturnType<typeof resolveDeliveryTarget>>;
@@ -267,10 +286,14 @@ export async function runCronIsolatedAgentTurn(params: {
     defaults: params.cfg.agents?.defaults,
     agentConfigOverride,
   });
-  const cfgWithAgentDefaults: OpenClawConfig = {
-    ...params.cfg,
-    agents: Object.assign({}, params.cfg.agents, { defaults: agentCfg }),
-  };
+  const agentPayload = params.job.payload.kind === "agentTurn" ? params.job.payload : null;
+  const cfgWithAgentDefaults = applyCronPermissionTierCap(
+    {
+      ...params.cfg,
+      agents: Object.assign({}, params.cfg.agents, { defaults: agentCfg }),
+    },
+    agentPayload?.permissionTier,
+  );
 
   const baseSessionKey = (params.sessionKey?.trim() || `cron:${params.job.id}`).trim();
   const agentSessionKey = resolveCronAgentSessionKey({ sessionKey: baseSessionKey, agentId });
@@ -458,7 +481,6 @@ export async function runCronIsolatedAgentTurn(params: {
       params.job.payload.kind === "agentTurn" ? params.job.payload.timeoutSeconds : undefined,
   });
 
-  const agentPayload = params.job.payload.kind === "agentTurn" ? params.job.payload : null;
   const { deliveryRequested, resolvedDelivery, toolPolicy } = await resolveCronDeliveryContext({
     cfg: cfgWithAgentDefaults,
     job: params.job,

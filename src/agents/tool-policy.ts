@@ -1,3 +1,4 @@
+import type { PermissionTier } from "../config/types.tools.js";
 import {
   expandToolGroups,
   normalizeToolList,
@@ -57,6 +58,7 @@ export function applyOwnerOnlyToolPolicy(tools: AnyAgentTool[], senderIsOwner: b
 }
 
 export type ToolPolicyLike = {
+  permissionTier?: PermissionTier;
   allow?: string[];
   deny?: string[];
 };

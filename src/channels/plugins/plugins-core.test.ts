@@ -88,7 +88,7 @@ describe("channel plugin registry", () => {
     );
     setActivePluginRegistry(registry);
     const pluginIds = listChannelPlugins().map((plugin) => plugin.id);
-    expect(pluginIds).toEqual(["signal", "slack", "telegram"]);
+    expect(pluginIds).toEqual(["telegram", "slack", "signal"]);
   });
 
   it("refreshes cached channel lookups when the same registry instance is re-activated", () => {
@@ -116,12 +116,18 @@ describe("channel plugin registry", () => {
 });
 
 describe("channel plugin catalog", () => {
-  it("is empty in the webchat-only build", () => {
-    expect(getChannelPluginCatalogEntry("msteams")).toBeUndefined();
-    expect(listChannelPluginCatalogEntries()).toEqual([]);
+  it("includes Microsoft Teams", () => {
+    const entry = getChannelPluginCatalogEntry("msteams");
+    expect(entry?.install.npmSpec).toBe("@openclaw/msteams");
+    expect(entry?.meta.aliases).toContain("teams");
   });
 
-  it("ignores external catalog entries", () => {
+  it("lists plugin catalog entries", () => {
+    const ids = listChannelPluginCatalogEntries().map((entry) => entry.id);
+    expect(ids).toContain("msteams");
+  });
+
+  it("includes external catalog entries", () => {
     const dir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-catalog-"));
     const catalogPath = path.join(dir, "catalog.json");
     fs.writeFileSync(
@@ -148,10 +154,13 @@ describe("channel plugin catalog", () => {
       }),
     );
 
-    expect(listChannelPluginCatalogEntries({ catalogPaths: [catalogPath] })).toEqual([]);
+    const ids = listChannelPluginCatalogEntries({ catalogPaths: [catalogPath] }).map(
+      (entry) => entry.id,
+    );
+    expect(ids).toContain("demo-channel");
   });
 
-  it("does not expose discovered channel plugin ids", () => {
+  it("preserves plugin ids when they differ from channel ids", () => {
     const stateDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-channel-catalog-state-"));
     const pluginDir = path.join(stateDir, "extensions", "demo-channel-plugin");
     fs.mkdirSync(pluginDir, { recursive: true });
@@ -190,12 +199,12 @@ describe("channel plugin catalog", () => {
         CLAWDBOT_STATE_DIR: undefined,
         OPENCLAW_BUNDLED_PLUGINS_DIR: "/nonexistent/bundled/plugins",
       },
-    });
+    }).find((item) => item.id === "demo-channel");
 
-    expect(entry).toEqual([]);
+    expect(entry?.pluginId).toBe("@vendor/demo-runtime");
   });
 
-  it("ignores env-provided external catalog paths", () => {
+  it("uses the provided env for external catalog path resolution", () => {
     const home = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-catalog-home-"));
     const catalogPath = path.join(home, "catalog.json");
     fs.writeFileSync(
@@ -228,12 +237,12 @@ describe("channel plugin catalog", () => {
         OPENCLAW_PLUGIN_CATALOG_PATHS: "~/catalog.json",
         HOME: home,
       },
-    });
+    }).map((entry) => entry.id);
 
-    expect(ids).toEqual([]);
+    expect(ids).toContain("env-demo-channel");
   });
 
-  it("ignores default catalog paths", () => {
+  it("uses the provided env for default catalog paths", () => {
     const stateDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-catalog-state-"));
     const catalogPath = path.join(stateDir, "plugins", "catalog.json");
     fs.mkdirSync(path.dirname(catalogPath), { recursive: true });
@@ -266,12 +275,12 @@ describe("channel plugin catalog", () => {
         OPENCLAW_STATE_DIR: stateDir,
         CLAWDBOT_STATE_DIR: undefined,
       },
-    });
+    }).map((entry) => entry.id);
 
-    expect(ids).toEqual([]);
+    expect(ids).toContain("default-env-demo");
   });
 
-  it("does not include bundled metadata-only channel entries", () => {
+  it("includes bundled metadata-only channel entries even when the runtime entrypoint is omitted", () => {
     const packageRoot = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-bundled-catalog-"));
     const bundledDir = path.join(packageRoot, "dist", "extensions", "whatsapp");
     fs.mkdirSync(bundledDir, { recursive: true });
@@ -313,9 +322,10 @@ describe("channel plugin catalog", () => {
         ...process.env,
         OPENCLAW_BUNDLED_PLUGINS_DIR: path.join(packageRoot, "dist", "extensions"),
       },
-    });
+    }).find((item) => item.id === "whatsapp");
 
-    expect(entry).toEqual([]);
+    expect(entry?.install.npmSpec).toBe("@openclaw/whatsapp");
+    expect(entry?.pluginId).toBe("whatsapp");
   });
 });
 

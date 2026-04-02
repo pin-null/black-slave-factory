@@ -1,3 +1,5 @@
+import type { PermissionTier } from "./types.tools.js";
+
 export type HookMappingMatch = {
   path?: string;
   source?: string;
@@ -12,6 +14,8 @@ export type HookMappingConfig = {
   id?: string;
   match?: HookMappingMatch;
   action?: "wake" | "agent";
+  /** Hard upper bound for tool capability level on runs triggered by this mapping. */
+  permissionTier?: PermissionTier;
   wakeMode?: "now" | "next-heartbeat";
   name?: string;
   /** Route this hook to a specific agent (unknown ids fall back to the default agent). */
@@ -28,6 +32,7 @@ export type HookMappingConfig = {
     | "telegram"
     | "discord"
     | "irc"
+    | "googlechat"
     | "slack"
     | "signal"
     | "imessage"
@@ -110,6 +115,8 @@ export type HooksConfig = {
   enabled?: boolean;
   path?: string;
   token?: string;
+  /** Hard upper bound for tool capability level on hook-triggered runs. */
+  permissionTier?: PermissionTier;
   /**
    * Default session key used for hook agent runs when no request/mapping session key is used.
    * If omitted, OpenClaw generates `hook:<uuid>` per request.

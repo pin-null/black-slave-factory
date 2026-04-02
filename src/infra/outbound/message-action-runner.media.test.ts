@@ -120,10 +120,10 @@ describe("runMessageAction media behavior", () => {
       id: "bluebubbles",
       meta: {
         id: "bluebubbles",
-        label: "BlueBubbles (Legacy)",
-        selectionLabel: "BlueBubbles (Legacy)",
-        docsPath: "/gateway/configuration-reference#bluebubbles",
-        blurb: "Legacy BlueBubbles test plugin.",
+        label: "BlueBubbles",
+        selectionLabel: "BlueBubbles",
+        docsPath: "/channels/bluebubbles",
+        blurb: "BlueBubbles test plugin.",
       },
       capabilities: { chatTypes: ["direct", "group"], media: true },
       config: {

@@ -21,6 +21,7 @@ enum ChatMarkdownPreprocessor {
         "Signal",
         "Slack",
         "Discord",
+        "Google Chat",
         "iMessage",
         "Teams",
         "Matrix",

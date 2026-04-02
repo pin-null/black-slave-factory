@@ -5,14 +5,10 @@ export {
   hasBinary,
   isBundledSkillAllowed,
   isConfigPathTruthy,
-  isSkillAllowedByCategoryPolicy,
   resolveBundledAllowlist,
-  resolveConfiguredSkillCategories,
   resolveConfigPath,
   resolveRuntimePlatform,
-  resolveSkillCategories,
   resolveSkillConfig,
-  resolveAllowedSkillCategories,
 } from "./skills/config.js";
 export {
   applySkillEnvOverrides,

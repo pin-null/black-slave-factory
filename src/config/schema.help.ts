@@ -550,24 +550,6 @@ export const FIELD_HELP: Record<string, string> = {
   "tools.loopDetection.detectors.knownPollNoProgress":
     "Enable known poll tool no-progress loop detection (default: true).",
   "tools.loopDetection.detectors.pingPong": "Enable ping-pong loop detection (default: true).",
-  "tools.securityFirewall":
-    "Built-in pre-tool-call security firewall for office-style hardening with rule-based blocking, approval-required responses, audit logging, and prompt guard injection. Use this when you need a coarse capability boundary before tool execution.",
-  "tools.securityFirewall.enabled":
-    "Enable the security firewall before tool execution (default: false). When enabled, matching rules can block or mark tool calls as approval-required before plugin hooks run.",
-  "tools.securityFirewall.profile":
-    'Optional bundled firewall profile. Use "office" to restrict the agent to office productivity tasks and guard risky shell, filesystem, and external-service actions.',
-  "tools.securityFirewall.ownerBypass":
-    "When true, sender identities marked as owner bypass firewall matches. Keep false for the strictest boundary and enable only when trusted operators need an escape hatch.",
-  "tools.securityFirewall.promptGuard":
-    "Extra system-prompt text injected on inbound runs when the firewall is enabled. Use this to reinforce the intended task boundary in the model prompt alongside rule enforcement.",
-  "tools.securityFirewall.audit":
-    "Audit-log settings for matched firewall rules. Enable this when you need a JSONL trail of blocked, approval-required, or audited actions for later review.",
-  "tools.securityFirewall.audit.enabled":
-    "Write JSONL audit records for firewall matches (default: true when the firewall is enabled). Disable only when local audit storage is intentionally handled elsewhere.",
-  "tools.securityFirewall.audit.path":
-    "Optional JSONL destination path for firewall audit logs. Defaults under the OpenClaw state logs directory when omitted.",
-  "tools.securityFirewall.rules":
-    "Ordered custom firewall rules evaluated before bundled profile defaults. Use these to match tools, senders, request text, commands, paths, or URL hosts and then block, require approval, or audit.",
   "tools.exec.notifyOnExit":
     "When true (default), backgrounded exec sessions on exit and node exec lifecycle events enqueue a system event and request a heartbeat.",
   "tools.exec.notifyOnExitEmptySuccess":
@@ -579,12 +561,16 @@ export const FIELD_HELP: Record<string, string> = {
     "Additional explicit directories trusted for safe-bin path checks (PATH entries are never auto-trusted).",
   "tools.exec.safeBinProfiles":
     "Optional per-binary safe-bin profiles (positional limits + allowed/denied flags).",
+  "tools.permissionTier":
+    'Global hard upper bound for tool capability level. Use "chat" for no tools, "readonly" for read-only access, "readwrite" for workspace mutations and sandbox execution, and "dangerous" for high-risk tools such as browser, web, gateway, and cross-session control.',
   "tools.profile":
     "Global tool profile name used to select a predefined tool policy baseline before applying allow/deny overrides. Use this for consistent environment posture across agents and keep profile names stable.",
   "tools.alsoAllow":
     "Extra tool allowlist entries merged on top of the selected tool profile and default policy. Keep this list small and explicit so audits can quickly identify intentional policy exceptions.",
   "tools.byProvider":
     "Per-provider tool allow/deny overrides keyed by channel/provider ID to tailor capabilities by surface. Use this when one provider needs stricter controls than global tool policy.",
+  "agents.list[].tools.permissionTier":
+    "Per-agent hard upper bound for tool capability level. Use this to pin specialized agents below the global maximum without editing their allowlists by hand.",
   "agents.list[].tools.profile":
     "Per-agent override for tool profile selection when one agent needs a different capability baseline. Use this sparingly so policy differences across agents stay intentional and reviewable.",
   "agents.list[].tools.alsoAllow":
@@ -640,14 +626,6 @@ export const FIELD_HELP: Record<string, string> = {
     "Ordered model preferences specifically for video understanding before shared media fallback applies. Prioritize models with strong multimodal video support to minimize degraded summaries.",
   "tools.media.video.scope":
     "Scope selector controlling when video understanding is attempted across incoming events. Narrow scope in noisy channels, and broaden only where video interpretation is core to workflow.",
-  "skills.policy":
-    "Global skill-category gating policy layered on top of per-skill enablement and bundled allowlists. Use this to keep only approved skill categories available to the agent.",
-  "skills.policy.allowedCategories":
-    'Optional allowlist of skill categories (for example `["office"]`). When set, a skill must declare at least one matching category via `metadata.openclaw.categories` or `skills.entries.*.categories` to stay eligible.',
-  "skills.policy.rejectUncategorized":
-    "When true, skills without any declared category are blocked by policy. Enable this when you want all installed or bundled skills to be explicitly classified before use.",
-  "skills.entries.*.categories":
-    "Optional operator override for a skill's categories. Use this to classify local or third-party skills without editing the upstream SKILL.md, or to tighten policy during review.",
   "skills.load.watch":
     "Enable filesystem watching for skill-definition changes so updates can be applied without full process restart. Keep enabled in development workflows and disable in immutable production images.",
   "skills.load.watchDebounceMs":
@@ -1249,6 +1227,8 @@ export const FIELD_HELP: Record<string, string> = {
     "HTTP path used by the hooks endpoint (for example `/hooks`) on the gateway control server. Use a non-guessable path and combine it with token validation for defense in depth.",
   "hooks.token":
     "Shared bearer token checked by hooks ingress for request authentication before mappings run. Treat holders as full-trust callers for the hook ingress surface, not as a separate non-owner role. Use environment substitution and rotate regularly when webhook endpoints are internet-accessible.",
+  "hooks.permissionTier":
+    "Global hard upper bound for tool capability level on hook-triggered runs. Use this to keep webhook automations below interactive-user privileges even when they target capable agents.",
   "hooks.defaultSessionKey":
     "Fallback session key used for hook deliveries when a request does not provide one through allowed channels. Use a stable but scoped key to avoid mixing unrelated automation conversations.",
   "hooks.allowRequestSessionKey":
@@ -1275,6 +1255,8 @@ export const FIELD_HELP: Record<string, string> = {
     "Source match condition for a hook mapping, typically set by trusted upstream metadata or adapter logic. Use stable source identifiers so routing remains deterministic across retries.",
   "hooks.mappings[].action":
     'Mapping action type: "wake" triggers agent wake flow, while "agent" sends directly to agent handling. Use "agent" for immediate execution and "wake" when heartbeat-driven processing is preferred.',
+  "hooks.mappings[].permissionTier":
+    "Per-mapping hard upper bound for tool capability level. Use this to keep specific webhook routes read-only or chat-only even when the broader hooks surface allows more.",
   "hooks.mappings[].wakeMode":
     'Wake scheduling mode: "now" wakes immediately, while "next-heartbeat" defers until the next heartbeat cycle. Use deferred mode for lower-priority automations that can tolerate slight delay.',
   "hooks.mappings[].name":
@@ -1292,7 +1274,7 @@ export const FIELD_HELP: Record<string, string> = {
   "hooks.mappings[].allowUnsafeExternalContent":
     "When true, mapping content may include less-sanitized external payload data in generated messages. Keep false by default and enable only for trusted sources with reviewed transform logic.",
   "hooks.mappings[].channel":
-    'Delivery channel override for mapping outputs (for example "last", "telegram", "discord", "slack", "signal", or "msteams"). Keep channel overrides explicit to avoid accidental cross-channel sends.',
+    'Delivery channel override for mapping outputs (for example "last", "telegram", "discord", "slack", "signal", "imessage", or "msteams"). Keep channel overrides explicit to avoid accidental cross-channel sends.',
   "hooks.mappings[].to":
     "Destination identifier inside the selected channel when mapping replies should route to a fixed target. Verify provider-specific destination formats before enabling production mappings.",
   "hooks.mappings[].model":
@@ -1416,9 +1398,9 @@ export const FIELD_HELP: Record<string, string> = {
   "channels.signal":
     "Signal channel provider configuration including account identity and DM policy behavior. Keep account mapping explicit so routing remains stable across multi-device setups.",
   "channels.imessage":
-    "Legacy macOS-only iMessage compatibility configuration for CLI integration and DM access policy handling. Keep this disabled for Windows-first deployments and use explicit CLI paths only for existing bridge setups.",
+    "iMessage channel provider configuration for CLI integration and DM access policy handling. Use explicit CLI paths when runtime environments have non-standard binary locations.",
   "channels.bluebubbles":
-    "Legacy macOS-only BlueBubbles compatibility configuration for Apple messaging bridge integrations. Keep this disabled for Windows-first deployments unless you are maintaining an existing BlueBubbles bridge.",
+    "BlueBubbles channel provider configuration used for Apple messaging bridge integrations. Keep DM policy aligned with your trusted sender model in shared deployments.",
   "channels.msteams":
     "Microsoft Teams channel provider configuration and provider-specific policy toggles. Use this section to isolate Teams behavior from other enterprise chat providers.",
   "channels.mattermost":
@@ -1488,9 +1470,9 @@ export const FIELD_HELP: Record<string, string> = {
   "channels.signal.account":
     "Signal account identifier (phone/number handle) used to bind this channel config to a specific Signal identity. Keep this aligned with your linked device/session state.",
   "channels.imessage.configWrites":
-    "Allow the legacy iMessage bridge to write config in response to channel events/commands (default: true).",
+    "Allow iMessage to write config in response to channel events/commands (default: true).",
   "channels.imessage.cliPath":
-    "Filesystem path to the legacy iMessage bridge CLI binary used for send/receive operations. Set explicitly only for existing macOS bridge deployments when the binary is not on PATH.",
+    "Filesystem path to the iMessage bridge CLI binary used for send/receive operations. Set explicitly when the binary is not on PATH in service runtime environments.",
   "channels.msteams.configWrites":
     "Allow Microsoft Teams to write config in response to channel events/commands (default: true).",
   "channels.modelByChannel":
@@ -1572,9 +1554,9 @@ export const FIELD_HELP: Record<string, string> = {
   "channels.signal.dmPolicy":
     'Direct message access control ("pairing" recommended). "open" requires channels.signal.allowFrom=["*"].',
   "channels.imessage.dmPolicy":
-    'Legacy iMessage direct message access control ("pairing" recommended). "open" requires channels.imessage.allowFrom=["*"].',
+    'Direct message access control ("pairing" recommended). "open" requires channels.imessage.allowFrom=["*"].',
   "channels.bluebubbles.dmPolicy":
-    'Legacy BlueBubbles direct message access control ("pairing" recommended). "open" requires channels.bluebubbles.allowFrom=["*"].',
+    'Direct message access control ("pairing" recommended). "open" requires channels.bluebubbles.allowFrom=["*"].',
   "channels.discord.dmPolicy":
     'Direct message access control ("pairing" recommended). "open" requires channels.discord.allowFrom=["*"].',
   "channels.discord.dm.policy":

@@ -44,13 +44,13 @@ export const blueBubblesSetupAdapter: ChannelSetupAdapter = {
     }),
   validateInput: ({ input }) => {
     if (!input.httpUrl && !input.password) {
-      return "BlueBubbles (Legacy) requires --http-url and --password.";
+      return "BlueBubbles requires --http-url and --password.";
     }
     if (!input.httpUrl) {
-      return "BlueBubbles (Legacy) requires --http-url.";
+      return "BlueBubbles requires --http-url.";
     }
     if (!input.password) {
-      return "BlueBubbles (Legacy) requires --password.";
+      return "BlueBubbles requires --password.";
     }
     return null;
   },

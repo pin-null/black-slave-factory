@@ -48,7 +48,6 @@ Row shape (JSON):
 - `key`: session key (string)
 - `kind`: `main | group | cron | hook | node | other`
 - `channel`: `whatsapp | telegram | discord | signal | imessage | webchat | internal | unknown`
-  `imessage` only appears for retained legacy compatibility sessions.
 - `displayName` (group display label if available)
 - `updatedAt` (ms)
 - `sessionId`

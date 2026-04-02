@@ -8,6 +8,15 @@ private let gatewayConnectionLogger = Logger(subsystem: "ai.openclaw", category:
 
 enum GatewayAgentChannel: String, Codable, CaseIterable {
     case last
+    case whatsapp
+    case telegram
+    case discord
+    case googlechat
+    case slack
+    case signal
+    case imessage
+    case msteams
+    case bluebubbles
     case webchat
 
     init(raw: String?) {

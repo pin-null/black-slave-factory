@@ -327,6 +327,41 @@ WhatsApp runs through the gateway's web channel (Baileys Web). It starts automat
 
 **Reaction notification modes:** `off` (none), `own` (bot's messages, default), `all` (all messages), `allowlist` (from `guilds.<id>.users` on all messages).
 
+### Google Chat
+
+```json5
+{
+  channels: {
+    googlechat: {
+      enabled: true,
+      serviceAccountFile: "/path/to/service-account.json",
+      audienceType: "app-url", // app-url | project-number
+      audience: "https://gateway.example.com/googlechat",
+      webhookPath: "/googlechat",
+      botUser: "users/1234567890",
+      dm: {
+        enabled: true,
+        policy: "pairing",
+        allowFrom: ["users/1234567890"],
+      },
+      groupPolicy: "allowlist",
+      groups: {
+        "spaces/AAAA": { allow: true, requireMention: true },
+      },
+      actions: { reactions: true },
+      typingIndicator: "message",
+      mediaMaxMb: 20,
+    },
+  },
+}
+```
+
+- Service account JSON: inline (`serviceAccount`) or file-based (`serviceAccountFile`).
+- Service account SecretRef is also supported (`serviceAccountRef`).
+- Env fallbacks: `GOOGLE_CHAT_SERVICE_ACCOUNT` or `GOOGLE_CHAT_SERVICE_ACCOUNT_FILE`.
+- Use `spaces/<spaceId>` or `users/<userId>` for delivery targets.
+- `channels.googlechat.dangerouslyAllowNameMatching` re-enables mutable email principal matching (break-glass compatibility mode).
+
 ### Slack
 
 ```json5
@@ -472,7 +507,7 @@ When Mattermost native commands are enabled:
 
 ### BlueBubbles
 
-BlueBubbles is a legacy macOS-only compatibility path retained under `channels.bluebubbles`.
+BlueBubbles is the recommended iMessage path (plugin-backed, configured under `channels.bluebubbles`).
 
 ```json5
 {
@@ -481,7 +516,7 @@ BlueBubbles is a legacy macOS-only compatibility path retained under `channels.b
       enabled: true,
       dmPolicy: "pairing",
       // serverUrl, password, webhookPath, group controls, and advanced actions:
-      // see /gateway/configuration-reference#bluebubbles
+      // see /channels/bluebubbles
     },
   },
 }
@@ -489,13 +524,9 @@ BlueBubbles is a legacy macOS-only compatibility path retained under `channels.b
 
 - Core key paths covered here: `channels.bluebubbles`, `channels.bluebubbles.dmPolicy`.
 - Optional `channels.bluebubbles.defaultAccount` overrides default account selection when it matches a configured account id.
-- This channel is not part of the default Windows-first runtime surface.
+- Full BlueBubbles channel configuration is documented in [BlueBubbles](/channels/bluebubbles).
 
 ### iMessage
-
-This is a legacy macOS-only compatibility path retained for existing setups.
-
-This channel is not part of the default Windows-first runtime surface.
 
 OpenClaw spawns `imsg rpc` (JSON-RPC over stdio). No daemon or port required.
 
@@ -528,9 +559,9 @@ OpenClaw spawns `imsg rpc` (JSON-RPC over stdio). No daemon or port required.
 - `cliPath` can point to an SSH wrapper; set `remoteHost` (`host` or `user@host`) for SCP attachment fetching.
 - `attachmentRoots` and `remoteAttachmentRoots` restrict inbound attachment paths (default: `/Users/*/Library/Messages/Attachments`).
 - SCP uses strict host-key checking, so ensure the relay host key already exists in `~/.ssh/known_hosts`.
-- `channels.imessage.configWrites`: allow or deny legacy iMessage-initiated config writes.
+- `channels.imessage.configWrites`: allow or deny iMessage-initiated config writes.
 
-<Accordion title="Legacy iMessage SSH wrapper example">
+<Accordion title="iMessage SSH wrapper example">
 
 ```bash
 #!/usr/bin/env bash
@@ -624,7 +655,7 @@ See the full channel index: [Channels](/channels).
 
 ### Group chat mention gating
 
-Group messages default to **require mention** (metadata mention or safe regex patterns). Applies to WhatsApp, Telegram, and Discord group chats in the default runtime surface.
+Group messages default to **require mention** (metadata mention or safe regex patterns). Applies to WhatsApp, Telegram, Discord, Google Chat, and iMessage group chats.
 
 **Mention types:**
 
@@ -662,7 +693,7 @@ Group messages default to **require mention** (metadata mention or safe regex pa
 
 Resolution: per-DM override → provider default → no limit (all retained).
 
-Supported: `telegram`, `whatsapp`, `discord`, `slack`, `signal`, `msteams`.
+Supported: `telegram`, `whatsapp`, `discord`, `slack`, `signal`, `imessage`, `msteams`.
 
 #### Self-chat mode
 
@@ -1070,7 +1101,7 @@ See [Session Pruning](/concepts/session-pruning) for behavior details.
 ```
 
 - Non-Telegram channels require explicit `*.blockStreaming: true` to enable block replies.
-- Channel overrides: `channels.<channel>.blockStreamingCoalesce` (and per-account variants). Signal/Slack/Discord default `minChars: 1500`.
+- Channel overrides: `channels.<channel>.blockStreamingCoalesce` (and per-account variants). Signal/Slack/Discord/Google Chat default `minChars: 1500`.
 - `humanDelay`: randomized pause between block replies. `natural` = 800–2500ms. Per-agent override: `agents.list[].humanDelay`.
 
 See [Streaming](/concepts/streaming) for behavior + chunking details.
@@ -1658,7 +1689,7 @@ Variables are case-insensitive. `{think}` is an alias for `{thinkingLevel}`.
 - Per-channel overrides: `channels.<channel>.ackReaction`, `channels.<channel>.accounts.<id>.ackReaction`.
 - Resolution order: account → channel → `messages.ackReaction` → identity fallback.
 - Scope: `group-mentions` (default), `group-all`, `direct`, `all`.
-- `removeAckAfterReply`: removes ack after reply (Slack/Discord/Telegram only).
+- `removeAckAfterReply`: removes ack after reply (Slack/Discord/Telegram/Google Chat only).
 
 ### Inbound debounce
 
@@ -1873,54 +1904,6 @@ Settings can be defined globally in `tools.loopDetection` and overridden per-age
 - `detectors.knownPollNoProgress`: warn/block on known poll tools (`process.poll`, `command_status`, etc.).
 - `detectors.pingPong`: warn/block on alternating no-progress pair patterns.
 - If `warningThreshold >= criticalThreshold` or `criticalThreshold >= globalCircuitBreakerThreshold`, validation fails.
-
-### `tools.securityFirewall`
-
-Use the built-in security firewall when you want a coarse pre-tool execution boundary for office-only or operator-reviewed workflows.
-
-```json5
-{
-  tools: {
-    securityFirewall: {
-      enabled: true,
-      profile: "office",
-      ownerBypass: false,
-      promptGuard: "You are restricted to office productivity tasks. Refuse system administration and host-level changes.",
-      audit: {
-        enabled: true,
-        path: "~/.openclaw/logs/security-firewall.jsonl",
-      },
-      rules: [
-        {
-          id: "calendar-http",
-          action: "approval", // block | approval | audit
-          tools: ["web_*"],
-          urlHosts: ["calendar.example.com"],
-          reason: "Calendar API calls require operator approval.",
-        },
-      ],
-    },
-  },
-}
-```
-
-- `enabled`: turns on firewall matching before tool execution.
-- `profile`: bundled baseline profile. `office` blocks shell execution and admin-style tools, requires approval for sensitive file access and external service calls, and audits selected reads.
-- `ownerBypass`: when true, owner senders bypass firewall matches.
-- `promptGuard`: extra system-prompt text injected alongside enforcement to keep the model inside the intended task lane.
-- `audit.enabled` / `audit.path`: JSONL audit logging for matched rules.
-- `rules`: custom ordered rules evaluated before bundled profile defaults.
-- Rule fields:
-  - `action`: `block`, `approval`, or `audit`
-  - `tools`: tool-name glob list such as `["read"]` or `["web_*"]`
-  - `senderIds`: sender-id glob list
-  - `ownerOnly`: only match owner senders
-  - `requestContains`: request-text fragment match
-  - `commandContains`: shell/command fragment match
-  - `pathPrefixes`: path-prefix match
-  - `outsideWorkspace`: match paths outside the agent workspace
-  - `urlHosts`: URL-host match
-  - `reason`: operator-facing reason used in logs and rejections
 
 ### `tools.web`
 
@@ -2383,10 +2366,6 @@ See [Local Models](/gateway/local-models). TL;DR: run MiniMax M2.5 via LM Studio
 {
   skills: {
     allowBundled: ["gemini", "peekaboo"],
-    policy: {
-      allowedCategories: ["office"],
-      rejectUncategorized: true,
-    },
     load: {
       extraDirs: ["~/Projects/agent-scripts/skills"],
     },
@@ -2396,7 +2375,6 @@ See [Local Models](/gateway/local-models). TL;DR: run MiniMax M2.5 via LM Studio
     },
     entries: {
       "image-lab": {
-        categories: ["office"],
         apiKey: { source: "env", provider: "default", id: "GEMINI_API_KEY" }, // or plaintext string
         env: { GEMINI_API_KEY: "GEMINI_KEY_HERE" },
       },
@@ -2408,12 +2386,8 @@ See [Local Models](/gateway/local-models). TL;DR: run MiniMax M2.5 via LM Studio
 ```
 
 - `allowBundled`: optional allowlist for bundled skills only (managed/workspace skills unaffected).
-- `policy.allowedCategories`: optional skill-category allowlist. When set, a skill must declare at least one matching category.
-- `policy.rejectUncategorized`: when true, uncategorized skills are blocked.
-- `entries.<skillKey>.categories`: optional operator override for a skill's categories.
 - `entries.<skillKey>.enabled: false` disables a skill even if bundled/installed.
 - `entries.<skillKey>.apiKey`: convenience for skills declaring a primary env var (plaintext string or SecretRef object).
-- Category policy affects prompt eligibility, sandbox skill sync, and skill installs. A blocked skill stays out of the prompt, is not copied into synced child workspaces, and cannot be installed through the skill installer path.
 
 ---
 

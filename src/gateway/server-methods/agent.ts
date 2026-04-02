@@ -5,6 +5,7 @@ import {
   normalizeSpawnedRunMetadata,
   resolveIngressWorkspaceOverrideForSpawnedRun,
 } from "../../agents/spawned-context.js";
+import { minPermissionTier } from "../../agents/tool-permission-tier.js";
 import { buildBareSessionResetPrompt } from "../../auto-reply/reply/session-reset-prompt.js";
 import { agentCommandFromIngress } from "../../commands/agent.js";
 import { loadConfig } from "../../config/config.js";
@@ -214,6 +215,7 @@ export const agentHandlers: GatewayRequestHandlers = {
       sessionId?: string;
       sessionKey?: string;
       thinking?: string;
+      permissionTier?: "chat" | "readonly" | "readwrite" | "dangerous";
       deliver?: boolean;
       attachments?: Array<{
         type?: string;
@@ -438,10 +440,16 @@ export const agentHandlers: GatewayRequestHandlers = {
       resolvedGroupChannel = resolvedGroupChannel || inheritedGroup?.groupChannel;
       resolvedGroupSpace = resolvedGroupSpace || inheritedGroup?.groupSpace;
       const deliveryFields = normalizeSessionDeliveryFields(entry);
+      const effectivePermissionTier =
+        minPermissionTier(entry?.permissionTier, request.permissionTier) ??
+        request.permissionTier ??
+        entry?.permissionTier;
       const nextEntryPatch: SessionEntry = {
         sessionId,
         updatedAt: now,
         thinkingLevel: entry?.thinkingLevel,
+        // Existing sessions may be downscoped per request, but never re-elevated.
+        permissionTier: effectivePermissionTier,
         fastMode: entry?.fastMode,
         verboseLevel: entry?.verboseLevel,
         reasoningLevel: entry?.reasoningLevel,

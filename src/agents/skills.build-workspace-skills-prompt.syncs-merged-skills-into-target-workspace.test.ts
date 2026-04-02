@@ -252,46 +252,4 @@ describe("buildWorkspaceSkillsPrompt", () => {
     });
     expect(emptyPrompt).toBe("");
   });
-
-  it("does not sync skills blocked by category policy into the target workspace", async () => {
-    const sourceWorkspace = await createCaseDir("source");
-    const targetWorkspace = await createCaseDir("target");
-
-    await writeSkill({
-      dir: path.join(sourceWorkspace, "skills", "calendar-helper"),
-      name: "calendar-helper",
-      description: "Office-safe",
-      metadata: '{"openclaw":{"categories":["office"]}}',
-    });
-    await writeSkill({
-      dir: path.join(sourceWorkspace, "skills", "shell-helper"),
-      name: "shell-helper",
-      description: "Not office-safe",
-      metadata: '{"openclaw":{"categories":["system"]}}',
-    });
-
-    await withEnv({ HOME: sourceWorkspace, PATH: "" }, () =>
-      syncSkillsToWorkspace({
-        sourceWorkspaceDir: sourceWorkspace,
-        targetWorkspaceDir: targetWorkspace,
-        config: {
-          skills: {
-            policy: {
-              allowedCategories: ["office"],
-              rejectUncategorized: true,
-            },
-          },
-        },
-        bundledSkillsDir: path.join(sourceWorkspace, ".bundled"),
-        managedSkillsDir: path.join(sourceWorkspace, ".managed"),
-      }),
-    );
-
-    expect(
-      await pathExists(path.join(targetWorkspace, "skills", "calendar-helper", "SKILL.md")),
-    ).toBe(true);
-    expect(await pathExists(path.join(targetWorkspace, "skills", "shell-helper", "SKILL.md"))).toBe(
-      false,
-    );
-  });
 });

@@ -89,7 +89,7 @@ export async function downloadBlueBubblesAttachment(
 ): Promise<{ buffer: Uint8Array; contentType?: string }> {
   const guid = attachment.guid?.trim();
   if (!guid) {
-    throw new Error("BlueBubbles (Legacy) attachment guid is required");
+    throw new Error("BlueBubbles attachment guid is required");
   }
   const { baseUrl, password, allowPrivateNetwork } = resolveAccount(opts);
   const url = buildBlueBubblesApiUrl({
@@ -125,7 +125,7 @@ export async function downloadBlueBubblesAttachment(
       throw new Error(`BlueBubbles attachment too large (limit ${maxBytes} bytes)`);
     }
     const text = error instanceof Error ? error.message : String(error);
-    throw new Error(`BlueBubbles (Legacy) attachment download failed: ${text}`);
+    throw new Error(`BlueBubbles attachment download failed: ${text}`);
   }
 }
 
@@ -164,7 +164,7 @@ export async function sendBlueBubblesAttachment(params: {
   if (isAudioMessage) {
     const voiceInfo = resolveVoiceInfo(filename, contentType);
     if (!voiceInfo.isAudio) {
-      throw new Error("BlueBubbles (Legacy) voice messages require audio media (mp3 or caf).");
+      throw new Error("BlueBubbles voice messages require audio media (mp3 or caf).");
     }
     if (voiceInfo.isMp3) {
       filename = ensureExtension(filename, ".mp3", fallbackName);
@@ -208,7 +208,7 @@ export async function sendBlueBubblesAttachment(params: {
     }
     if (!chatGuid) {
       throw new Error(
-        "BlueBubbles (Legacy) attachment send failed: chatGuid not found for target. Use a chat_guid target or ensure the chat exists.",
+        "BlueBubbles attachment send failed: chatGuid not found for target. Use a chat_guid target or ensure the chat exists.",
       );
     }
   }

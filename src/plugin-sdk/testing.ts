@@ -1,10 +1,6 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { expect, it } from "vitest";
-import type { ChannelPlugin } from "../channels/plugins/types.plugin.js";
-import { createEmptyPluginRegistry } from "../plugins/registry-empty.js";
-import type { PluginRegistry } from "../plugins/registry.js";
-import { setActivePluginRegistry } from "../plugins/runtime.js";
 
 // Narrow public testing surface for plugin authors.
 // Keep this list additive and limited to helpers we are willing to support.
@@ -15,36 +11,6 @@ export type { OpenClawConfig } from "../config/config.js";
 export type { PluginRuntime } from "../plugins/runtime/types.js";
 export type { RuntimeEnv } from "../runtime.js";
 export type { MockFn } from "../test-utils/vitest-mock-fn.js";
-
-export type TestChannelRegistration = {
-  pluginId: string;
-  plugin: ChannelPlugin;
-  source: string;
-};
-
-export function createTestPluginRegistry(channels: TestChannelRegistration[] = []): PluginRegistry {
-  const registry = createEmptyPluginRegistry();
-  registry.channels = channels.map((entry) => ({
-    pluginId: entry.pluginId,
-    plugin: entry.plugin,
-    source: entry.source,
-  }));
-  registry.channelSetups = channels.map((entry) => ({
-    pluginId: entry.pluginId,
-    plugin: entry.plugin,
-    source: entry.source,
-    enabled: true,
-  }));
-  return registry;
-}
-
-export function setActiveTestPluginRegistry(
-  channels: TestChannelRegistration[] = [],
-): PluginRegistry {
-  const registry = createTestPluginRegistry(channels);
-  setActivePluginRegistry(registry);
-  return registry;
-}
 
 export async function createWindowsCmdShimFixture(params: {
   shimPath: string;

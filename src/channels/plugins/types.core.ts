@@ -128,7 +128,6 @@ export type ChannelMeta = {
   selectionExtras?: string[];
   detailLabel?: string;
   systemImage?: string;
-  deprecated?: boolean;
   showConfigured?: boolean;
   quickstartAllowFrom?: boolean;
   forceAccountBinding?: boolean;

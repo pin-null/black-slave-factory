@@ -11,14 +11,16 @@
     "setupEntry": "./setup-entry.ts",
     "channel": {
       "id": "imessage",
-      "label": "iMessage (Legacy)",
-      "selectionLabel": "iMessage (Legacy)",
-      "detailLabel": "iMessage (Legacy)",
-      "docsPath": "/gateway/configuration-reference#imessage",
+      "label": "iMessage",
+      "selectionLabel": "iMessage (imsg)",
+      "detailLabel": "iMessage",
+      "docsPath": "/channels/imessage",
       "docsLabel": "imessage",
-      "blurb": "Legacy macOS-only iMessage/SMS bridge retained for compatibility.",
-      "systemImage": "message.fill",
-      "deprecated": true
+      "blurb": "this is still a work in progress.",
+      "aliases": [
+        "imsg"
+      ],
+      "systemImage": "message.fill"
     }
   }
 }

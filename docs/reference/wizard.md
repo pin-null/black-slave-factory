@@ -89,8 +89,11 @@ For a high-level overview, see [Onboarding (CLI)](/start/wizard).
     - [WhatsApp](/channels/whatsapp): optional QR login.
     - [Telegram](/channels/telegram): bot token.
     - [Discord](/channels/discord): bot token.
+    - [Google Chat](/channels/googlechat): service account JSON + webhook audience.
     - [Mattermost](/channels/mattermost) (plugin): bot token + base URL.
     - [Signal](/channels/signal): optional `signal-cli` install + account config.
+    - [BlueBubbles](/channels/bluebubbles): **recommended for iMessage**; server URL + password + webhook.
+    - [iMessage](/channels/imessage): legacy `imsg` CLI path + DB access.
     - DM security: default is pairing. First DM sends a code; approve via `openclaw pairing approve <channel> <code>` or use allowlists.
   </Step>
   <Step title="Web search">
@@ -117,10 +120,10 @@ For a high-level overview, see [Onboarding (CLI)](/start/wizard).
   <Step title="Skills (recommended)">
     - Reads the available skills and checks requirements.
     - Lets you choose a node manager: **npm / pnpm** (bun not recommended).
-    - Installs optional dependencies when required.
+    - Installs optional dependencies (some use Homebrew on macOS).
   </Step>
   <Step title="Finish">
-    - Summary + next steps, including Control UI plus iOS/Android apps for extra features.
+    - Summary + next steps, including iOS/Android/macOS apps for extra features.
   </Step>
 </Steps>
 
@@ -181,7 +184,7 @@ openclaw agents add work \
 ## Gateway wizard RPC
 
 The Gateway exposes the onboarding flow over RPC (`wizard.start`, `wizard.next`, `wizard.cancel`, `wizard.status`).
-Clients (Control UI and other shells) can render steps without re-implementing onboarding logic.
+Clients (macOS app, Control UI) can render steps without re‑implementing onboarding logic.
 
 ## Signal setup (signal-cli)
 
@@ -206,7 +209,7 @@ Typical fields in `~/.openclaw/openclaw.json`:
 - `tools.profile` (local onboarding defaults to `"coding"` when unset; existing explicit values are preserved)
 - `gateway.*` (mode, bind, auth, tailscale)
 - `session.dmScope` (behavior details: [CLI Setup Reference](/start/wizard-cli-reference#outputs-and-internals))
-- `channels.telegram.botToken`, `channels.discord.token`, `channels.signal.*`
+- `channels.telegram.botToken`, `channels.discord.token`, `channels.signal.*`, `channels.imessage.*`
 - Channel allowlists (Slack/Discord/Matrix/Microsoft Teams) when you opt in during the prompts (names resolve to IDs when possible).
 - `skills.install.nodeManager`
 - `wizard.lastRunAt`
@@ -226,6 +229,7 @@ will prompt to install it (npm or a local path) before it can be configured.
 ## Related docs
 
 - Onboarding overview: [Onboarding (CLI)](/start/wizard)
+- macOS app onboarding: [Onboarding](/start/onboarding)
 - Config reference: [Gateway configuration](/gateway/configuration)
-- Providers: [WhatsApp](/channels/whatsapp), [Telegram](/channels/telegram), [Discord](/channels/discord), [Signal](/channels/signal)
+- Providers: [WhatsApp](/channels/whatsapp), [Telegram](/channels/telegram), [Discord](/channels/discord), [Google Chat](/channels/googlechat), [Signal](/channels/signal), [BlueBubbles](/channels/bluebubbles) (iMessage), [iMessage](/channels/imessage) (legacy)
 - Skills: [Skills](/tools/skills), [Skills config](/tools/skills-config)

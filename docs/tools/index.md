@@ -448,7 +448,7 @@ For full behavior, limits, config, and examples, see [PDF tool](/tools/pdf).
 
 ### `message`
 
-Send messages and channel actions across Discord/Slack/Telegram/WhatsApp/Signal/MS Teams.
+Send messages and channel actions across Discord/Google Chat/Slack/Telegram/WhatsApp/Signal/iMessage/MS Teams.
 
 Core actions:
 

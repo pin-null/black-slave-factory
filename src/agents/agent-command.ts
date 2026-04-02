@@ -392,6 +392,7 @@ function runAgentAttempt(params: {
       runCliAgent({
         sessionId: params.sessionId,
         sessionKey: params.sessionKey,
+        sessionPermissionTier: params.sessionEntry?.permissionTier,
         agentId: params.sessionAgentId,
         sessionFile: params.sessionFile,
         workspaceDir: params.workspaceDir,
@@ -490,6 +491,7 @@ function runAgentAttempt(params: {
   return runEmbeddedPiAgent({
     sessionId: params.sessionId,
     sessionKey: params.sessionKey,
+    sessionPermissionTier: params.sessionEntry?.permissionTier,
     agentId: params.sessionAgentId,
     trigger: "user",
     messageChannel: params.messageChannel,

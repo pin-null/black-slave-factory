@@ -4,15 +4,11 @@ import type { ResolvedIMessageAccount } from "./accounts.js";
 import { monitorIMessageProvider } from "./monitor.js";
 import { probeIMessage } from "./probe.js";
 import { getIMessageRuntime } from "./runtime.js";
-import { sendMessageIMessage } from "./send.js";
-import type { IMessageSendOpts } from "./send.js";
 import { imessageSetupWizard } from "./setup-surface.js";
 
-type IMessageSendFn = (
-  to: string,
-  text: string,
-  opts?: IMessageSendOpts,
-) => Promise<{ messageId: string }>;
+type IMessageSendFn = ReturnType<
+  typeof getIMessageRuntime
+>["channel"]["imessage"]["sendMessageIMessage"];
 
 export async function sendIMessageOutbound(params: {
   cfg: Parameters<typeof import("./accounts.js").resolveIMessageAccount>[0]["cfg"];
@@ -25,7 +21,8 @@ export async function sendIMessageOutbound(params: {
   replyToId?: string;
 }) {
   const send =
-    resolveOutboundSendDep<IMessageSendFn>(params.deps, "imessage") ?? sendMessageIMessage;
+    resolveOutboundSendDep<IMessageSendFn>(params.deps, "imessage") ??
+    getIMessageRuntime().channel.imessage.sendMessageIMessage;
   const maxBytes = resolveChannelMediaMaxBytes({
     cfg: params.cfg,
     resolveChannelLimitMb: ({ cfg, accountId }) =>
@@ -44,7 +41,7 @@ export async function sendIMessageOutbound(params: {
 }
 
 export async function notifyIMessageApproval(id: string): Promise<void> {
-  await sendMessageIMessage(id, PAIRING_APPROVED_MESSAGE);
+  await getIMessageRuntime().channel.imessage.sendMessageIMessage(id, PAIRING_APPROVED_MESSAGE);
 }
 
 export async function probeIMessageAccount(timeoutMs?: number) {

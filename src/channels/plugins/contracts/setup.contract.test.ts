@@ -1,20 +1,12 @@
-import { describe, expect, it } from "vitest";
+import { describe } from "vitest";
 import { setupContractRegistry } from "./registry.js";
 import { installChannelSetupContractSuite } from "./suites.js";
 
-if (setupContractRegistry.length === 0) {
-  describe("channel setup contracts", () => {
-    it("skip when the build has no registered external channel contracts", () => {
-      expect(setupContractRegistry).toEqual([]);
+for (const entry of setupContractRegistry) {
+  describe(`${entry.id} setup contract`, () => {
+    installChannelSetupContractSuite({
+      plugin: entry.plugin,
+      cases: entry.cases as never,
     });
   });
-} else {
-  for (const entry of setupContractRegistry) {
-    describe(`${entry.id} setup contract`, () => {
-      installChannelSetupContractSuite({
-        plugin: entry.plugin,
-        cases: entry.cases as never,
-      });
-    });
-  }
 }

@@ -9,10 +9,11 @@ export const createIMessageTestPlugin = (params?: {
   id: "imessage",
   meta: {
     id: "imessage",
-    label: "iMessage (Legacy)",
-    selectionLabel: "iMessage (Legacy)",
-    docsPath: "/gateway/configuration-reference#imessage",
-    blurb: "Legacy iMessage test stub.",
+    label: "iMessage",
+    selectionLabel: "iMessage (imsg)",
+    docsPath: "/channels/imessage",
+    blurb: "iMessage test stub.",
+    aliases: ["imsg"],
   },
   capabilities: { chatTypes: ["direct", "group"], media: true },
   config: {

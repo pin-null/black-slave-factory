@@ -41,6 +41,7 @@ import {
 import { describeUnknownError } from "../secrets/shared.js";
 import {
   isDiscordMutableAllowEntry,
+  isGoogleChatMutableAllowEntry,
   isIrcMutableAllowEntry,
   isMSTeamsMutableAllowEntry,
   isMattermostMutableAllowEntry,
@@ -770,6 +771,49 @@ function scanMutableAllowlistEntries(cfg: OpenClawConfig): MutableAllowlistHit[]
     }
   }
 
+  for (const scope of collectProviderDangerousNameMatchingScopes(cfg, "googlechat")) {
+    if (scope.dangerousNameMatchingEnabled) {
+      continue;
+    }
+    addMutableAllowlistHits({
+      hits,
+      pathLabel: `${scope.prefix}.groupAllowFrom`,
+      list: scope.account.groupAllowFrom,
+      detector: isGoogleChatMutableAllowEntry,
+      channel: "googlechat",
+      dangerousFlagPath: scope.dangerousFlagPath,
+    });
+    const dm = asObjectRecord(scope.account.dm);
+    if (dm) {
+      addMutableAllowlistHits({
+        hits,
+        pathLabel: `${scope.prefix}.dm.allowFrom`,
+        list: dm.allowFrom,
+        detector: isGoogleChatMutableAllowEntry,
+        channel: "googlechat",
+        dangerousFlagPath: scope.dangerousFlagPath,
+      });
+    }
+    const groups = asObjectRecord(scope.account.groups);
+    if (!groups) {
+      continue;
+    }
+    for (const [groupKey, groupRaw] of Object.entries(groups)) {
+      const group = asObjectRecord(groupRaw);
+      if (!group) {
+        continue;
+      }
+      addMutableAllowlistHits({
+        hits,
+        pathLabel: `${scope.prefix}.groups.${groupKey}.users`,
+        list: group.users,
+        detector: isGoogleChatMutableAllowEntry,
+        channel: "googlechat",
+        dangerousFlagPath: scope.dangerousFlagPath,
+      });
+    }
+  }
+
   for (const scope of collectProviderDangerousNameMatchingScopes(cfg, "msteams")) {
     if (scope.dangerousNameMatchingEnabled) {
       continue;
@@ -896,9 +940,12 @@ function maybeRepairOpenPolicyAllowFrom(cfg: OpenClawConfig): {
   const next = structuredClone(cfg);
   const changes: string[] = [];
 
-  type OpenPolicyAllowFromMode = "topOnly" | "topOrNested";
+  type OpenPolicyAllowFromMode = "topOnly" | "topOrNested" | "nestedOnly";
 
   const resolveAllowFromMode = (channelName: string): OpenPolicyAllowFromMode => {
+    if (channelName === "googlechat") {
+      return "nestedOnly";
+    }
     if (channelName === "discord" || channelName === "slack") {
       return "topOrNested";
     }
@@ -927,6 +974,22 @@ function maybeRepairOpenPolicyAllowFrom(cfg: OpenClawConfig): {
 
     const topAllowFrom = account.allowFrom as Array<string | number> | undefined;
     const nestedAllowFrom = dm?.allowFrom as Array<string | number> | undefined;
+
+    if (mode === "nestedOnly") {
+      if (hasWildcard(nestedAllowFrom)) {
+        return;
+      }
+      if (Array.isArray(nestedAllowFrom)) {
+        nestedAllowFrom.push("*");
+        changes.push(`- ${prefix}.dm.allowFrom: added "*" (required by dmPolicy="open")`);
+        return;
+      }
+      const nextDm = dm ?? {};
+      nextDm.allowFrom = ["*"];
+      account.dm = nextDm;
+      changes.push(`- ${prefix}.dm.allowFrom: set to ["*"] (required by dmPolicy="open")`);
+      return;
+    }
 
     if (mode === "topOrNested") {
       if (hasWildcard(topAllowFrom) || hasWildcard(nestedAllowFrom)) {
@@ -1003,9 +1066,12 @@ async function maybeRepairAllowlistPolicyAllowFrom(cfg: OpenClawConfig): Promise
     return { config: cfg, changes: [] };
   }
 
-  type AllowFromMode = "topOnly" | "topOrNested";
+  type AllowFromMode = "topOnly" | "topOrNested" | "nestedOnly";
 
   const resolveAllowFromMode = (channelName: string): AllowFromMode => {
+    if (channelName === "googlechat") {
+      return "nestedOnly";
+    }
     if (channelName === "discord" || channelName === "slack") {
       return "topOrNested";
     }
@@ -1023,6 +1089,20 @@ async function maybeRepairAllowlistPolicyAllowFrom(cfg: OpenClawConfig): Promise
   }) => {
     const count = params.allowFrom.length;
     const noun = count === 1 ? "entry" : "entries";
+
+    if (params.mode === "nestedOnly") {
+      const dmEntry = params.account.dm;
+      const dm =
+        dmEntry && typeof dmEntry === "object" && !Array.isArray(dmEntry)
+          ? (dmEntry as Record<string, unknown>)
+          : {};
+      dm.allowFrom = params.allowFrom;
+      params.account.dm = dm;
+      changes.push(
+        `- ${params.prefix}.dm.allowFrom: restored ${count} sender ${noun} from pairing store (dmPolicy="allowlist").`,
+      );
+      return;
+    }
 
     if (params.mode === "topOrNested") {
       const dmEntry = params.account.dm;
@@ -1150,7 +1230,7 @@ function detectEmptyAllowlistPolicy(cfg: OpenClawConfig): string[] {
     }
     // These channels enforce group access via channel/space config, not sender-based
     // groupAllowFrom lists.
-    return !(channelName === "discord" || channelName === "slack");
+    return !(channelName === "discord" || channelName === "slack" || channelName === "googlechat");
   };
 
   const allowsGroupAllowFromFallback = (channelName?: string): boolean => {
@@ -1159,6 +1239,7 @@ function detectEmptyAllowlistPolicy(cfg: OpenClawConfig): string[] {
     }
     // Keep doctor warnings aligned with runtime access semantics.
     return !(
+      channelName === "googlechat" ||
       channelName === "imessage" ||
       channelName === "matrix" ||
       channelName === "msteams" ||

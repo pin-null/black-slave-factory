@@ -35,10 +35,6 @@ const PROVIDER_PLUGIN_IDS: Array<{ pluginId: string; providerId: string }> = [
   { pluginId: "minimax", providerId: "minimax-portal" },
 ];
 
-// Windows-first builds should not silently promote Apple-only channels back
-// into the active plugin/config surface.
-const DISABLED_CHANNEL_AUTO_ENABLE = new Set(["bluebubbles", "imessage", "googlechat"]);
-
 function hasNonEmptyString(value: unknown): boolean {
   return typeof value === "string" && value.trim().length > 0;
 }
@@ -313,7 +309,7 @@ function listKnownChannelPluginIds(env: NodeJS.ProcessEnv): string[] {
   return Array.from(
     new Set([
       ...listChatChannels().map((meta) => meta.id),
-      ...listChannelPluginCatalogEntries({ env, includeHidden: true }).map((entry) => entry.id),
+      ...listChannelPluginCatalogEntries({ env }).map((entry) => entry.id),
     ]),
   );
 }
@@ -343,9 +339,6 @@ function resolveConfiguredPlugins(
   // Build reverse map: channel ID → plugin ID from installed plugin manifests.
   const channelToPluginId = buildChannelToPluginIdMap(registry);
   for (const channelId of collectCandidateChannelIds(cfg, env)) {
-    if (DISABLED_CHANNEL_AUTO_ENABLE.has(channelId)) {
-      continue;
-    }
     const pluginId = resolvePluginIdForChannel(channelId, channelToPluginId);
     if (isChannelConfigured(cfg, channelId, env)) {
       changes.push({ pluginId, reason: `${channelId} configured` });
@@ -401,7 +394,7 @@ function resolvePreferredOverIds(pluginId: string, env: NodeJS.ProcessEnv): stri
   if (normalized) {
     return getChatChannelMeta(normalized).preferOver ?? [];
   }
-  const catalogEntry = getChannelPluginCatalogEntry(pluginId, { env, includeHidden: true });
+  const catalogEntry = getChannelPluginCatalogEntry(pluginId, { env });
   return catalogEntry?.meta.preferOver ?? [];
 }
 

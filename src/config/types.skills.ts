@@ -5,8 +5,6 @@ export type SkillConfig = {
   apiKey?: SecretInput;
   env?: Record<string, string>;
   config?: Record<string, unknown>;
-  /** Optional operator override for skill categories (e.g. ["office"]). */
-  categories?: string[];
 };
 
 export type SkillsLoadConfig = {
@@ -42,12 +40,6 @@ export type SkillsLimitsConfig = {
 export type SkillsConfig = {
   /** Optional bundled-skill allowlist (only affects bundled skills). */
   allowBundled?: string[];
-  policy?: {
-    /** Allow only skills whose categories intersect this list. */
-    allowedCategories?: string[];
-    /** When true, uncategorized skills are blocked. */
-    rejectUncategorized?: boolean;
-  };
   load?: SkillsLoadConfig;
   install?: SkillsInstallConfig;
   limits?: SkillsLimitsConfig;

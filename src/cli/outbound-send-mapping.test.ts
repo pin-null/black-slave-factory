@@ -9,6 +9,7 @@ describe("createOutboundSendDepsFromCliSource", () => {
       discord: vi.fn(),
       slack: vi.fn(),
       signal: vi.fn(),
+      imessage: vi.fn(),
     };
 
     const outbound = createOutboundSendDepsFromCliSource(deps);
@@ -19,11 +20,13 @@ describe("createOutboundSendDepsFromCliSource", () => {
       discord: deps.discord,
       slack: deps.slack,
       signal: deps.signal,
+      imessage: deps.imessage,
       sendWhatsApp: deps.whatsapp,
       sendTelegram: deps.telegram,
       sendDiscord: deps.discord,
       sendSlack: deps.slack,
       sendSignal: deps.signal,
+      sendIMessage: deps.imessage,
     });
   });
 });

@@ -44,8 +44,6 @@ Docs: https://docs.openclaw.ai
 - Control UI/chat: add an expand-to-canvas button on assistant chat bubbles and in-app session navigation from Sessions and Cron views. Thanks @BunsDev.
 - Plugins/context engines: expose `delegateCompactionToRuntime(...)` on the public plugin SDK, refactor the legacy engine to use the shared helper, and clarify `ownsCompaction` delegation semantics for non-owning engines. (#49061) Thanks @jalehman.
 - Plugins/MiniMax: add MiniMax-M2.7 and MiniMax-M2.7-highspeed models and update the default model from M2.5 to M2.7. (#49691) Thanks @liyuan97.
-- Channels/Google Chat: start the Phase 1 sunset by hiding Google Chat from new setup and Control UI entry points while keeping existing configs manageable during the compatibility window.
-- Channels/Google Chat: complete the Phase 2 removal by deleting the bundled Google Chat channel runtime, SDK export, setup surfaces, and primary docs/UI references; old configs now warn that the channel has been removed.
 
 ### Fixes
 

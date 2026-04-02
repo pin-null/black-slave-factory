@@ -777,14 +777,11 @@ export async function syncSkillsToWorkspace(params: {
   await serializeByKey(`syncSkills:${targetDir}`, async () => {
     const targetSkillsDir = path.join(targetDir, "skills");
 
-    const entries = filterSkillEntries(
-      loadSkillEntries(sourceDir, {
-        config: params.config,
-        managedSkillsDir: params.managedSkillsDir,
-        bundledSkillsDir: params.bundledSkillsDir,
-      }),
-      params.config,
-    );
+    const entries = loadSkillEntries(sourceDir, {
+      config: params.config,
+      managedSkillsDir: params.managedSkillsDir,
+      bundledSkillsDir: params.bundledSkillsDir,
+    });
 
     await fsp.rm(targetSkillsDir, { recursive: true, force: true });
     await fsp.mkdir(targetSkillsDir, { recursive: true });

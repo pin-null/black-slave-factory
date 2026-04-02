@@ -282,7 +282,7 @@ vi.mock("../channels/plugins/index.js", () => ({
       {
         ...createErrorChannelPlugin({
           id: "imessage",
-          label: "iMessage (Legacy)",
+          label: "iMessage",
           docsPath: "/platforms/mac",
         }),
       },

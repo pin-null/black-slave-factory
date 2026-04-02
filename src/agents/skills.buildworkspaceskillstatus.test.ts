@@ -6,7 +6,6 @@ import type { SkillEntry } from "./skills/types.js";
 function makeEntry(params: {
   name: string;
   source?: string;
-  categories?: string[];
   os?: string[];
   requires?: { bins?: string[]; env?: string[]; config?: string[] };
   install?: Array<{
@@ -30,7 +29,6 @@ function makeEntry(params: {
     },
     frontmatter: {},
     metadata: {
-      ...(params.categories ? { categories: params.categories } : {}),
       ...(params.os ? { os: params.os } : {}),
       ...(params.requires ? { requires: params.requires } : {}),
       ...(params.install ? { install: params.install } : {}),
@@ -108,31 +106,6 @@ describe("buildWorkspaceSkillStatus", () => {
     expect(skill?.blockedByAllowlist).toBe(true);
     expect(skill?.eligible).toBe(false);
     expect(skill?.bundled).toBe(true);
-  });
-
-  it("blocks skills that do not match the allowed category policy", async () => {
-    const entry = makeEntry({
-      name: "terminal-admin",
-      categories: ["system"],
-    });
-
-    const report = buildWorkspaceSkillStatus("/tmp/ws", {
-      entries: [entry],
-      config: {
-        skills: {
-          policy: {
-            allowedCategories: ["office"],
-            rejectUncategorized: true,
-          },
-        },
-      },
-    });
-    const skill = report.skills.find((reportEntry) => reportEntry.name === "terminal-admin");
-
-    expect(skill).toBeDefined();
-    expect(skill?.categories).toEqual(["system"]);
-    expect(skill?.blockedByCategoryPolicy).toBe(true);
-    expect(skill?.eligible).toBe(false);
   });
 
   it("filters install options by OS", async () => {

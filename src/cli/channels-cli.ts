@@ -20,6 +20,9 @@ const optionNamesAdd = [
   "appToken",
   "signalNumber",
   "cliPath",
+  "dbPath",
+  "service",
+  "region",
   "authDir",
   "httpUrl",
   "httpHost",
@@ -168,15 +171,18 @@ export function registerChannelsCli(program: Command) {
     .option("--bot-token <token>", "Slack bot token (xoxb-...)")
     .option("--app-token <token>", "Slack app token (xapp-...)")
     .option("--signal-number <e164>", "Signal account number (E.164)")
-    .option("--cli-path <path>", "CLI path (signal-cli)")
+    .option("--cli-path <path>", "CLI path (signal-cli or imsg)")
+    .option("--db-path <path>", "iMessage database path")
+    .option("--service <service>", "iMessage service (imessage|sms|auto)")
+    .option("--region <region>", "iMessage region (for SMS)")
     .option("--auth-dir <path>", "WhatsApp auth directory override")
     .option("--http-url <url>", "Signal HTTP daemon base URL")
     .option("--http-host <host>", "Signal HTTP host")
     .option("--http-port <port>", "Signal HTTP port")
-    .option("--webhook-path <path>", "Webhook path")
-    .option("--webhook-url <url>", "Webhook URL")
-    .option("--audience-type <type>", "Webhook audience type")
-    .option("--audience <value>", "Webhook audience value")
+    .option("--webhook-path <path>", "Webhook path (Google Chat/BlueBubbles)")
+    .option("--webhook-url <url>", "Google Chat webhook URL")
+    .option("--audience-type <type>", "Google Chat audience type (app-url|project-number)")
+    .option("--audience <value>", "Google Chat audience value (app URL or project number)")
     .option("--homeserver <url>", "Matrix homeserver URL")
     .option("--user-id <id>", "Matrix user ID")
     .option("--access-token <token>", "Matrix access token")

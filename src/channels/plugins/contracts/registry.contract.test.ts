@@ -135,10 +135,6 @@ describe("channel contract registry", () => {
   });
 
   it("keeps session binding coverage aligned with registered session binding adapters", () => {
-    if (pluginContractRegistry.length === 0 && sessionBindingContractRegistry.length === 0) {
-      expect(sessionBindingContractRegistry).toEqual([]);
-      return;
-    }
     expect(sessionBindingContractRegistry.map((entry) => entry.id).toSorted()).toEqual(
       discoverSessionBindingChannels(),
     );

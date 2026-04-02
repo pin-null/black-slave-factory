@@ -418,7 +418,7 @@ describe("createGatewayPluginRequestHandler", () => {
 describe("plugin HTTP route auth checks", () => {
   const deeplyEncodedChannelPath =
     "/api%2525252fchannels%2525252fnostr%2525252fdefault%2525252fprofile";
-  const decodeOverflowPublicPath = `/plugin-public${buildRepeatedEncodedSlash(40)}public`;
+  const decodeOverflowPublicPath = `/googlechat${buildRepeatedEncodedSlash(40)}public`;
 
   it("detects registered route paths", () => {
     const registry = createTestRegistry({
@@ -440,12 +440,12 @@ describe("plugin HTTP route auth checks", () => {
   it("enforces auth for protected and gateway-auth routes", () => {
     const registry = createTestRegistry({
       httpRoutes: [
-        createRoute({ path: "/plugin-public", match: "prefix", auth: "plugin" }),
+        createRoute({ path: "/googlechat", match: "prefix", auth: "plugin" }),
         createRoute({ path: "/api/demo", auth: "gateway" }),
       ],
     });
     expect(shouldEnforceGatewayAuthForPluginPath(registry, "/api//demo")).toBe(true);
-    expect(shouldEnforceGatewayAuthForPluginPath(registry, "/plugin-public/public")).toBe(false);
+    expect(shouldEnforceGatewayAuthForPluginPath(registry, "/googlechat/public")).toBe(false);
     expect(shouldEnforceGatewayAuthForPluginPath(registry, "/api/channels/status")).toBe(true);
     expect(shouldEnforceGatewayAuthForPluginPath(registry, deeplyEncodedChannelPath)).toBe(true);
     expect(shouldEnforceGatewayAuthForPluginPath(registry, decodeOverflowPublicPath)).toBe(true);

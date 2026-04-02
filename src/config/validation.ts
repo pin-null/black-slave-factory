@@ -1,10 +1,6 @@
 import path from "node:path";
 import { resolveAgentWorkspaceDir, resolveDefaultAgentId } from "../agents/agent-scope.js";
-import {
-  CHANNEL_IDS,
-  REMOVED_CHAT_CHANNEL_IDS,
-  normalizeChatChannelId,
-} from "../channels/registry.js";
+import { CHANNEL_IDS, normalizeChatChannelId } from "../channels/registry.js";
 import {
   normalizePluginsConfig,
   resolveEffectiveEnableState,
@@ -402,12 +398,7 @@ function validateConfigObjectWithPluginsBase(
     return info.normalizedPlugins;
   };
 
-  const allowedChannels = new Set<string>([
-    "defaults",
-    "modelByChannel",
-    ...CHANNEL_IDS,
-    ...REMOVED_CHAT_CHANNEL_IDS,
-  ]);
+  const allowedChannels = new Set<string>(["defaults", "modelByChannel", ...CHANNEL_IDS]);
 
   if (config.channels && isRecord(config.channels)) {
     for (const key of Object.keys(config.channels)) {
@@ -433,13 +424,8 @@ function validateConfigObjectWithPluginsBase(
   }
 
   const heartbeatChannelIds = new Set<string>();
-  const removedChannelIds = new Set<string>(REMOVED_CHAT_CHANNEL_IDS);
   for (const channelId of CHANNEL_IDS) {
-    const normalized = channelId.toLowerCase();
-    if (removedChannelIds.has(normalized)) {
-      continue;
-    }
-    heartbeatChannelIds.add(normalized);
+    heartbeatChannelIds.add(channelId.toLowerCase());
   }
 
   const validateHeartbeatTarget = (target: string | undefined, path: string) => {
@@ -455,8 +441,7 @@ function validateConfigObjectWithPluginsBase(
     if (normalized === "last" || normalized === "none") {
       return;
     }
-    const normalizedBuiltIn = normalizeChatChannelId(trimmed);
-    if (normalizedBuiltIn && !removedChannelIds.has(normalizedBuiltIn)) {
+    if (normalizeChatChannelId(trimmed)) {
       return;
     }
     if (!heartbeatChannelIds.has(normalized)) {

@@ -51,7 +51,7 @@ export const collectIMessageSecurityWarnings =
   createAllowlistProviderRestrictSendersWarningCollector<ResolvedIMessageAccount>({
     providerConfigPresent: (cfg) => cfg.channels?.imessage !== undefined,
     resolveGroupPolicy: (account) => account.config.groupPolicy,
-    surface: "iMessage (Legacy) groups",
+    surface: "iMessage groups",
     openScope: "any member",
     groupPolicyPath: "channels.imessage.groupPolicy",
     groupAllowFromPath: "channels.imessage.groupAllowFrom",
@@ -77,6 +77,7 @@ export function createIMessagePluginBase(params: {
     id: IMESSAGE_CHANNEL,
     meta: {
       ...getChatChannelMeta(IMESSAGE_CHANNEL),
+      aliases: ["imsg"],
       showConfigured: false,
     },
     setupWizard: params.setupWizard,

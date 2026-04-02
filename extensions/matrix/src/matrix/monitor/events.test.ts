@@ -516,9 +516,7 @@ describe("registerMatrixMonitorEvents verification routing", () => {
     await vi.waitFor(() => {
       expect(sendMessage).toHaveBeenCalledTimes(1);
     });
-    const firstSendCall = sendMessage.mock.calls[0] as unknown as
-      | [string, ...unknown[]]
-      | undefined;
+    const firstSendCall = sendMessage.mock.calls.at(0) as [unknown, ...unknown[]] | undefined;
     const roomId = (firstSendCall?.[0] ?? "") as string;
     const body = getSentNoticeBody(sendMessage, 0);
     expect(roomId).toBe("!dm-active:example.org");

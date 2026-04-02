@@ -76,7 +76,7 @@ export function normalizeIMessageHandle(raw: string): string {
 export function parseIMessageTarget(raw: string): IMessageTarget {
   const trimmed = raw.trim();
   if (!trimmed) {
-    throw new Error("iMessage (Legacy) target is required");
+    throw new Error("iMessage target is required");
   }
   const lower = trimmed.toLowerCase();
 

@@ -491,9 +491,7 @@ function discoverInDirectory(params: {
   }
   let entries: fs.Dirent[] = [];
   try {
-    entries = fs
-      .readdirSync(params.dir, { withFileTypes: true })
-      .toSorted((left, right) => left.name.localeCompare(right.name));
+    entries = fs.readdirSync(params.dir, { withFileTypes: true });
   } catch (err) {
     params.diagnostics.push({
       level: "warn",

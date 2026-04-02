@@ -25,6 +25,7 @@ const CORE_CHANNEL_ORDER = [
   "whatsapp",
   "discord",
   "irc",
+  "googlechat",
   "slack",
   "signal",
   "imessage",

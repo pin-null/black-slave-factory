@@ -118,7 +118,7 @@ function resolveAccount(params: BlueBubblesReactionOpts) {
 export function normalizeBlueBubblesReactionInput(emoji: string, remove?: boolean): string {
   const trimmed = emoji.trim();
   if (!trimmed) {
-    throw new Error("BlueBubbles (Legacy) reaction requires an emoji or name.");
+    throw new Error("BlueBubbles reaction requires an emoji or name.");
   }
   let raw = trimmed.toLowerCase();
   if (raw.startsWith("-")) {
@@ -143,16 +143,16 @@ export async function sendBlueBubblesReaction(params: {
   const chatGuid = params.chatGuid.trim();
   const messageGuid = params.messageGuid.trim();
   if (!chatGuid) {
-    throw new Error("BlueBubbles (Legacy) reaction requires chatGuid.");
+    throw new Error("BlueBubbles reaction requires chatGuid.");
   }
   if (!messageGuid) {
-    throw new Error("BlueBubbles (Legacy) reaction requires messageGuid.");
+    throw new Error("BlueBubbles reaction requires messageGuid.");
   }
   const reaction = normalizeBlueBubblesReactionInput(params.emoji, params.remove);
   const { baseUrl, password, accountId } = resolveAccount(params.opts ?? {});
   if (getCachedBlueBubblesPrivateApiStatus(accountId) === false) {
     throw new Error(
-      "BlueBubbles (Legacy) reaction requires Private API, but it is disabled on the BlueBubbles server.",
+      "BlueBubbles reaction requires Private API, but it is disabled on the BlueBubbles server.",
     );
   }
   const url = buildBlueBubblesApiUrl({
@@ -177,8 +177,6 @@ export async function sendBlueBubblesReaction(params: {
   );
   if (!res.ok) {
     const errorText = await res.text();
-    throw new Error(
-      `BlueBubbles (Legacy) reaction failed (${res.status}): ${errorText || "unknown"}`,
-    );
+    throw new Error(`BlueBubbles reaction failed (${res.status}): ${errorText || "unknown"}`);
   }
 }

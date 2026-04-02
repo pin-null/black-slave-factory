@@ -143,7 +143,6 @@ const SkillEntrySchema = z
     apiKey: SecretInputSchema.optional().register(sensitive),
     env: z.record(z.string(), z.string()).optional(),
     config: z.record(z.string(), z.unknown()).optional(),
-    categories: z.array(z.string()).optional(),
   })
   .strict();
 
@@ -592,6 +591,14 @@ export const OpenClawSchema = z
         enabled: z.boolean().optional(),
         path: z.string().optional(),
         token: z.string().optional().register(sensitive),
+        permissionTier: z
+          .union([
+            z.literal("chat"),
+            z.literal("readonly"),
+            z.literal("readwrite"),
+            z.literal("dangerous"),
+          ])
+          .optional(),
         defaultSessionKey: z.string().optional(),
         allowRequestSessionKey: z.boolean().optional(),
         allowedSessionKeyPrefixes: z.array(z.string()).optional(),
@@ -881,13 +888,6 @@ export const OpenClawSchema = z
     skills: z
       .object({
         allowBundled: z.array(z.string()).optional(),
-        policy: z
-          .object({
-            allowedCategories: z.array(z.string()).optional(),
-            rejectUncategorized: z.boolean().optional(),
-          })
-          .strict()
-          .optional(),
         load: z
           .object({
             extraDirs: z.array(z.string()).optional(),

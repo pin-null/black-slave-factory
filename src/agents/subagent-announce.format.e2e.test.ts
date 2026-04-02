@@ -6,7 +6,7 @@ import {
   type OpenClawConfig,
 } from "../config/config.js";
 import * as configSessions from "../config/sessions.js";
-import type { SessionEntry } from "../config/sessions/types.js";
+import type { SessionEntry } from "../config/sessions.js";
 import * as gatewayCall from "../gateway/call.js";
 import {
   __testing as sessionBindingServiceTesting,
@@ -67,10 +67,10 @@ const readLatestAssistantReplyMock = vi.fn(
   async (_sessionKey?: string): Promise<string | undefined> => "raw subagent reply",
 );
 const embeddedRunMock = {
-  isEmbeddedPiRunActive: vi.fn((_sessionKey?: string) => false),
-  isEmbeddedPiRunStreaming: vi.fn((_sessionKey?: string) => false),
-  queueEmbeddedPiMessage: vi.fn((_sessionKey: string, _text: string) => false),
-  waitForEmbeddedPiRunEnd: vi.fn(async (_sessionKey: string, _timeoutMs?: number) => true),
+  isEmbeddedPiRunActive: vi.fn((_sessionId: string) => false),
+  isEmbeddedPiRunStreaming: vi.fn((_sessionId: string) => false),
+  queueEmbeddedPiMessage: vi.fn((_sessionId: string, _text: string) => false),
+  waitForEmbeddedPiRunEnd: vi.fn(async (_sessionId: string, _timeoutMs = 15_000) => true),
 };
 const { subagentRegistryMock } = vi.hoisted(() => ({
   subagentRegistryMock: {
@@ -104,7 +104,7 @@ const hookRunnerMock = {
 const chatHistoryMock = vi.fn(async (_sessionKey?: string) => ({
   messages: [] as Array<unknown>,
 }));
-let sessionStore: Record<string, SessionEntry | Record<string, unknown>> = {};
+let sessionStore: Record<string, Record<string, unknown>> = {};
 let configOverride: OpenClawConfig = {
   session: {
     mainKey: "main",
@@ -133,20 +133,20 @@ function setConfigOverride(next: OpenClawConfig): void {
 }
 
 function loadSessionStoreFixture(): Record<string, SessionEntry> {
-  return new Proxy(sessionStore, {
+  return new Proxy(sessionStore as Record<string, SessionEntry>, {
     get(target, key: string | symbol) {
       if (typeof key === "string" && !(key in target) && key.includes(":subagent:")) {
         return {
           sessionId: key,
-          updatedAt: 0,
+          updatedAt: Date.now(),
           inputTokens: 1,
           outputTokens: 1,
           totalTokens: 2,
         } satisfies SessionEntry;
       }
-      return target[key as keyof typeof target] as SessionEntry | undefined;
+      return target[key as keyof typeof target];
     },
-  }) as unknown as Record<string, SessionEntry>;
+  });
 }
 
 vi.mock("./subagent-registry.js", () => subagentRegistryMock);
@@ -227,17 +227,20 @@ describe("subagent announce formatting", () => {
       .mockImplementation(async (params) => await readLatestAssistantReplyMock(params?.sessionKey));
     isEmbeddedPiRunActiveSpy
       .mockReset()
-      .mockImplementation(() => embeddedRunMock.isEmbeddedPiRunActive());
+      .mockImplementation((sessionId) => embeddedRunMock.isEmbeddedPiRunActive(sessionId));
     isEmbeddedPiRunStreamingSpy
       .mockReset()
-      .mockImplementation(() => embeddedRunMock.isEmbeddedPiRunStreaming());
+      .mockImplementation((sessionId) => embeddedRunMock.isEmbeddedPiRunStreaming(sessionId));
     queueEmbeddedPiMessageSpy
       .mockReset()
-      .mockImplementation((...args) => embeddedRunMock.queueEmbeddedPiMessage(...args));
+      .mockImplementation((sessionId, text) =>
+        embeddedRunMock.queueEmbeddedPiMessage(sessionId, text),
+      );
     waitForEmbeddedPiRunEndSpy
       .mockReset()
       .mockImplementation(
-        async (...args) => await embeddedRunMock.waitForEmbeddedPiRunEnd(...args),
+        async (sessionId, timeoutMs) =>
+          await embeddedRunMock.waitForEmbeddedPiRunEnd(sessionId, timeoutMs),
       );
     embeddedRunMock.isEmbeddedPiRunActive.mockClear().mockReturnValue(false);
     embeddedRunMock.isEmbeddedPiRunStreaming.mockClear().mockReturnValue(false);

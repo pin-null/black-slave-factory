@@ -1,6 +1,8 @@
 import fs from "node:fs";
 import path from "node:path";
+import { minPermissionTier } from "../agents/tool-permission-tier.js";
 import { CONFIG_PATH, type HookMappingConfig, type HooksConfig } from "../config/config.js";
+import type { PermissionTier } from "../config/types.tools.js";
 import { importFileModule, resolveFunctionModuleExport } from "../hooks/module-loader.js";
 import type { HookMessageChannel } from "./hooks.js";
 
@@ -10,6 +12,7 @@ export type HookMappingResolved = {
   matchSource?: string;
   action: "wake" | "agent";
   wakeMode?: "now" | "next-heartbeat";
+  permissionTier?: PermissionTier;
   name?: string;
   agentId?: string;
   sessionKey?: string;
@@ -49,6 +52,7 @@ export type HookAction =
       name?: string;
       agentId?: string;
       wakeMode: "now" | "next-heartbeat";
+      permissionTier?: PermissionTier;
       sessionKey?: string;
       deliver?: boolean;
       allowUnsafeExternalContent?: boolean;
@@ -88,6 +92,7 @@ type HookTransformResult = Partial<{
   message: string;
   agentId: string;
   wakeMode: "now" | "next-heartbeat";
+  permissionTier: PermissionTier;
   name: string;
   sessionKey: string;
   deliver: boolean;
@@ -205,6 +210,7 @@ function normalizeHookMapping(
     matchSource,
     action,
     wakeMode,
+    permissionTier: mapping.permissionTier,
     name: mapping.name,
     agentId: mapping.agentId?.trim() || undefined,
     sessionKey: mapping.sessionKey,
@@ -260,6 +266,7 @@ function buildActionFromMapping(
       name: renderOptional(mapping.name, ctx),
       agentId: mapping.agentId,
       wakeMode: mapping.wakeMode ?? "now",
+      permissionTier: mapping.permissionTier,
       sessionKey: renderOptional(mapping.sessionKey, ctx),
       deliver: mapping.deliver,
       allowUnsafeExternalContent: mapping.allowUnsafeExternalContent,
@@ -298,6 +305,8 @@ function mergeAction(
     wakeMode,
     name: override.name ?? baseAgent?.name,
     agentId: override.agentId ?? baseAgent?.agentId,
+    // Hook transforms can tighten the mapping's permission cap, but never raise it.
+    permissionTier: minPermissionTier(baseAgent?.permissionTier, override.permissionTier),
     sessionKey: override.sessionKey ?? baseAgent?.sessionKey,
     deliver: typeof override.deliver === "boolean" ? override.deliver : baseAgent?.deliver,
     allowUnsafeExternalContent:

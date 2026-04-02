@@ -21,6 +21,11 @@ const hookMocks = vi.hoisted(() => ({
 
 let cfg: Record<string, unknown> = {};
 let lastCreateOpenClawToolsContext: Record<string, unknown> | undefined;
+const loadSessionEntryMock = vi.hoisted(() =>
+  vi.fn<(sessionKey: string) => { entry: undefined }>(() => ({
+    entry: undefined,
+  })),
+);
 
 // Perf: keep this suite pure unit. Mock heavyweight config/session modules.
 vi.mock("../config/config.js", () => ({
@@ -47,6 +52,10 @@ vi.mock("../config/sessions.js", () => ({
     const mainKey = mainKeyRaw || "main";
     return `agent:${agentId}:${mainKey}`;
   },
+}));
+
+vi.mock("./session-utils.js", () => ({
+  loadSessionEntry: (sessionKey: string) => loadSessionEntryMock(sessionKey),
 }));
 
 vi.mock("./auth.js", () => ({
@@ -229,6 +238,7 @@ beforeEach(() => {
   pluginHttpHandlers = [];
   cfg = {};
   lastCreateOpenClawToolsContext = undefined;
+  loadSessionEntryMock.mockReset().mockReturnValue({ entry: undefined });
   hookMocks.resolveToolLoopDetectionConfig.mockClear();
   hookMocks.resolveToolLoopDetectionConfig.mockImplementation(() => ({ warnAt: 3 }));
   hookMocks.runBeforeToolCallHook.mockClear();
@@ -493,6 +503,30 @@ describe("POST /tools/invoke", () => {
 
     const profileRes = await invokeAgentsListAuthed({ sessionKey: "main" });
     expect(profileRes.status).toBe(404);
+  });
+
+  it("filters HTTP tool availability through tools.permissionTier", async () => {
+    cfg = {
+      ...cfg,
+      tools: { permissionTier: "readonly" },
+      agents: {
+        list: [
+          {
+            id: "main",
+            default: true,
+            tools: { allow: ["gateway"] },
+          },
+        ],
+      },
+      gateway: { tools: { allow: ["gateway"] } },
+    };
+
+    const res = await invokeToolAuthed({
+      tool: "gateway",
+      sessionKey: "main",
+    });
+
+    expect(res.status).toBe(404);
   });
 
   it("denies sessions_spawn via HTTP even when agent policy allows", async () => {

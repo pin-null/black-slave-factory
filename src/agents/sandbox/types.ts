@@ -1,3 +1,4 @@
+import type { PermissionTier } from "../../config/types.tools.js";
 import type { SandboxBackendHandle, SandboxBackendId } from "./backend.js";
 import type { SandboxFsBridge } from "./fs-bridge.js";
 import type { SandboxDockerConfig } from "./types.docker.js";
@@ -5,6 +6,7 @@ import type { SandboxDockerConfig } from "./types.docker.js";
 export type { SandboxDockerConfig } from "./types.docker.js";
 
 export type SandboxToolPolicy = {
+  permissionTier?: PermissionTier;
   allow?: string[];
   deny?: string[];
 };

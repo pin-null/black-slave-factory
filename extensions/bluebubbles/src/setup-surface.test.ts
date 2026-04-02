@@ -13,7 +13,7 @@ async function createBlueBubblesConfigureAdapter() {
       id: "bluebubbles",
       label: "BlueBubbles",
       selectionLabel: "BlueBubbles",
-      docsPath: "/gateway/configuration-reference#bluebubbles",
+      docsPath: "/channels/bluebubbles",
       blurb: "iMessage via BlueBubbles",
     },
     config: {

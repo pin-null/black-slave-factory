@@ -56,25 +56,19 @@ export async function setupSkills(
   const report = buildWorkspaceSkillStatus(workspaceDir, { config: cfg });
   const eligible = report.skills.filter((s) => s.eligible);
   const unsupportedOs = report.skills.filter(
-    (s) =>
-      !s.disabled && !s.blockedByAllowlist && !s.blockedByCategoryPolicy && s.missing.os.length > 0,
+    (s) => !s.disabled && !s.blockedByAllowlist && s.missing.os.length > 0,
   );
   const missing = report.skills.filter(
-    (s) =>
-      !s.eligible &&
-      !s.disabled &&
-      !s.blockedByAllowlist &&
-      !s.blockedByCategoryPolicy &&
-      s.missing.os.length === 0,
+    (s) => !s.eligible && !s.disabled && !s.blockedByAllowlist && s.missing.os.length === 0,
   );
-  const blocked = report.skills.filter((s) => s.blockedByAllowlist || s.blockedByCategoryPolicy);
+  const blocked = report.skills.filter((s) => s.blockedByAllowlist);
 
   await prompter.note(
     [
       `Eligible: ${eligible.length}`,
       `Missing requirements: ${missing.length}`,
       `Unsupported on this OS: ${unsupportedOs.length}`,
-      `Blocked by policy: ${blocked.length}`,
+      `Blocked by allowlist: ${blocked.length}`,
     ].join("\n"),
     "Skills status",
   );

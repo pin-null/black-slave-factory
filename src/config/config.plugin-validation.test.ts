@@ -487,22 +487,6 @@ describe("config plugin validation", () => {
     }
   });
 
-  it("rejects removed built-in heartbeat targets", async () => {
-    const res = validateInSuite({
-      agents: {
-        defaults: { heartbeat: { target: "googlechat" } },
-        list: [{ id: "pi" }],
-      },
-    });
-    expect(res.ok).toBe(false);
-    if (!res.ok) {
-      expect(res.issues).toContainEqual({
-        path: "agents.defaults.heartbeat.target",
-        message: "unknown heartbeat target: googlechat",
-      });
-    }
-  });
-
   it("rejects invalid heartbeat directPolicy values", async () => {
     const res = validateInSuite({
       agents: {

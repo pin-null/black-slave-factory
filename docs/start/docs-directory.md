@@ -38,14 +38,19 @@ For a complete map of the docs, see [Docs hubs](/start/hubs).
 
 - [WebChat](/web/webchat)
 - [Control UI (browser)](/web/control-ui)
-- [Channels hub](/channels)
-- [Channel integration conditions](/channels/integration-conditions)
-- [Multi-agent routing](/concepts/multi-agent)
+- [Telegram](/channels/telegram)
+- [Discord](/channels/discord)
+- [Mattermost (plugin)](/channels/mattermost)
+- [BlueBubbles (iMessage)](/channels/bluebubbles)
+- [iMessage (legacy)](/channels/imessage)
+- [Groups](/channels/groups)
+- [WhatsApp group messages](/channels/group-messages)
 - [Media images](/nodes/images)
 - [Media audio](/nodes/audio)
 
 ## Companion apps
 
+- [macOS app](/platforms/macos)
 - [iOS app](/platforms/ios)
 - [Android app](/platforms/android)
 - [Windows (WSL2)](/platforms/windows)

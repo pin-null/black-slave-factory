@@ -233,7 +233,6 @@ export type PluginPackageChannel = {
   selectionDocsPrefix?: string;
   selectionDocsOmitLabel?: boolean;
   selectionExtras?: string[];
-  deprecated?: boolean;
   showConfigured?: boolean;
   quickstartAllowFrom?: boolean;
   forceAccountBinding?: boolean;

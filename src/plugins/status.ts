@@ -30,7 +30,7 @@ export type PluginInspectShape =
 
 export type PluginCompatibilityNotice = {
   pluginId: string;
-  code: "legacy-before-agent-start" | "hook-only" | "removed-channel-config";
+  code: "legacy-before-agent-start" | "hook-only";
   severity: "warn" | "info";
   message: string;
 };
@@ -110,24 +110,6 @@ function buildCompatibilityNoticesForInspect(
     });
   }
   return warnings;
-}
-
-function buildConfigCompatibilityNotices(
-  config: ReturnType<typeof loadConfig>,
-): PluginCompatibilityNotice[] {
-  const channels = config.channels as Record<string, unknown> | undefined;
-  if (!channels || !Object.prototype.hasOwnProperty.call(channels, "googlechat")) {
-    return [];
-  }
-  return [
-    {
-      pluginId: "googlechat",
-      code: "removed-channel-config",
-      severity: "warn",
-      message:
-        "Google Chat channel support has been removed. Remove channels.googlechat from config and migrate to another channel.",
-    },
-  ];
 }
 
 const log = createSubsystemLogger("plugins");
@@ -374,14 +356,7 @@ export function buildPluginCompatibilityNotices(params?: {
   env?: NodeJS.ProcessEnv;
   report?: PluginStatusReport;
 }): PluginCompatibilityNotice[] {
-  const config = params?.config ?? loadConfig();
-  return [
-    ...buildAllPluginInspectReports({
-      ...params,
-      config,
-    }).flatMap((inspect) => inspect.compatibility),
-    ...buildConfigCompatibilityNotices(config),
-  ];
+  return buildAllPluginInspectReports(params).flatMap((inspect) => inspect.compatibility);
 }
 
 export function formatPluginCompatibilityNotice(notice: PluginCompatibilityNotice): string {

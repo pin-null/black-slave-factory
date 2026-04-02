@@ -39,7 +39,7 @@ describe("matrix plugin helper resolution", () => {
           ].join("\n"),
         );
 
-        const cfg = {} as const;
+        const cfg = {} as OpenClawConfig;
 
         expect(isMatrixLegacyCryptoInspectorAvailable({ cfg, env: process.env })).toBe(true);
         const inspectLegacyStore = await loadMatrixLegacyCryptoInspector({
@@ -90,13 +90,13 @@ describe("matrix plugin helper resolution", () => {
           ].join("\n"),
         );
 
-        const cfg: OpenClawConfig = {
+        const cfg = {
           plugins: {
             load: {
               paths: [customRoot],
             },
           },
-        };
+        } as OpenClawConfig;
 
         expect(isMatrixLegacyCryptoInspectorAvailable({ cfg, env: process.env })).toBe(true);
         const inspectLegacyStore = await loadMatrixLegacyCryptoInspector({
@@ -161,13 +161,13 @@ describe("matrix plugin helper resolution", () => {
           return;
         }
 
-        const cfg: OpenClawConfig = {
+        const cfg = {
           plugins: {
             load: {
               paths: [customRoot],
             },
           },
-        };
+        } as OpenClawConfig;
 
         expect(isMatrixLegacyCryptoInspectorAvailable({ cfg, env: process.env })).toBe(false);
         await expect(

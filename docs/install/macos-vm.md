@@ -1,8 +1,8 @@
 ---
-summary: "Run OpenClaw in a sandboxed macOS VM (local or hosted) when you need isolation or legacy Apple compatibility"
+summary: "Run OpenClaw in a sandboxed macOS VM (local or hosted) when you need isolation or iMessage"
 read_when:
   - You want OpenClaw isolated from your main macOS environment
-  - You intentionally need the legacy Apple messaging compatibility path in a sandbox
+  - You want iMessage integration (BlueBubbles) in a sandbox
   - You want a resettable macOS environment you can clone
   - You want to compare local vs hosted macOS VM options
 title: "macOS VMs"
@@ -16,7 +16,7 @@ title: "macOS VMs"
 - **Dedicated hardware** (Mac mini or Linux box) if you want full control and a **residential IP** for browser automation. Many sites block data center IPs, so local browsing often works better.
 - **Hybrid:** keep the Gateway on a cheap VPS, and connect your Mac as a **node** when you need browser/UI automation. See [Nodes](/nodes) and [Gateway remote](/gateway/remote).
 
-Use a macOS VM only when you specifically need macOS-only compatibility paths (for example, legacy iMessage/BlueBubbles setups) or want strict isolation from your daily Mac.
+Use a macOS VM when you specifically need macOS-only capabilities (iMessage/BlueBubbles) or want strict isolation from your daily Mac.
 
 ## macOS VM options
 
@@ -27,7 +27,7 @@ Run OpenClaw in a sandboxed macOS VM on your existing Apple Silicon Mac using [L
 This gives you:
 
 - Full macOS environment in isolation (your host stays clean)
-- Legacy Apple messaging compatibility via BlueBubbles when you explicitly opt into that path
+- iMessage support via BlueBubbles (impossible on Linux/Windows)
 - Instant reset by cloning VMs
 - No extra hardware or cloud costs
 
@@ -101,7 +101,7 @@ Note: The download can take a while depending on your connection.
 In the VNC window:
 
 1. Select language and region
-2. Skip Apple ID (or sign in later only if you intentionally need legacy iMessage compatibility)
+2. Skip Apple ID (or sign in if you want iMessage later)
 3. Create a user account (remember the username and password)
 4. Skip all optional features
 
@@ -196,9 +196,9 @@ ssh youruser@192.168.64.X "openclaw status"
 
 ---
 
-## Bonus: legacy BlueBubbles compatibility
+## Bonus: iMessage integration
 
-Only use this when you intentionally need the legacy Apple messaging compatibility path. Use [BlueBubbles](https://bluebubbles.app) to connect a macOS-hosted iMessage bridge.
+This is the killer feature of running on macOS. Use [BlueBubbles](https://bluebubbles.app) to add iMessage to OpenClaw.
 
 Inside the VM:
 
@@ -221,9 +221,9 @@ Add to your OpenClaw config:
 }
 ```
 
-Restart the gateway. This enables the legacy BlueBubbles compatibility path for legacy iMessage send/receive.
+Restart the gateway. Now your agent can send and receive iMessages.
 
-Full setup details: [Gateway configuration reference](/gateway/configuration-reference#bluebubbles)
+Full setup details: [BlueBubbles channel](/channels/bluebubbles)
 
 ---
 
@@ -274,7 +274,7 @@ For true always-on, consider a dedicated Mac mini or a small VPS. See [VPS hosti
 - [VPS hosting](/vps)
 - [Nodes](/nodes)
 - [Gateway remote](/gateway/remote)
-- [Gateway configuration reference](/gateway/configuration-reference#bluebubbles)
+- [BlueBubbles channel](/channels/bluebubbles)
 - [Lume Quickstart](https://cua.ai/docs/lume/guide/getting-started/quickstart)
 - [Lume CLI Reference](https://cua.ai/docs/lume/reference/cli-reference)
 - [Unattended VM Setup](https://cua.ai/docs/lume/guide/fundamentals/unattended-setup) (advanced)

@@ -59,18 +59,18 @@ async function promptBlueBubblesAllowFrom(params: {
     accountId: params.accountId,
     defaultAccountId: resolveDefaultBlueBubblesAccountId(params.cfg),
     prompter: params.prompter,
-    noteTitle: "BlueBubbles legacy allowlist",
+    noteTitle: "BlueBubbles allowlist",
     noteLines: [
-      "Allowlist legacy BlueBubbles DMs by handle or chat target.",
+      "Allowlist BlueBubbles DMs by handle or chat target.",
       "Examples:",
       "- +15555550123",
       "- user@example.com",
       "- chat_id:123",
       "- chat_guid:iMessage;-;+15555550123",
       "Multiple entries: comma- or newline-separated.",
-      `Docs: ${formatDocsLink("/gateway/configuration-reference#bluebubbles", "bluebubbles")}`,
+      `Docs: ${formatDocsLink("/channels/bluebubbles", "bluebubbles")}`,
     ],
-    message: "BlueBubbles legacy allowFrom (handle or chat_id)",
+    message: "BlueBubbles allowFrom (handle or chat_id)",
     placeholder: "+15555550123, user@example.com, chat_id:123",
     parseEntries: (raw) => {
       const entries = parseBlueBubblesAllowFromInput(raw);
@@ -140,7 +140,7 @@ function validateBlueBubblesWebhookPath(value: string): string | undefined {
 }
 
 const dmPolicy: ChannelSetupDmPolicy = {
-  label: "BlueBubbles (Legacy)",
+  label: "BlueBubbles",
   channel,
   policyKey: "channels.bluebubbles.dmPolicy",
   allowFromKey: "channels.bluebubbles.allowFrom",
@@ -156,7 +156,7 @@ export const blueBubblesSetupWizard: ChannelSetupWizard = {
     configuredLabel: "configured",
     unconfiguredLabel: "needs setup",
     configuredHint: "configured",
-    unconfiguredHint: "legacy Apple messaging via BlueBubbles",
+    unconfiguredHint: "iMessage via BlueBubbles app",
     configuredScore: 1,
     unconfiguredScore: 0,
     resolveConfigured: ({ cfg }) =>
@@ -165,10 +165,10 @@ export const blueBubblesSetupWizard: ChannelSetupWizard = {
         return account.configured;
       }),
     resolveStatusLines: ({ configured }) => [
-      `BlueBubbles (Legacy): ${configured ? "configured" : "needs setup"}`,
+      `BlueBubbles: ${configured ? "configured" : "needs setup"}`,
     ],
     resolveSelectionHint: ({ configured }) =>
-      configured ? "configured" : "legacy Apple messaging via BlueBubbles",
+      configured ? "configured" : "iMessage via BlueBubbles app",
   },
   prepare: async ({ cfg, accountId, prompter, credentialValues }) => {
     const existingWebhookPath = resolveBlueBubblesWebhookPath(cfg, accountId);
@@ -191,14 +191,14 @@ export const blueBubblesSetupWizard: ChannelSetupWizard = {
       inputKey: "password",
       providerHint: channel,
       credentialLabel: "server password",
-      helpTitle: "BlueBubbles (Legacy) password",
+      helpTitle: "BlueBubbles password",
       helpLines: [
-        "Enter the BlueBubbles server password for the legacy compatibility path.",
+        "Enter the BlueBubbles server password.",
         "Find this in the BlueBubbles Server app under Settings.",
       ],
       envPrompt: "",
-      keepPrompt: "BlueBubbles (Legacy) password already set. Keep it?",
-      inputPrompt: "BlueBubbles (Legacy) password",
+      keepPrompt: "BlueBubbles password already set. Keep it?",
+      inputPrompt: "BlueBubbles password",
       inspect: ({ cfg, accountId }) => {
         const existingPassword = resolveBlueBubblesAccount({ cfg, accountId }).config.password;
         return {
@@ -216,13 +216,13 @@ export const blueBubblesSetupWizard: ChannelSetupWizard = {
   textInputs: [
     {
       inputKey: "httpUrl",
-      message: "BlueBubbles (Legacy) server URL",
+      message: "BlueBubbles server URL",
       placeholder: "http://192.168.1.100:1234",
-      helpTitle: "BlueBubbles (Legacy) server URL",
+      helpTitle: "BlueBubbles server URL",
       helpLines: [
-        "Enter the BlueBubbles server URL for the legacy compatibility path (e.g., http://192.168.1.100:1234).",
+        "Enter the BlueBubbles server URL (e.g., http://192.168.1.100:1234).",
         "Find this in the BlueBubbles Server app under Connection.",
-        `Docs: ${formatDocsLink("/gateway/configuration-reference#bluebubbles", "bluebubbles")}`,
+        `Docs: ${formatDocsLink("/channels/bluebubbles", "bluebubbles")}`,
       ],
       currentValue: ({ cfg, accountId }) => resolveBlueBubblesServerUrl(cfg, accountId),
       validate: ({ value }) => validateBlueBubblesServerUrlInput(value),
@@ -251,34 +251,34 @@ export const blueBubblesSetupWizard: ChannelSetupWizard = {
     },
   ],
   completionNote: {
-    title: "BlueBubbles legacy next steps",
+    title: "BlueBubbles next steps",
     lines: [
-      "Configure the webhook URL in BlueBubbles Server for the legacy compatibility path:",
+      "Configure the webhook URL in BlueBubbles Server:",
       "1. Open BlueBubbles Server -> Settings -> Webhooks",
       "2. Add your OpenClaw gateway URL + webhook path",
       `   Example: https://your-gateway-host:3000${DEFAULT_WEBHOOK_PATH}`,
       "3. Enable the webhook and save",
       "",
-      `Docs: ${formatDocsLink("/gateway/configuration-reference#bluebubbles", "bluebubbles")}`,
+      `Docs: ${formatDocsLink("/channels/bluebubbles", "bluebubbles")}`,
     ],
   },
   dmPolicy,
   allowFrom: createAllowFromSection({
-    helpTitle: "BlueBubbles legacy allowlist",
+    helpTitle: "BlueBubbles allowlist",
     helpLines: [
-      "Allowlist legacy BlueBubbles DMs by handle or chat target.",
+      "Allowlist BlueBubbles DMs by handle or chat target.",
       "Examples:",
       "- +15555550123",
       "- user@example.com",
       "- chat_id:123",
       "- chat_guid:iMessage;-;+15555550123",
       "Multiple entries: comma- or newline-separated.",
-      `Docs: ${formatDocsLink("/gateway/configuration-reference#bluebubbles", "bluebubbles")}`,
+      `Docs: ${formatDocsLink("/channels/bluebubbles", "bluebubbles")}`,
     ],
-    message: "BlueBubbles legacy allowFrom (handle or chat_id)",
+    message: "BlueBubbles allowFrom (handle or chat_id)",
     placeholder: "+15555550123, user@example.com, chat_id:123",
     invalidWithoutCredentialNote:
-      "Use a legacy BlueBubbles handle or chat target like +15555550123 or chat_id:123.",
+      "Use a BlueBubbles handle or chat target like +15555550123 or chat_id:123.",
     parseInputs: parseBlueBubblesAllowFromInput,
     parseId: (raw) => validateBlueBubblesAllowFromEntry(raw),
     apply: async ({ cfg, accountId, allowFrom }) =>

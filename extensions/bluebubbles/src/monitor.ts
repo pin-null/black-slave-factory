@@ -224,7 +224,7 @@ export async function handleBlueBubblesWebhookRequest(
       if (reaction) {
         processReaction(reaction, target).catch((err) => {
           target.runtime.error?.(
-            `[${target.account.accountId}] BlueBubbles (Legacy) reaction failed: ${String(err)}`,
+            `[${target.account.accountId}] BlueBubbles reaction failed: ${String(err)}`,
           );
         });
       } else if (message) {
@@ -233,7 +233,7 @@ export async function handleBlueBubblesWebhookRequest(
         const debouncer = debounceRegistry.getOrCreateDebouncer(target);
         debouncer.enqueue({ message, target }).catch((err) => {
           target.runtime.error?.(
-            `[${target.account.accountId}] BlueBubbles (Legacy) webhook failed: ${String(err)}`,
+            `[${target.account.accountId}] BlueBubbles webhook failed: ${String(err)}`,
           );
         });
       }

@@ -82,6 +82,14 @@ export const AgentParamsSchema = Type.Object(
     sessionId: Type.Optional(Type.String()),
     sessionKey: Type.Optional(Type.String()),
     thinking: Type.Optional(Type.String()),
+    permissionTier: Type.Optional(
+      Type.Union([
+        Type.Literal("chat"),
+        Type.Literal("readonly"),
+        Type.Literal("readwrite"),
+        Type.Literal("dangerous"),
+      ]),
+    ),
     deliver: Type.Optional(Type.Boolean()),
     attachments: Type.Optional(Type.Array(Type.Unknown())),
     channel: Type.Optional(Type.String()),

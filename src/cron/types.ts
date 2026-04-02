@@ -1,5 +1,6 @@
 import type { FailoverReason } from "../agents/pi-embedded-helpers.js";
 import type { ChannelId } from "../channels/plugins/types.js";
+import type { PermissionTier } from "../config/types.tools.js";
 import type { CronJobBase } from "./types-shared.js";
 
 export type CronSchedule =
@@ -90,6 +91,7 @@ type CronAgentTurnPayloadFields = {
   fallbacks?: string[];
   thinking?: string;
   timeoutSeconds?: number;
+  permissionTier?: PermissionTier;
   allowUnsafeExternalContent?: boolean;
   /** If true, run with lightweight bootstrap context. */
   lightContext?: boolean;

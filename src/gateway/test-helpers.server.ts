@@ -4,7 +4,11 @@ import os from "node:os";
 import path from "node:path";
 import { afterAll, afterEach, beforeAll, beforeEach, expect, vi } from "vitest";
 import { WebSocket } from "ws";
-import { resolveMainSessionKeyFromConfig, type SessionEntry } from "../config/sessions.js";
+import {
+  resolveMainSessionKeyFromConfig,
+  saveSessionStore,
+  type SessionEntry,
+} from "../config/sessions.js";
 import { resetAgentRunContextForTest } from "../infra/agent-events.js";
 import {
   loadOrCreateDeviceIdentity,
@@ -88,7 +92,7 @@ export async function writeSessionStore(params: {
     store[storeKey] = entry;
   }
   await fs.mkdir(path.dirname(storePath), { recursive: true });
-  await fs.writeFile(storePath, JSON.stringify(store, null, 2), "utf-8");
+  await saveSessionStore(storePath, store as Record<string, SessionEntry>);
 }
 
 async function setupGatewayTestHome() {

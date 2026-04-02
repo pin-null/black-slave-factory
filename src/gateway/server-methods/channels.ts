@@ -1,4 +1,3 @@
-import { shouldExposeChannelInEntryPoints } from "../../channels/entry-point-visibility.js";
 import { buildChannelUiCatalog } from "../../channels/plugins/catalog.js";
 import { resolveChannelDefaultAccountId } from "../../channels/plugins/helpers.js";
 import {
@@ -86,9 +85,6 @@ export const channelsHandlers: GatewayRequestHandlers = {
     const cfg = loadConfig();
     const runtime = context.getRuntimeSnapshot();
     const plugins = listChannelPlugins();
-    const visiblePlugins = plugins.filter((plugin) =>
-      shouldExposeChannelInEntryPoints({ cfg, meta: plugin.meta }),
-    );
     const pluginMap = new Map<ChannelId, ChannelPlugin>(
       plugins.map((plugin) => [plugin.id, plugin]),
     );
@@ -197,7 +193,7 @@ export const channelsHandlers: GatewayRequestHandlers = {
       return { accounts, defaultAccountId, defaultAccount, resolvedAccounts };
     };
 
-    const uiCatalog = buildChannelUiCatalog(visiblePlugins);
+    const uiCatalog = buildChannelUiCatalog(plugins);
     const payload: Record<string, unknown> = {
       ts: Date.now(),
       channelOrder: uiCatalog.order,
@@ -212,7 +208,7 @@ export const channelsHandlers: GatewayRequestHandlers = {
     const channelsMap = payload.channels as Record<string, unknown>;
     const accountsMap = payload.channelAccounts as Record<string, unknown>;
     const defaultAccountIdMap = payload.channelDefaultAccountId as Record<string, unknown>;
-    for (const plugin of visiblePlugins) {
+    for (const plugin of plugins) {
       const { accounts, defaultAccountId, defaultAccount, resolvedAccounts } =
         await buildChannelAccounts(plugin.id);
       const fallbackAccount =

@@ -50,7 +50,7 @@ Quick answers plus deeper troubleshooting for real-world setups (local dev, VPS,
   - [Is a local model OK for casual chats?](#is-a-local-model-ok-for-casual-chats)
   - [How do I keep hosted model traffic in a specific region?](#how-do-i-keep-hosted-model-traffic-in-a-specific-region)
   - [Do I have to buy a Mac Mini to install this?](#do-i-have-to-buy-a-mac-mini-to-install-this)
-  - [Do I need a Mac mini for legacy iMessage support?](#do-i-need-a-mac-mini-for-legacy-imessage-support)
+  - [Do I need a Mac mini for iMessage support?](#do-i-need-a-mac-mini-for-imessage-support)
   - [If I buy a Mac mini to run OpenClaw, can I connect it to my MacBook Pro?](#if-i-buy-a-mac-mini-to-run-openclaw-can-i-connect-it-to-my-macbook-pro)
   - [Can I use Bun?](#can-i-use-bun)
   - [Telegram: what goes in `allowFrom`?](#telegram-what-goes-in-allowfrom)
@@ -692,8 +692,8 @@ Docs: [Update](/cli/update), [Updating](/install/updating).
 - **Model/auth setup** (provider OAuth/setup-token flows and API keys supported, plus local model options such as LM Studio)
 - **Workspace** location + bootstrap files
 - **Gateway settings** (bind/port/auth/tailscale)
-- **Providers** (WhatsApp, Telegram, Discord, Mattermost (plugin), Signal)
-- **Daemon install** (systemd user unit on Linux/WSL2, or equivalent local service setup)
+- **Providers** (WhatsApp, Telegram, Discord, Mattermost (plugin), Signal, iMessage)
+- **Daemon install** (LaunchAgent on macOS; systemd user unit on Linux/WSL2)
 - **Health checks** and **skills** selection
 
 It also warns if your configured model is unknown or missing auth.
@@ -798,22 +798,25 @@ Pick region-pinned endpoints. OpenRouter exposes US-hosted options for MiniMax, 
 
 ### Do I have to buy a Mac Mini to install this
 
-No. OpenClaw runs well on Linux or Windows via WSL2. A Mac mini is optional; a VPS, home server,
-or small always-on box works too.
+No. OpenClaw runs on macOS or Linux (Windows via WSL2). A Mac mini is optional - some people
+buy one as an always-on host, but a small VPS, home server, or Raspberry Pi-class box works too.
 
-This Windows-first build focuses on the Gateway, Control UI, WebChat, and mobile nodes rather than macOS-only companion features.
+You only need a Mac **for macOS-only tools**. For iMessage, use [BlueBubbles](/channels/bluebubbles) (recommended) - the BlueBubbles server runs on any Mac, and the Gateway can run on Linux or elsewhere. If you want other macOS-only tools, run the Gateway on a Mac or pair a macOS node.
 
-Docs: [Nodes](/nodes), [Remote access](/gateway/remote), [Windows (WSL2)](/platforms/windows).
+Docs: [BlueBubbles](/channels/bluebubbles), [Nodes](/nodes), [Mac remote mode](/platforms/mac/remote).
 
-### Do I need a Mac mini for legacy iMessage support
+### Do I need a Mac mini for iMessage support
 
-This Windows-first build does not include legacy iMessage in the default runtime surface.
+You need **some macOS device** signed into Messages. It does **not** have to be a Mac mini -
+any Mac works. **Use [BlueBubbles](/channels/bluebubbles)** (recommended) for iMessage - the BlueBubbles server runs on macOS, while the Gateway can run on Linux or elsewhere.
 
-Legacy macOS compatibility paths are still retained for existing setups, but they are not part of the default Windows-first deployment path.
+Common setups:
 
-You do **not** need a Mac mini to run OpenClaw itself. Use Windows via WSL2 or Linux for the Gateway host, then connect through Control UI, WebChat, or supported nodes.
+- Run the Gateway on Linux/VPS, and run the BlueBubbles server on any Mac signed into Messages.
+- Run everything on the Mac if you want the simplest single‑machine setup.
 
-Docs: [Nodes](/nodes), [Remote access](/gateway/remote), [Windows (WSL2)](/platforms/windows).
+Docs: [BlueBubbles](/channels/bluebubbles), [Nodes](/nodes),
+[Mac remote mode](/platforms/mac/remote).
 
 ### If I buy a Mac mini to run OpenClaw can I connect it to my MacBook Pro
 
@@ -824,7 +827,7 @@ capabilities like screen/camera/canvas and `system.run` on that device.
 Common pattern:
 
 - Gateway on the Mac mini (always-on).
-- Another trusted device runs the node host and pairs to the Gateway.
+- MacBook Pro runs the macOS app or a node host and pairs to the Gateway.
 - Use `openclaw nodes status` / `openclaw nodes list` to see it.
 
 Docs: [Nodes](/nodes), [Nodes CLI](/cli/nodes).
@@ -976,7 +979,7 @@ If you are running macOS in a VM, see [macOS VM](/install/macos-vm).
 
 ### What is OpenClaw in one paragraph
 
-OpenClaw is a personal AI assistant you run on your own devices. It replies on the messaging surfaces you already use (WhatsApp, Telegram, Slack, Mattermost (plugin), Discord, Signal, WebChat) and can also do voice + a live Canvas on supported platforms. The **Gateway** is the always-on control plane; the assistant is the product.
+OpenClaw is a personal AI assistant you run on your own devices. It replies on the messaging surfaces you already use (WhatsApp, Telegram, Slack, Mattermost (plugin), Discord, Google Chat, Signal, iMessage, WebChat) and can also do voice + a live Canvas on supported platforms. The **Gateway** is the always-on control plane; the assistant is the product.
 
 ### Value proposition
 
@@ -987,9 +990,9 @@ SaaS.
 
 Highlights:
 
-- **Your devices, your data:** run the Gateway wherever you want (Windows/WSL2, Linux, VPS) and keep the
+- **Your devices, your data:** run the Gateway wherever you want (Mac, Linux, VPS) and keep the
   workspace + session history local.
-- **Real channels, not a web sandbox:** WhatsApp/Telegram/Slack/Discord/Signal/etc,
+- **Real channels, not a web sandbox:** WhatsApp/Telegram/Slack/Discord/Signal/iMessage/etc,
   plus mobile voice and Canvas on supported platforms.
 - **Model-agnostic:** use Anthropic, OpenAI, MiniMax, OpenRouter, etc., with per-agent routing
   and failover.
@@ -1600,7 +1603,8 @@ Typical setup:
 1. Run the Gateway on the always-on host (VPS/home server).
 2. Put the Gateway host + your computer on the same tailnet.
 3. Ensure the Gateway WS is reachable (tailnet bind or SSH tunnel).
-4. Open the Control UI locally over the SSH tunnel (or direct tailnet), then connect and approve the node client.
+4. Open the macOS app locally and connect in **Remote over SSH** mode (or direct tailnet)
+   so it can register as a node.
 5. Approve the node on the Gateway:
 
    ```bash
@@ -1613,7 +1617,7 @@ No separate TCP bridge is required; nodes connect over the Gateway WebSocket.
 Security reminder: pairing a macOS node allows `system.run` on that machine. Only
 pair devices you trust, and review [Security](/gateway/security).
 
-Docs: [Nodes](/nodes), [Gateway protocol](/gateway/protocol), [Remote access](/gateway/remote), [Security](/gateway/security).
+Docs: [Nodes](/nodes), [Gateway protocol](/gateway/protocol), [macOS remote mode](/platforms/mac/remote), [Security](/gateway/security).
 
 ### Tailscale is connected but I get no replies What now
 
@@ -1768,8 +1772,8 @@ Serve exposes the **Gateway Control UI + WS**. Nodes connect over the same Gatew
 Recommended setup:
 
 1. **Make sure the VPS + Mac are on the same tailnet**.
-2. **Use an SSH tunnel or direct tailnet connection** to the same Gateway WS endpoint.
-   Then connect and approve the node client.
+2. **Use the macOS app in Remote mode** (SSH target can be the tailnet hostname).
+   The app will tunnel the Gateway port and connect as a node.
 3. **Approve the node** on the gateway:
 
    ```bash
@@ -1777,7 +1781,7 @@ Recommended setup:
    openclaw devices approve <requestId>
    ```
 
-Docs: [Gateway protocol](/gateway/protocol), [Discovery](/gateway/discovery), [Remote access](/gateway/remote).
+Docs: [Gateway protocol](/gateway/protocol), [Discovery](/gateway/discovery), [macOS remote mode](/platforms/mac/remote).
 
 ## Env vars and .env loading
 
@@ -2527,7 +2531,7 @@ Set `gateway.mode: "remote"` and point to a remote WebSocket URL, optionally wit
 Notes:
 
 - `openclaw gateway` only starts when `gateway.mode` is `local` (or you pass the override flag).
-- Connected clients pick up these changes on the next config refresh or reconnect.
+- The macOS app watches the config file and switches modes live when these values change.
 
 ### The Control UI says unauthorized or keeps reconnecting What now
 

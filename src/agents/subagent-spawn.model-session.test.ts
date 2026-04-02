@@ -3,9 +3,15 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { resetSubagentRegistryForTests } from "./subagent-registry.js";
 import { spawnSubagentDirect } from "./subagent-spawn.js";
 
-const callGatewayMock = vi.fn();
-const updateSessionStoreMock = vi.fn();
-const pruneLegacyStoreKeysMock = vi.fn();
+const callGatewayMock = vi.hoisted(() => vi.fn());
+const loadSessionStoreMock = vi.hoisted(() => vi.fn());
+const resolveStorePathMock = vi.hoisted(() =>
+  vi.fn<(store?: string, opts?: { agentId?: string; env?: NodeJS.ProcessEnv }) => string>(
+    () => "/tmp/subagent-store.json",
+  ),
+);
+const updateSessionStoreMock = vi.hoisted(() => vi.fn());
+const pruneLegacyStoreKeysMock = vi.hoisted(() => vi.fn());
 
 vi.mock("../gateway/call.js", () => ({
   callGateway: (opts: unknown) => callGatewayMock(opts),
@@ -33,7 +39,36 @@ vi.mock("../config/sessions.js", async (importOriginal) => {
   const actual = await importOriginal<typeof import("../config/sessions.js")>();
   return {
     ...actual,
-    updateSessionStore: (...args: unknown[]) => updateSessionStoreMock(...args),
+    resolveStorePath: (store?: string, opts?: { agentId?: string; env?: NodeJS.ProcessEnv }) =>
+      resolveStorePathMock(store, opts),
+    loadSessionStore: (storePath: string, opts?: { skipCache?: boolean }) =>
+      loadSessionStoreMock(storePath, opts),
+    updateSessionStore: <T>(
+      storePath: string,
+      update: (store: Record<string, Record<string, unknown>>) => T | Promise<T>,
+    ) => updateSessionStoreMock(storePath, update),
+  };
+});
+
+vi.mock("../config/sessions/paths.js", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("../config/sessions/paths.js")>();
+  return {
+    ...actual,
+    resolveStorePath: (store?: string, opts?: { agentId?: string; env?: NodeJS.ProcessEnv }) =>
+      resolveStorePathMock(store, opts),
+  };
+});
+
+vi.mock("../config/sessions/store.js", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("../config/sessions/store.js")>();
+  return {
+    ...actual,
+    loadSessionStore: (storePath: string, opts?: { skipCache?: boolean }) =>
+      loadSessionStoreMock(storePath, opts),
+    updateSessionStore: <T>(
+      storePath: string,
+      update: (store: Record<string, Record<string, unknown>>) => T | Promise<T>,
+    ) => updateSessionStoreMock(storePath, update),
   };
 });
 
@@ -47,7 +82,11 @@ vi.mock("../gateway/session-utils.js", async (importOriginal) => {
       canonicalKey: params.key,
       storeKeys: [params.key],
     }),
-    pruneLegacyStoreKeys: (...args: unknown[]) => pruneLegacyStoreKeysMock(...args),
+    pruneLegacyStoreKeys: (params: {
+      store: Record<string, unknown>;
+      canonicalKey: string;
+      candidates?: string[];
+    }) => pruneLegacyStoreKeysMock(params),
   };
 });
 
@@ -80,6 +119,8 @@ describe("spawnSubagentDirect runtime model persistence", () => {
   beforeEach(() => {
     resetSubagentRegistryForTests();
     callGatewayMock.mockReset();
+    loadSessionStoreMock.mockReset().mockReturnValue({});
+    resolveStorePathMock.mockReset().mockReturnValue("/tmp/subagent-store.json");
     updateSessionStoreMock.mockReset();
     pruneLegacyStoreKeysMock.mockReset();
 
@@ -165,5 +206,27 @@ describe("spawnSubagentDirect runtime model persistence", () => {
       operations.indexOf("gateway:sessions.patch"),
     );
     expect(operations.indexOf("gateway:agent")).toBeGreaterThan(operations.indexOf("store:update"));
+  });
+
+  it("inherits requester permission tier onto the child session", async () => {
+    loadSessionStoreMock.mockReturnValue({
+      "agent:main:main": {
+        permissionTier: "readonly",
+      },
+    });
+
+    await spawnSubagentDirect(
+      {
+        task: "test",
+      },
+      {
+        agentSessionKey: "agent:main:main",
+      },
+    );
+
+    const patchCall = callGatewayMock.mock.calls.find(
+      ([request]) => (request as { method?: string }).method === "sessions.patch",
+    )?.[0] as { params?: { permissionTier?: string } } | undefined;
+    expect(patchCall?.params?.permissionTier).toBe("readonly");
   });
 });

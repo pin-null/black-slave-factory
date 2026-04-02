@@ -91,6 +91,16 @@ export type SessionThreadBindingsConfig = {
    */
   enabled?: boolean;
   /**
+   * Allow thread-bound subagent spawns for this channel/account.
+   * Omit to use the provider default.
+   */
+  spawnSubagentSessions?: boolean;
+  /**
+   * Allow thread-bound ACP session spawns for this channel/account.
+   * Omit to use the provider default.
+   */
+  spawnAcpSessions?: boolean;
+  /**
    * Inactivity window for thread-bound sessions (hours).
    * Session auto-unfocuses after this amount of idle time. Set to 0 to disable. Default: 24.
    */
@@ -100,10 +110,6 @@ export type SessionThreadBindingsConfig = {
    * Session auto-unfocuses once this age is reached even if active. Set to 0 to disable. Default: 0.
    */
   maxAgeHours?: number;
-  /** Allow thread-bound subagent spawns when the channel supports them. */
-  spawnSubagentSessions?: boolean;
-  /** Allow thread-bound ACP spawns when the channel supports them. */
-  spawnAcpSessions?: boolean;
 };
 
 export type SessionConfig = {

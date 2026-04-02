@@ -1,28 +1,23 @@
+import type { PermissionTier } from "../config/types.tools.js";
 import type { ToolLoopDetectionConfig } from "../config/types.tools.js";
 import type { SessionState } from "../logging/diagnostic-session-state.js";
 import { createSubsystemLogger } from "../logging/subsystem.js";
 import { getGlobalHookRunner } from "../plugins/hook-runner-global.js";
 import { createLazyRuntimeSurface } from "../shared/lazy-runtime.js";
 import { isPlainObject } from "../utils.js";
-import { evaluateSecurityFirewall } from "./security-firewall.js";
+import { buildPermissionSnapshot } from "./permission-snapshot.js";
+import { isPermissionTierAllowed, resolveToolPermissionTier } from "./tool-permission-tier.js";
 import { normalizeToolName } from "./tool-policy.js";
 import type { AnyAgentTool } from "./tools/common.js";
 
 export type HookContext = {
-  config?: import("../config/config.js").OpenClawConfig;
   agentId?: string;
   sessionKey?: string;
   /** Ephemeral session UUID — regenerated on /new and /reset. */
   sessionId?: string;
   runId?: string;
-  senderId?: string | null;
-  senderName?: string | null;
-  senderUsername?: string | null;
-  senderE164?: string | null;
-  senderIsOwner?: boolean;
-  workspaceDir?: string;
-  requestText?: string;
   loopDetection?: ToolLoopDetectionConfig;
+  permissionTier?: PermissionTier;
 };
 
 type HookOutcome = { blocked: true; reason: string } | { blocked: false; params: unknown };
@@ -100,9 +95,27 @@ export async function runBeforeToolCallHook(args: {
   params: unknown;
   toolCallId?: string;
   ctx?: HookContext;
+  declaredPermissionTier?: PermissionTier;
 }): Promise<HookOutcome> {
   const toolName = normalizeToolName(args.toolName || "tool");
   const params = args.params;
+  const requiredPermissionTier = resolveToolPermissionTier({
+    toolName,
+    toolParams: params,
+    declaredTier: args.declaredPermissionTier,
+  });
+
+  if (
+    !isPermissionTierAllowed({
+      required: requiredPermissionTier,
+      allowed: args.ctx?.permissionTier,
+    })
+  ) {
+    return {
+      blocked: true,
+      reason: `Tool "${toolName}" requires permission tier "${requiredPermissionTier}" (current: "${args.ctx?.permissionTier}").`,
+    };
+  }
 
   if (args.ctx?.sessionKey) {
     const { getDiagnosticSessionState, logToolLoopAction, detectToolCallLoop, recordToolCall } =
@@ -155,24 +168,6 @@ export async function runBeforeToolCallHook(args: {
   }
 
   const hookRunner = getGlobalHookRunner();
-  const firewallDecision = await evaluateSecurityFirewall({
-    config: args.ctx?.config,
-    toolName,
-    params,
-    senderId: args.ctx?.senderId,
-    senderName: args.ctx?.senderName,
-    senderUsername: args.ctx?.senderUsername,
-    senderE164: args.ctx?.senderE164,
-    senderIsOwner: args.ctx?.senderIsOwner,
-    workspaceDir: args.ctx?.workspaceDir,
-    requestText: args.ctx?.requestText,
-  });
-  if (firewallDecision?.action === "block" || firewallDecision?.action === "approval") {
-    return {
-      blocked: true,
-      reason: firewallDecision.reason || "Tool call blocked by security firewall",
-    };
-  }
   if (!hookRunner?.hasHooks("before_tool_call")) {
     return { blocked: false, params: args.params };
   }
@@ -185,6 +180,10 @@ export async function runBeforeToolCallHook(args: {
       ...(args.ctx?.sessionKey ? { sessionKey: args.ctx.sessionKey } : {}),
       ...(args.ctx?.sessionId ? { sessionId: args.ctx.sessionId } : {}),
       ...(args.ctx?.runId ? { runId: args.ctx.runId } : {}),
+      permissionSnapshot: buildPermissionSnapshot({
+        configuredTier: args.ctx?.permissionTier,
+        tools: [{ name: toolName, permissionTier: args.declaredPermissionTier }],
+      }),
       ...(args.toolCallId ? { toolCallId: args.toolCallId } : {}),
     };
     const hookResult = await hookRunner.runBeforeToolCall(
@@ -235,6 +234,7 @@ export function wrapToolWithBeforeToolCallHook(
         params,
         toolCallId,
         ctx,
+        declaredPermissionTier: tool.permissionTier,
       });
       if (outcome.blocked) {
         throw new Error(outcome.reason);

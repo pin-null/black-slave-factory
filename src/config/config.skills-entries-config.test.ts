@@ -5,14 +5,9 @@ describe("skills entries config schema", () => {
   it("accepts custom fields under config", () => {
     const res = OpenClawSchema.safeParse({
       skills: {
-        policy: {
-          allowedCategories: ["office"],
-          rejectUncategorized: true,
-        },
         entries: {
           "custom-skill": {
             enabled: true,
-            categories: ["office"],
             config: {
               url: "https://example.invalid",
               token: "abc123",

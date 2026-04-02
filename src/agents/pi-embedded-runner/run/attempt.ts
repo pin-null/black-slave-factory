@@ -61,6 +61,11 @@ import { supportsModelTools } from "../../model-tool-support.js";
 import { createConfiguredOllamaStreamFn } from "../../ollama-stream.js";
 import { createOpenAIWebSocketStreamFn, releaseWsSession } from "../../openai-ws-stream.js";
 import { resolveOwnerDisplaySetting } from "../../owner-display.js";
+import {
+  appendPermissionSnapshotToSystemPrompt,
+  buildPermissionSnapshot,
+  type PermissionSnapshot,
+} from "../../permission-snapshot.js";
 import { createBundleLspToolRuntime } from "../../pi-bundle-lsp-runtime.js";
 import { createBundleMcpToolRuntime } from "../../pi-bundle-mcp-tools.js";
 import {
@@ -1232,6 +1237,23 @@ export async function resolvePromptBuildHookResult(params: {
   };
 }
 
+function enforcePermissionSnapshotOnSystemPrompt(params: {
+  systemPrompt?: string;
+  permissionSnapshot: PermissionSnapshot;
+}): string | undefined {
+  const baseSystemPrompt = params.systemPrompt?.trim();
+  if (!baseSystemPrompt) {
+    return appendPermissionSnapshotToSystemPrompt({
+      systemPrompt: "",
+      permissionSnapshot: params.permissionSnapshot,
+    });
+  }
+  return appendPermissionSnapshotToSystemPrompt({
+    systemPrompt: baseSystemPrompt,
+    permissionSnapshot: params.permissionSnapshot,
+  });
+}
+
 export function composeSystemPromptWithHookContext(params: {
   baseSystemPrompt?: string;
   prependSystemContext?: string;
@@ -1516,12 +1538,12 @@ export async function runEmbeddedAttempt(
           groupChannel: params.groupChannel,
           groupSpace: params.groupSpace,
           spawnedBy: params.spawnedBy,
+          sessionPermissionTier: params.sessionPermissionTier,
           senderId: params.senderId,
           senderName: params.senderName,
           senderUsername: params.senderUsername,
           senderE164: params.senderE164,
           senderIsOwner: params.senderIsOwner,
-          requestText: params.requestText,
           allowGatewaySubagentBinding: params.allowGatewaySubagentBinding,
           sessionKey: sandboxSessionKey,
           sessionId: params.sessionId,
@@ -1588,6 +1610,9 @@ export async function runEmbeddedAttempt(
       ...(bundleMcpRuntime?.tools ?? []),
       ...(bundleLspRuntime?.tools ?? []),
     ];
+    const permissionSnapshot = buildPermissionSnapshot({
+      tools: effectiveTools,
+    });
     const allowedToolNames = collectAllowedToolNames({
       tools: effectiveTools,
       clientTools,
@@ -1705,34 +1730,38 @@ export async function runEmbeddedAttempt(
       ? resolveHeartbeatPrompt(params.config?.agents?.defaults?.heartbeat?.prompt)
       : undefined;
 
-    const appendPrompt = buildEmbeddedSystemPrompt({
-      workspaceDir: effectiveWorkspace,
-      defaultThinkLevel: params.thinkLevel,
-      reasoningLevel: params.reasoningLevel ?? "off",
-      extraSystemPrompt: params.extraSystemPrompt,
-      ownerNumbers: params.ownerNumbers,
-      ownerDisplay: ownerDisplay.ownerDisplay,
-      ownerDisplaySecret: ownerDisplay.ownerDisplaySecret,
-      reasoningTagHint,
-      heartbeatPrompt,
-      skillsPrompt,
-      docsPath: docsPath ?? undefined,
-      ttsHint,
-      workspaceNotes,
-      reactionGuidance,
-      promptMode,
-      acpEnabled: params.config?.acp?.enabled !== false,
-      runtimeInfo,
-      messageToolHints,
-      sandboxInfo,
-      tools: effectiveTools,
-      modelAliasLines: buildModelAliasLines(params.config),
-      userTimezone,
-      userTime,
-      userTimeFormat,
-      contextFiles,
-      memoryCitationsMode: params.config?.memory?.citations,
-    });
+    const appendPrompt =
+      enforcePermissionSnapshotOnSystemPrompt({
+        systemPrompt: buildEmbeddedSystemPrompt({
+          workspaceDir: effectiveWorkspace,
+          defaultThinkLevel: params.thinkLevel,
+          reasoningLevel: params.reasoningLevel ?? "off",
+          extraSystemPrompt: params.extraSystemPrompt,
+          ownerNumbers: params.ownerNumbers,
+          ownerDisplay: ownerDisplay.ownerDisplay,
+          ownerDisplaySecret: ownerDisplay.ownerDisplaySecret,
+          reasoningTagHint,
+          heartbeatPrompt,
+          skillsPrompt,
+          docsPath: docsPath ?? undefined,
+          ttsHint,
+          workspaceNotes,
+          reactionGuidance,
+          promptMode,
+          acpEnabled: params.config?.acp?.enabled !== false,
+          runtimeInfo,
+          messageToolHints,
+          sandboxInfo,
+          tools: effectiveTools,
+          modelAliasLines: buildModelAliasLines(params.config),
+          userTimezone,
+          userTime,
+          userTimeFormat,
+          contextFiles,
+          memoryCitationsMode: params.config?.memory?.citations,
+        }),
+        permissionSnapshot,
+      }) ?? "";
     const systemPromptReport = buildSystemPromptReport({
       source: "run",
       generatedAt: Date.now(),
@@ -2428,6 +2457,7 @@ export async function runEmbeddedAttempt(
           sessionId: params.sessionId,
           workspaceDir: params.workspaceDir,
           messageProvider: params.messageProvider ?? undefined,
+          permissionSnapshot,
           trigger: params.trigger,
           channelId: params.messageChannel ?? params.messageProvider ?? undefined,
         };
@@ -2465,6 +2495,14 @@ export async function runEmbeddedAttempt(
             log.debug(
               `hooks: applied prependSystemContext/appendSystemContext (${prependSystemLen}+${appendSystemLen} chars)`,
             );
+          }
+          const enforcedSystemPrompt = enforcePermissionSnapshotOnSystemPrompt({
+            systemPrompt: systemPromptText,
+            permissionSnapshot,
+          });
+          if (enforcedSystemPrompt && enforcedSystemPrompt !== systemPromptText) {
+            applySystemPromptOverrideToSession(activeSession, enforcedSystemPrompt);
+            systemPromptText = enforcedSystemPrompt;
           }
         }
 
@@ -2560,6 +2598,7 @@ export async function runEmbeddedAttempt(
                   sessionId: params.sessionId,
                   workspaceDir: params.workspaceDir,
                   messageProvider: params.messageProvider ?? undefined,
+                  permissionSnapshot,
                   trigger: params.trigger,
                   channelId: params.messageChannel ?? params.messageProvider ?? undefined,
                 },

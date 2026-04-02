@@ -1,7 +1,6 @@
 import type { ChannelId } from "../channels/plugins/types.js";
 import {
   CHANNEL_IDS,
-  REMOVED_CHAT_CHANNEL_IDS,
   listChatChannelAliases,
   normalizeChatChannelId,
 } from "../channels/registry.js";
@@ -36,13 +35,10 @@ const MARKDOWN_CAPABLE_CHANNELS = new Set<string>([
   "telegram",
   "signal",
   "discord",
+  "googlechat",
   "tui",
   INTERNAL_MESSAGE_CHANNEL,
 ]);
-
-// Removed built-in channels can still appear in compatibility metadata, but
-// must not be offered as active delivery targets.
-const NON_DELIVERABLE_BUILTIN_MESSAGE_CHANNELS = new Set<string>(REMOVED_CHAT_CHANNEL_IDS);
 
 export { GATEWAY_CLIENT_NAMES, GATEWAY_CLIENT_MODES };
 export type { GatewayClientName, GatewayClientMode };
@@ -119,12 +115,7 @@ const listPluginChannelAliases = (): string[] => {
 };
 
 export const listDeliverableMessageChannels = (): ChannelId[] =>
-  Array.from(
-    new Set([
-      ...CHANNEL_IDS.filter((id) => !NON_DELIVERABLE_BUILTIN_MESSAGE_CHANNELS.has(id)),
-      ...listPluginChannelIds(),
-    ]),
-  );
+  Array.from(new Set([...CHANNEL_IDS, ...listPluginChannelIds()]));
 
 export type DeliverableMessageChannel = ChannelId;
 
@@ -136,15 +127,7 @@ export const listGatewayMessageChannels = (): GatewayMessageChannel[] => [
 ];
 
 export const listGatewayAgentChannelAliases = (): string[] =>
-  Array.from(
-    new Set([
-      ...listChatChannelAliases().filter((alias) => {
-        const normalized = normalizeChatChannelId(alias);
-        return !normalized || !NON_DELIVERABLE_BUILTIN_MESSAGE_CHANNELS.has(normalized);
-      }),
-      ...listPluginChannelAliases(),
-    ]),
-  );
+  Array.from(new Set([...listChatChannelAliases(), ...listPluginChannelAliases()]));
 
 export type GatewayAgentChannelHint = GatewayMessageChannel | "last";
 

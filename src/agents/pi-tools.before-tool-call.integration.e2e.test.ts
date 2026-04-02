@@ -101,61 +101,20 @@ describe("before_tool_call hook integration", () => {
     expect(execute).not.toHaveBeenCalled();
   });
 
-  it("blocks tool execution when the security firewall rejects the tool call", async () => {
-    hookRunner.hasHooks.mockReturnValue(false);
+  it("blocks tools above the configured permission tier before hooks run", async () => {
+    hookRunner.hasHooks.mockReturnValue(true);
     const execute = vi.fn().mockResolvedValue({ content: [], details: { ok: true } });
     // oxlint-disable-next-line typescript/no-explicit-any
-    const tool = wrapToolWithBeforeToolCallHook({ name: "exec", execute } as any, {
-      config: {
-        tools: {
-          securityFirewall: {
-            enabled: true,
-            profile: "office",
-            audit: { enabled: false },
-          },
-        },
-      },
-      workspaceDir: "/tmp/workspace",
-      requestText: "run ls",
+    const tool = wrapToolWithBeforeToolCallHook({ name: "browser", execute } as any, {
+      permissionTier: "readwrite",
     });
     const extensionContext = {} as Parameters<typeof tool.execute>[3];
 
-    await expect(
-      tool.execute("call-firewall", { cmd: "ls" }, undefined, extensionContext),
-    ).rejects.toThrow("Security firewall blocked exec");
-    expect(execute).not.toHaveBeenCalled();
-    expect(hookRunner.runBeforeToolCall).not.toHaveBeenCalled();
-  });
-
-  it("allows owner bypass when the security firewall is configured for it", async () => {
-    hookRunner.hasHooks.mockReturnValue(false);
-    const execute = vi.fn().mockResolvedValue({ content: [], details: { ok: true } });
-    // oxlint-disable-next-line typescript/no-explicit-any
-    const tool = wrapToolWithBeforeToolCallHook({ name: "exec", execute } as any, {
-      config: {
-        tools: {
-          securityFirewall: {
-            enabled: true,
-            profile: "office",
-            ownerBypass: true,
-            audit: { enabled: false },
-          },
-        },
-      },
-      senderIsOwner: true,
-      workspaceDir: "/tmp/workspace",
-      requestText: "run ls",
-    });
-    const extensionContext = {} as Parameters<typeof tool.execute>[3];
-
-    await tool.execute("call-firewall-owner", { cmd: "ls" }, undefined, extensionContext);
-
-    expect(execute).toHaveBeenCalledWith(
-      "call-firewall-owner",
-      { cmd: "ls" },
-      undefined,
-      extensionContext,
+    await expect(tool.execute("call-tier-block", {}, undefined, extensionContext)).rejects.toThrow(
+      'Tool "browser" requires permission tier "dangerous" (current: "readwrite").',
     );
+    expect(hookRunner.runBeforeToolCall).not.toHaveBeenCalled();
+    expect(execute).not.toHaveBeenCalled();
   });
 
   it("continues execution when hook throws", async () => {
@@ -198,14 +157,17 @@ describe("before_tool_call hook integration", () => {
         runId: "run-main",
         toolCallId: "call-5",
       },
-      {
+      expect.objectContaining({
         toolName: "read",
         agentId: "main",
         sessionKey: "main",
         sessionId: "ephemeral-main",
         runId: "run-main",
         toolCallId: "call-5",
-      },
+        permissionSnapshot: expect.objectContaining({
+          tier: "readonly",
+        }),
+      }),
     );
   });
 
@@ -334,5 +296,28 @@ describe("before_tool_call hook integration for client tools", () => {
       value: "ok",
       extra: true,
     });
+  });
+
+  it("passes permission snapshot through tool hook context", async () => {
+    hookRunner.hasHooks.mockReturnValue(true);
+    hookRunner.runBeforeToolCall.mockResolvedValue(undefined);
+    const execute = vi.fn().mockResolvedValue({ content: [], details: { ok: true } });
+    // oxlint-disable-next-line typescript/no-explicit-any
+    const tool = wrapToolWithBeforeToolCallHook({ name: "exec", execute } as any, {
+      agentId: "main",
+      permissionTier: "readwrite",
+    });
+    const extensionContext = {} as Parameters<typeof tool.execute>[3];
+
+    await tool.execute("call-permission-snapshot", { cmd: "ls" }, undefined, extensionContext);
+
+    expect(hookRunner.runBeforeToolCall).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        permissionSnapshot: expect.objectContaining({
+          tier: "readwrite",
+        }),
+      }),
+    );
   });
 });

@@ -151,6 +151,11 @@ export async function resolveMessageChannelSelection(params: {
   configured: MessageChannelId[];
   source: MessageChannelSelectionSource;
 }> {
+  // Explicit or tool-context-resolved sends already know their destination.
+  // Avoid scanning every configured plugin account here because some plugin
+  // `isConfigured` checks do lazy runtime/bootstrap work that is irrelevant on
+  // this path and can make dry-run validation unexpectedly slow.
+  const noConfiguredChannels: MessageChannelId[] = [];
   const normalized = normalizeMessageChannel(params.channel);
   if (normalized) {
     const availableExplicit = resolveAvailableKnownChannel({
@@ -165,7 +170,7 @@ export async function resolveMessageChannelSelection(params: {
       if (fallback) {
         return {
           channel: fallback,
-          configured: await listConfiguredMessageChannels(params.cfg),
+          configured: noConfiguredChannels,
           source: "tool-context-fallback",
         };
       }
@@ -176,7 +181,7 @@ export async function resolveMessageChannelSelection(params: {
     }
     return {
       channel: availableExplicit,
-      configured: await listConfiguredMessageChannels(params.cfg),
+      configured: noConfiguredChannels,
       source: "explicit",
     };
   }
@@ -188,7 +193,7 @@ export async function resolveMessageChannelSelection(params: {
   if (fallback) {
     return {
       channel: fallback,
-      configured: await listConfiguredMessageChannels(params.cfg),
+      configured: noConfiguredChannels,
       source: "tool-context-fallback",
     };
   }

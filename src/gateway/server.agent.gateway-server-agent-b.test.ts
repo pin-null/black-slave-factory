@@ -181,7 +181,15 @@ describe("gateway server agent", () => {
     expect(vi.mocked(agentCommand)).not.toHaveBeenCalled();
   });
 
-  test("agent accepts the explicit imessage channel id", async () => {
+  test("agent accepts channel aliases (imsg/teams)", async () => {
+    const registry = createRegistry([
+      {
+        pluginId: "msteams",
+        source: "test",
+        plugin: createMSTeamsPlugin({ aliases: ["teams"] }),
+      },
+    ]);
+    setRegistry(registry);
     await writeMainSessionEntry({
       sessionId: "sess-alias",
       lastChannel: "imessage",
@@ -190,13 +198,29 @@ describe("gateway server agent", () => {
     const resIMessage = await rpcReq(ws, "agent", {
       message: "hi",
       sessionKey: "main",
-      channel: "imessage",
+      channel: "imsg",
       deliver: true,
-      idempotencyKey: "idem-agent-imessage",
+      idempotencyKey: "idem-agent-imsg",
     });
     expect(resIMessage.ok).toBe(true);
 
-    expectAgentRoutingCall({ channel: "imessage", deliver: true });
+    const resTeams = await rpcReq(ws, "agent", {
+      message: "hi",
+      sessionKey: "main",
+      channel: "teams",
+      to: "conversation:teams-abc",
+      deliver: false,
+      idempotencyKey: "idem-agent-teams",
+    });
+    expect(resTeams.ok).toBe(true);
+
+    expectAgentRoutingCall({ channel: "imessage", deliver: true, fromEnd: 2 });
+    expectAgentRoutingCall({
+      channel: "msteams",
+      deliver: false,
+      to: "conversation:teams-abc",
+      fromEnd: 1,
+    });
   });
 
   test("agent rejects unknown channel", async () => {

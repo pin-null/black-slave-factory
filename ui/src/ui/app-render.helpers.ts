@@ -653,10 +653,9 @@ async function switchChatModel(state: AppViewState, nextModel: string) {
 
 /* ── Channel display labels ────────────────────────────── */
 const CHANNEL_LABELS: Record<string, string> = {
-  bluebubbles: "BlueBubbles (Legacy)",
+  bluebubbles: "iMessage",
   telegram: "Telegram",
   discord: "Discord",
-  imessage: "iMessage (Legacy)",
   signal: "Signal",
   slack: "Slack",
   whatsapp: "WhatsApp",

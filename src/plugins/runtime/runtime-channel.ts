@@ -77,6 +77,7 @@ import {
 } from "../../pairing/pairing-store.js";
 import { buildAgentSessionKey, resolveAgentRoute } from "../../routing/resolve-route.js";
 import { createRuntimeDiscord } from "./runtime-discord.js";
+import { createRuntimeIMessage } from "./runtime-imessage.js";
 import { createRuntimeSignal } from "./runtime-signal.js";
 import { createRuntimeSlack } from "./runtime-slack.js";
 import { createRuntimeTelegram } from "./runtime-telegram.js";
@@ -205,16 +206,20 @@ export function createRuntimeChannel(): PluginRuntime["channel"] {
     },
   } satisfies Omit<
     PluginRuntime["channel"],
-    "discord" | "slack" | "telegram" | "signal" | "whatsapp"
+    "discord" | "slack" | "telegram" | "signal" | "imessage" | "whatsapp"
   > &
     Partial<
-      Pick<PluginRuntime["channel"], "discord" | "slack" | "telegram" | "signal" | "whatsapp">
+      Pick<
+        PluginRuntime["channel"],
+        "discord" | "slack" | "telegram" | "signal" | "imessage" | "whatsapp"
+      >
     >;
 
   defineCachedValue(channelRuntime, "discord", createRuntimeDiscord);
   defineCachedValue(channelRuntime, "slack", createRuntimeSlack);
   defineCachedValue(channelRuntime, "telegram", createRuntimeTelegram);
   defineCachedValue(channelRuntime, "signal", createRuntimeSignal);
+  defineCachedValue(channelRuntime, "imessage", createRuntimeIMessage);
   defineCachedValue(channelRuntime, "whatsapp", createRuntimeWhatsApp);
 
   return channelRuntime as PluginRuntime["channel"];

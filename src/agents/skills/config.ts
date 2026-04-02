@@ -47,11 +47,6 @@ function normalizeAllowlist(input: unknown): string[] | undefined {
   return normalized.length > 0 ? normalized : undefined;
 }
 
-function normalizeCategories(input: unknown): string[] | undefined {
-  const normalized = normalizeStringEntries(Array.isArray(input) ? input : []);
-  return normalized.length > 0 ? normalized.map((entry) => entry.toLowerCase()) : undefined;
-}
-
 const BUNDLED_SOURCES = new Set(["openclaw-bundled"]);
 
 function isBundledSkill(entry: SkillEntry): boolean {
@@ -60,44 +55,6 @@ function isBundledSkill(entry: SkillEntry): boolean {
 
 export function resolveBundledAllowlist(config?: OpenClawConfig): string[] | undefined {
   return normalizeAllowlist(config?.skills?.allowBundled);
-}
-
-export function resolveAllowedSkillCategories(config?: OpenClawConfig): string[] | undefined {
-  return normalizeCategories(config?.skills?.policy?.allowedCategories);
-}
-
-export function resolveConfiguredSkillCategories(
-  config: OpenClawConfig | undefined,
-  skillKey: string,
-): string[] | undefined {
-  return normalizeCategories(resolveSkillConfig(config, skillKey)?.categories);
-}
-
-export function resolveSkillCategories(
-  entry: SkillEntry,
-  config?: OpenClawConfig,
-): string[] | undefined {
-  const skillKey = resolveSkillKey(entry.skill, entry);
-  return (
-    resolveConfiguredSkillCategories(config, skillKey) ??
-    normalizeCategories(entry.metadata?.categories)
-  );
-}
-
-export function isSkillAllowedByCategoryPolicy(params: {
-  entry: SkillEntry;
-  config?: OpenClawConfig;
-}): boolean {
-  const allowedCategories = resolveAllowedSkillCategories(params.config);
-  const rejectUncategorized = params.config?.skills?.policy?.rejectUncategorized === true;
-  if (!allowedCategories || allowedCategories.length === 0) {
-    return !rejectUncategorized || Boolean(resolveSkillCategories(params.entry, params.config));
-  }
-  const categories = resolveSkillCategories(params.entry, params.config);
-  if (!categories || categories.length === 0) {
-    return !rejectUncategorized;
-  }
-  return categories.some((category) => allowedCategories.includes(category));
 }
 
 export function isBundledSkillAllowed(entry: SkillEntry, allowlist?: string[]): boolean {
@@ -125,9 +82,6 @@ export function shouldIncludeSkill(params: {
     return false;
   }
   if (!isBundledSkillAllowed(entry, allowBundled)) {
-    return false;
-  }
-  if (!isSkillAllowedByCategoryPolicy({ entry, config })) {
     return false;
   }
   return evaluateRuntimeEligibility({

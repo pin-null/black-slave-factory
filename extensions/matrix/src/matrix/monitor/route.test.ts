@@ -1,9 +1,11 @@
-import { setActiveTestPluginRegistry, type OpenClawConfig } from "openclaw/plugin-sdk/testing";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import type { OpenClawConfig } from "../../../../../src/config/config.js";
 import {
   __testing as sessionBindingTesting,
   registerSessionBindingAdapter,
 } from "../../../../../src/infra/outbound/session-binding-service.js";
+import { createEmptyPluginRegistry } from "../../../../../src/plugins/registry.js";
+import { setActivePluginRegistry } from "../../../../../src/plugins/runtime.js";
 import { resolveAgentRoute } from "../../../../../src/routing/resolve-route.js";
 import { matrixPlugin } from "../../channel.js";
 import { resolveMatrixInboundRoute } from "./route.js";
@@ -30,7 +32,15 @@ function resolveDmRoute(cfg: OpenClawConfig) {
 describe("resolveMatrixInboundRoute", () => {
   beforeEach(() => {
     sessionBindingTesting.resetSessionBindingAdaptersForTests();
-    setActiveTestPluginRegistry([{ pluginId: "matrix", source: "test", plugin: matrixPlugin }]);
+    const registry = createEmptyPluginRegistry();
+    registry.channels.push({ pluginId: "matrix", source: "test", plugin: matrixPlugin });
+    registry.channelSetups.push({
+      pluginId: "matrix",
+      source: "test",
+      plugin: matrixPlugin,
+      enabled: true,
+    });
+    setActivePluginRegistry(registry);
   });
 
   it("prefers sender-bound DM routing over DM room fallback bindings", () => {

@@ -303,7 +303,7 @@ export async function monitorIMessageProvider(opts: MonitorIMessageOpts = {}): P
           }),
       })({
         senderId: decision.senderId,
-        senderIdLine: `Your iMessage (Legacy) sender id: ${decision.senderId}`,
+        senderIdLine: `Your iMessage sender id: ${decision.senderId}`,
         meta: {
           sender: decision.senderId,
           chatId: chatId ? String(chatId) : undefined,
@@ -481,7 +481,7 @@ export async function monitorIMessageProvider(opts: MonitorIMessageOpts = {}): P
         return { ok: true };
       }
       if (probe.fatal) {
-        throw new Error(probe.error ?? "legacy imsg rpc unavailable");
+        throw new Error(probe.error ?? "imsg rpc unavailable");
       }
       return { ok: false, error: probe.error ?? "unreachable" };
     },

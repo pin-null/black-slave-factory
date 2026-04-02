@@ -12,6 +12,7 @@ type MemoryIndexModule = typeof import("./index.js");
 const embedBatch = vi.fn(async (_texts: string[]) => [] as number[][]);
 const embedQuery = vi.fn(async () => [0.5, 0.5, 0.5]);
 let getMemorySearchManager: MemoryIndexModule["getMemorySearchManager"];
+let mockPublicPinnedHostname: typeof import("./test-helpers/ssrf.js").mockPublicPinnedHostname;
 
 describe("memory indexing with OpenAI batches", () => {
   let fixtureRoot: string;
@@ -112,21 +113,6 @@ describe("memory indexing with OpenAI batches", () => {
 
   beforeAll(async () => {
     vi.resetModules();
-    vi.doMock("../infra/net/ssrf.js", async (importOriginal) => {
-      const actual = await importOriginal<typeof import("../infra/net/ssrf.js")>();
-      return {
-        ...actual,
-        resolvePinnedHostnameWithPolicy: vi.fn(async (hostname: string) => {
-          const normalized = hostname.trim().toLowerCase().replace(/\.$/, "");
-          const addresses = ["93.184.216.34"];
-          return {
-            hostname: normalized,
-            addresses,
-            lookup: actual.createPinnedLookup({ hostname: normalized, addresses }),
-          };
-        }),
-      };
-    });
     vi.doMock("./embeddings.js", () => ({
       createEmbeddingProvider: async () =>
         createOpenAIEmbeddingProviderMock({
@@ -134,6 +120,7 @@ describe("memory indexing with OpenAI batches", () => {
           embedBatch,
         }),
     }));
+    ({ mockPublicPinnedHostname } = await import("./test-helpers/ssrf.js"));
     await import("./test-runtime-mocks.js");
     ({ getMemorySearchManager } = await import("./index.js"));
 
@@ -194,6 +181,7 @@ describe("memory indexing with OpenAI batches", () => {
     const { fetchMock } = createOpenAIBatchFetchMock();
 
     vi.stubGlobal("fetch", fetchMock);
+    mockPublicPinnedHostname();
 
     try {
       if (!manager) {
@@ -236,6 +224,7 @@ describe("memory indexing with OpenAI batches", () => {
     });
 
     vi.stubGlobal("fetch", fetchMock);
+    mockPublicPinnedHostname();
 
     try {
       if (!manager) {
@@ -275,6 +264,7 @@ describe("memory indexing with OpenAI batches", () => {
     });
 
     vi.stubGlobal("fetch", fetchMock);
+    mockPublicPinnedHostname();
 
     try {
       if (!manager) {

@@ -1,7 +1,7 @@
 {
   "$schema": "https://mintlify.com/docs.json",
   "name": "OpenClaw",
-  "description": "Self-hosted gateway with an internal WebChat surface for AI agents. Run a single Gateway process on your own machine and chat with your assistant through the built-in web UI.",
+  "description": "Self-hosted gateway that connects WhatsApp, Telegram, Discord, iMessage, and more to AI coding agents. Run a single Gateway process on your own machine and message your AI assistant from anywhere.",
   "theme": "mint",
   "icons": {
     "library": "lucide"
@@ -117,11 +117,11 @@
     },
     {
       "source": "/mattermost",
-      "destination": "/channels"
+      "destination": "/channels/mattermost"
     },
     {
       "source": "/line",
-      "destination": "/channels"
+      "destination": "/channels/line"
     },
     {
       "source": "/glm",
@@ -137,163 +137,59 @@
     },
     {
       "source": "/providers/discord",
-      "destination": "/channels"
+      "destination": "/channels/discord"
+    },
+    {
+      "source": "/providers/googlechat",
+      "destination": "/channels/googlechat"
     },
     {
       "source": "/providers/grammy",
-      "destination": "/channels"
+      "destination": "/channels/telegram"
     },
     {
       "source": "/providers/imessage",
-      "destination": "/gateway/configuration-reference#imessage"
+      "destination": "/channels/imessage"
     },
     {
       "source": "/providers/location",
-      "destination": "/channels"
+      "destination": "/channels/location"
     },
     {
       "source": "/providers/mattermost",
-      "destination": "/channels"
+      "destination": "/channels/mattermost"
     },
     {
       "source": "/providers/msteams",
-      "destination": "/channels"
+      "destination": "/channels/msteams"
     },
     {
       "source": "/providers/line",
-      "destination": "/channels"
+      "destination": "/channels/line"
     },
     {
       "source": "/providers/signal",
-      "destination": "/channels"
+      "destination": "/channels/signal"
     },
     {
       "source": "/providers/slack",
-      "destination": "/channels"
+      "destination": "/channels/slack"
     },
     {
       "source": "/providers/telegram",
-      "destination": "/channels"
+      "destination": "/channels/telegram"
     },
     {
       "source": "/providers/troubleshooting",
-      "destination": "/channels"
+      "destination": "/channels/troubleshooting"
     },
     {
       "source": "/providers/zalo",
-      "destination": "/channels"
+      "destination": "/channels/zalo"
     },
     {
       "source": "/providers/whatsapp",
-      "destination": "/channels"
-    },
-    {
-      "source": "/channels/bluebubbles",
-      "destination": "/gateway/configuration-reference#bluebubbles"
-    },
-    {
-      "source": "/channels/broadcast-groups",
-      "destination": "/channels"
-    },
-    {
-      "source": "/channels/channel-routing",
-      "destination": "/channels"
-    },
-    {
-      "source": "/channels/discord",
-      "destination": "/channels"
-    },
-    {
-      "source": "/channels/feishu",
-      "destination": "/channels"
-    },
-    {
-      "source": "/channels/group-messages",
-      "destination": "/channels"
-    },
-    {
-      "source": "/channels/groups",
-      "destination": "/channels"
-    },
-    {
-      "source": "/channels/imessage",
-      "destination": "/gateway/configuration-reference#imessage"
-    },
-    {
-      "source": "/channels/irc",
-      "destination": "/channels"
-    },
-    {
-      "source": "/channels/line",
-      "destination": "/channels"
-    },
-    {
-      "source": "/channels/location",
-      "destination": "/channels"
-    },
-    {
-      "source": "/channels/matrix",
-      "destination": "/channels"
-    },
-    {
-      "source": "/channels/mattermost",
-      "destination": "/channels"
-    },
-    {
-      "source": "/channels/msteams",
-      "destination": "/channels"
-    },
-    {
-      "source": "/channels/nextcloud-talk",
-      "destination": "/channels"
-    },
-    {
-      "source": "/channels/nostr",
-      "destination": "/channels"
-    },
-    {
-      "source": "/channels/pairing",
-      "destination": "/channels"
-    },
-    {
-      "source": "/channels/signal",
-      "destination": "/channels"
-    },
-    {
-      "source": "/channels/slack",
-      "destination": "/channels"
-    },
-    {
-      "source": "/channels/synology-chat",
-      "destination": "/channels"
-    },
-    {
-      "source": "/channels/telegram",
-      "destination": "/channels"
-    },
-    {
-      "source": "/channels/tlon",
-      "destination": "/channels"
-    },
-    {
-      "source": "/channels/troubleshooting",
-      "destination": "/channels"
-    },
-    {
-      "source": "/channels/twitch",
-      "destination": "/channels"
-    },
-    {
-      "source": "/channels/whatsapp",
-      "destination": "/channels"
-    },
-    {
-      "source": "/channels/zalo",
-      "destination": "/channels"
-    },
-    {
-      "source": "/channels/zalouser",
-      "destination": "/channels"
+      "destination": "/channels/whatsapp"
     },
     {
       "source": "/sandbox",
@@ -389,7 +285,7 @@
     },
     {
       "source": "/start/pairing",
-      "destination": "/gateway/pairing"
+      "destination": "/channels/pairing"
     },
     {
       "source": "/clawhub",
@@ -429,7 +325,7 @@
     },
     {
       "source": "/discord",
-      "destination": "/channels"
+      "destination": "/channels/discord"
     },
     {
       "source": "/discovery",
@@ -477,19 +373,19 @@
     },
     {
       "source": "/grammy",
-      "destination": "/channels"
+      "destination": "/channels/telegram"
     },
     {
       "source": "/channels/grammy",
-      "destination": "/channels"
+      "destination": "/channels/telegram"
     },
     {
       "source": "/group-messages",
-      "destination": "/channels"
+      "destination": "/channels/group-messages"
     },
     {
       "source": "/groups",
-      "destination": "/channels"
+      "destination": "/channels/groups"
     },
     {
       "source": "/health",
@@ -509,7 +405,7 @@
     },
     {
       "source": "/imessage",
-      "destination": "/gateway/configuration-reference#imessage"
+      "destination": "/channels/imessage"
     },
     {
       "source": "/ios",
@@ -521,7 +417,7 @@
     },
     {
       "source": "/location",
-      "destination": "/channels"
+      "destination": "/channels/location"
     },
     {
       "source": "/location-command",
@@ -533,47 +429,47 @@
     },
     {
       "source": "/mac/bun",
-      "destination": "/platforms/windows"
+      "destination": "/platforms/mac/bundled-gateway"
     },
     {
       "source": "/platforms/mac/bun",
-      "destination": "/platforms/windows"
+      "destination": "/platforms/mac/bundled-gateway"
     },
     {
       "source": "/mac/canvas",
-      "destination": "/platforms/windows"
+      "destination": "/platforms/mac/canvas"
     },
     {
       "source": "/mac/child-process",
-      "destination": "/platforms/windows"
+      "destination": "/platforms/mac/child-process"
     },
     {
       "source": "/mac/dev-setup",
-      "destination": "/platforms/windows"
+      "destination": "/platforms/mac/dev-setup"
     },
     {
       "source": "/mac/health",
-      "destination": "/platforms/windows"
+      "destination": "/platforms/mac/health"
     },
     {
       "source": "/mac/icon",
-      "destination": "/platforms/windows"
+      "destination": "/platforms/mac/icon"
     },
     {
       "source": "/mac/logging",
-      "destination": "/platforms/windows"
+      "destination": "/platforms/mac/logging"
     },
     {
       "source": "/mac/menu-bar",
-      "destination": "/platforms/windows"
+      "destination": "/platforms/mac/menu-bar"
     },
     {
       "source": "/mac/peekaboo",
-      "destination": "/platforms/windows"
+      "destination": "/platforms/mac/peekaboo"
     },
     {
       "source": "/mac/permissions",
-      "destination": "/platforms/windows"
+      "destination": "/platforms/mac/permissions"
     },
     {
       "source": "/mac/release",
@@ -581,107 +477,35 @@
     },
     {
       "source": "/mac/remote",
-      "destination": "/platforms/windows"
+      "destination": "/platforms/mac/remote"
     },
     {
       "source": "/mac/signing",
-      "destination": "/platforms/windows"
+      "destination": "/platforms/mac/signing"
     },
     {
       "source": "/mac/skills",
-      "destination": "/platforms/windows"
+      "destination": "/platforms/mac/skills"
     },
     {
       "source": "/mac/voice-overlay",
-      "destination": "/platforms/windows"
+      "destination": "/platforms/mac/voice-overlay"
     },
     {
       "source": "/mac/voicewake",
-      "destination": "/platforms/windows"
+      "destination": "/platforms/mac/voicewake"
     },
     {
       "source": "/mac/webchat",
-      "destination": "/web/webchat"
+      "destination": "/platforms/mac/webchat"
     },
     {
       "source": "/mac/xpc",
-      "destination": "/platforms/windows"
+      "destination": "/platforms/mac/xpc"
     },
     {
       "source": "/macos",
-      "destination": "/platforms/windows"
-    },
-    {
-      "source": "/platforms/macos",
-      "destination": "/platforms/windows"
-    },
-    {
-      "source": "/platforms/mac/bundled-gateway",
-      "destination": "/platforms/windows"
-    },
-    {
-      "source": "/platforms/mac/canvas",
-      "destination": "/platforms/windows"
-    },
-    {
-      "source": "/platforms/mac/child-process",
-      "destination": "/platforms/windows"
-    },
-    {
-      "source": "/platforms/mac/dev-setup",
-      "destination": "/platforms/windows"
-    },
-    {
-      "source": "/platforms/mac/health",
-      "destination": "/platforms/windows"
-    },
-    {
-      "source": "/platforms/mac/icon",
-      "destination": "/platforms/windows"
-    },
-    {
-      "source": "/platforms/mac/logging",
-      "destination": "/platforms/windows"
-    },
-    {
-      "source": "/platforms/mac/menu-bar",
-      "destination": "/platforms/windows"
-    },
-    {
-      "source": "/platforms/mac/peekaboo",
-      "destination": "/platforms/windows"
-    },
-    {
-      "source": "/platforms/mac/permissions",
-      "destination": "/platforms/windows"
-    },
-    {
-      "source": "/platforms/mac/remote",
-      "destination": "/platforms/windows"
-    },
-    {
-      "source": "/platforms/mac/signing",
-      "destination": "/platforms/windows"
-    },
-    {
-      "source": "/platforms/mac/skills",
-      "destination": "/platforms/windows"
-    },
-    {
-      "source": "/platforms/mac/voice-overlay",
-      "destination": "/platforms/windows"
-    },
-    {
-      "source": "/platforms/mac/voicewake",
-      "destination": "/platforms/windows"
-    },
-    {
-      "source": "/platforms/mac/webchat",
-      "destination": "/web/webchat"
-    },
-    {
-      "source": "/platforms/mac/xpc",
-      "destination": "/platforms/windows"
+      "destination": "/platforms/macos"
     },
     {
       "source": "/model-failover",
@@ -713,7 +537,7 @@
     },
     {
       "source": "/pairing",
-      "destination": "/gateway/pairing"
+      "destination": "/channels/pairing"
     },
     {
       "source": "/experiments/plans/cron-add-hardening",
@@ -721,7 +545,7 @@
     },
     {
       "source": "/experiments/plans/group-policy-hardening",
-      "destination": "/channels"
+      "destination": "/channels/groups"
     },
     {
       "source": "/poll",
@@ -733,11 +557,11 @@
     },
     {
       "source": "/provider-routing",
-      "destination": "/channels"
+      "destination": "/channels/channel-routing"
     },
     {
       "source": "/concepts/provider-routing",
-      "destination": "/channels"
+      "destination": "/channels/channel-routing"
     },
     {
       "source": "/queue",
@@ -781,7 +605,7 @@
     },
     {
       "source": "/signal",
-      "destination": "/channels"
+      "destination": "/channels/signal"
     },
     {
       "source": "/skills",
@@ -793,7 +617,7 @@
     },
     {
       "source": "/slack",
-      "destination": "/channels"
+      "destination": "/channels/slack"
     },
     {
       "source": "/slash-commands",
@@ -813,7 +637,7 @@
     },
     {
       "source": "/telegram",
-      "destination": "/channels"
+      "destination": "/channels/telegram"
     },
     {
       "source": "/templates/AGENTS",
@@ -889,7 +713,7 @@
     },
     {
       "source": "/whatsapp",
-      "destination": "/channels"
+      "destination": "/channels/whatsapp"
     },
     {
       "source": "/windows",
@@ -1067,6 +891,44 @@
               {
                 "group": "Overview",
                 "pages": ["channels/index"]
+              },
+              {
+                "group": "Messaging platforms",
+                "pages": [
+                  "channels/bluebubbles",
+                  "channels/discord",
+                  "channels/feishu",
+                  "channels/googlechat",
+                  "channels/imessage",
+                  "channels/irc",
+                  "channels/line",
+                  "channels/matrix",
+                  "channels/mattermost",
+                  "channels/msteams",
+                  "channels/nextcloud-talk",
+                  "channels/nostr",
+                  "channels/signal",
+                  "channels/synology-chat",
+                  "channels/slack",
+                  "channels/telegram",
+                  "channels/tlon",
+                  "channels/twitch",
+                  "channels/whatsapp",
+                  "channels/zalo",
+                  "channels/zalouser"
+                ]
+              },
+              {
+                "group": "Configuration",
+                "pages": [
+                  "channels/pairing",
+                  "channels/group-messages",
+                  "channels/groups",
+                  "channels/broadcast-groups",
+                  "channels/channel-routing",
+                  "channels/location",
+                  "channels/troubleshooting"
+                ]
               }
             ]
           },
@@ -1280,6 +1142,7 @@
                 "group": "Platforms overview",
                 "pages": [
                   "platforms/index",
+                  "platforms/macos",
                   "platforms/linux",
                   "platforms/windows",
                   "platforms/android",
@@ -1287,6 +1150,28 @@
                   "platforms/digitalocean",
                   "platforms/oracle",
                   "platforms/raspberry-pi"
+                ]
+              },
+              {
+                "group": "macOS companion app",
+                "pages": [
+                  "platforms/mac/dev-setup",
+                  "platforms/mac/menu-bar",
+                  "platforms/mac/voicewake",
+                  "platforms/mac/voice-overlay",
+                  "platforms/mac/webchat",
+                  "platforms/mac/canvas",
+                  "platforms/mac/child-process",
+                  "platforms/mac/health",
+                  "platforms/mac/icon",
+                  "platforms/mac/logging",
+                  "platforms/mac/permissions",
+                  "platforms/mac/remote",
+                  "platforms/mac/signing",
+                  "platforms/mac/bundled-gateway",
+                  "platforms/mac/xpc",
+                  "platforms/mac/skills",
+                  "platforms/mac/peekaboo"
                 ]
               }
             ]
@@ -1601,6 +1486,43 @@
               {
                 "group": "概览",
                 "pages": ["zh-CN/channels/index"]
+              },
+              {
+                "group": "消息平台",
+                "pages": [
+                  "zh-CN/channels/bluebubbles",
+                  "zh-CN/channels/discord",
+                  "zh-CN/channels/feishu",
+                  "zh-CN/channels/grammy",
+                  "zh-CN/channels/googlechat",
+                  "zh-CN/channels/imessage",
+                  "zh-CN/channels/line",
+                  "zh-CN/channels/matrix",
+                  "zh-CN/channels/mattermost",
+                  "zh-CN/channels/msteams",
+                  "zh-CN/channels/nextcloud-talk",
+                  "zh-CN/channels/nostr",
+                  "zh-CN/channels/signal",
+                  "zh-CN/channels/slack",
+                  "zh-CN/channels/telegram",
+                  "zh-CN/channels/tlon",
+                  "zh-CN/channels/twitch",
+                  "zh-CN/channels/whatsapp",
+                  "zh-CN/channels/zalo",
+                  "zh-CN/channels/zalouser"
+                ]
+              },
+              {
+                "group": "配置",
+                "pages": [
+                  "zh-CN/channels/pairing",
+                  "zh-CN/channels/group-messages",
+                  "zh-CN/channels/groups",
+                  "zh-CN/channels/broadcast-groups",
+                  "zh-CN/channels/channel-routing",
+                  "zh-CN/channels/location",
+                  "zh-CN/channels/troubleshooting"
+                ]
               }
             ]
           },
@@ -1789,6 +1711,7 @@
                 "group": "平台概览",
                 "pages": [
                   "zh-CN/platforms/index",
+                  "zh-CN/platforms/macos",
                   "zh-CN/platforms/linux",
                   "zh-CN/platforms/windows",
                   "zh-CN/platforms/android",
@@ -1796,6 +1719,28 @@
                   "zh-CN/platforms/digitalocean",
                   "zh-CN/platforms/oracle",
                   "zh-CN/platforms/raspberry-pi"
+                ]
+              },
+              {
+                "group": "macOS 配套应用",
+                "pages": [
+                  "zh-CN/platforms/mac/dev-setup",
+                  "zh-CN/platforms/mac/menu-bar",
+                  "zh-CN/platforms/mac/voicewake",
+                  "zh-CN/platforms/mac/voice-overlay",
+                  "zh-CN/platforms/mac/webchat",
+                  "zh-CN/platforms/mac/canvas",
+                  "zh-CN/platforms/mac/child-process",
+                  "zh-CN/platforms/mac/health",
+                  "zh-CN/platforms/mac/icon",
+                  "zh-CN/platforms/mac/logging",
+                  "zh-CN/platforms/mac/permissions",
+                  "zh-CN/platforms/mac/remote",
+                  "zh-CN/platforms/mac/signing",
+                  "zh-CN/platforms/mac/bundled-gateway",
+                  "zh-CN/platforms/mac/xpc",
+                  "zh-CN/platforms/mac/skills",
+                  "zh-CN/platforms/mac/peekaboo"
                 ]
               }
             ]

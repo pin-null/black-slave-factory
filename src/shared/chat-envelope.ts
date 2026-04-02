@@ -6,14 +6,13 @@ const ENVELOPE_CHANNELS = [
   "Signal",
   "Slack",
   "Discord",
+  "Google Chat",
   "iMessage",
-  "iMessage (Legacy)",
   "Teams",
   "Matrix",
   "Zalo",
   "Zalo Personal",
   "BlueBubbles",
-  "BlueBubbles (Legacy)",
 ];
 
 const MESSAGE_ID_LINE = /^\s*\[message_id:\s*[^\]]+\]\s*$/i;

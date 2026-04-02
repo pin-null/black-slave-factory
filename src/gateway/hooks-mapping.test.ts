@@ -144,6 +144,24 @@ describe("hooks mapping", () => {
     }
   });
 
+  it("passes permission tier from mapping", async () => {
+    const result = await applyGmailMappings({
+      mappings: [
+        {
+          ...createGmailAgentMapping({
+            id: "permission-tier",
+            messageTemplate: "Subject: {{messages[0].subject}}",
+          }),
+          permissionTier: "readonly",
+        },
+      ],
+    });
+    expect(result?.ok).toBe(true);
+    if (result?.ok && result.action?.kind === "agent") {
+      expect(result.action.permissionTier).toBe("readonly");
+    }
+  });
+
   it("runs transform module", async () => {
     const configDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-config-"));
     const transformsRoot = path.join(configDir, "hooks", "transforms");
@@ -469,6 +487,80 @@ describe("hooks mapping", () => {
     expect(resultB?.ok).toBe(true);
     if (resultB?.ok && resultB.action?.kind === "wake") {
       expect(resultB.action.text).toBe("from-B");
+    }
+  });
+
+  it("lets transforms tighten the mapping permission tier", async () => {
+    const configDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-hooks-tier-tighten-"));
+    const transformsRoot = path.join(configDir, "hooks", "transforms");
+    fs.mkdirSync(transformsRoot, { recursive: true });
+    fs.writeFileSync(
+      path.join(transformsRoot, "tighten-tier.mjs"),
+      'export default () => ({ permissionTier: "readonly" });',
+    );
+
+    const mappings = resolveHookMappings(
+      {
+        mappings: [
+          {
+            match: { path: "tier-tighten" },
+            action: "agent",
+            messageTemplate: "tier",
+            permissionTier: "dangerous",
+            transform: { module: "tighten-tier.mjs" },
+          },
+        ],
+      },
+      { configDir },
+    );
+
+    const result = await applyHookMappings(mappings, {
+      payload: {},
+      headers: {},
+      url: new URL("http://127.0.0.1:18789/hooks/tier-tighten"),
+      path: "tier-tighten",
+    });
+
+    expect(result?.ok).toBe(true);
+    if (result?.ok && result.action?.kind === "agent") {
+      expect(result.action.permissionTier).toBe("readonly");
+    }
+  });
+
+  it("does not let transforms elevate the mapping permission tier", async () => {
+    const configDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-hooks-tier-"));
+    const transformsRoot = path.join(configDir, "hooks", "transforms");
+    fs.mkdirSync(transformsRoot, { recursive: true });
+    fs.writeFileSync(
+      path.join(transformsRoot, "override-tier.mjs"),
+      'export default () => ({ permissionTier: "dangerous" });',
+    );
+
+    const mappings = resolveHookMappings(
+      {
+        mappings: [
+          {
+            match: { path: "tier" },
+            action: "agent",
+            messageTemplate: "tier",
+            permissionTier: "readonly",
+            transform: { module: "override-tier.mjs" },
+          },
+        ],
+      },
+      { configDir },
+    );
+
+    const result = await applyHookMappings(mappings, {
+      payload: {},
+      headers: {},
+      url: new URL("http://127.0.0.1:18789/hooks/tier"),
+      path: "tier",
+    });
+
+    expect(result?.ok).toBe(true);
+    if (result?.ok && result.action?.kind === "agent") {
+      expect(result.action.permissionTier).toBe("readonly");
     }
   });
 

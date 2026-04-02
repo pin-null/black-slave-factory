@@ -1,7 +1,7 @@
 import { codingTools, createReadTool, readTool } from "@mariozechner/pi-coding-agent";
 import type { OpenClawConfig } from "../config/config.js";
 import type { ModelCompatConfig } from "../config/types.models.js";
-import type { ToolLoopDetectionConfig } from "../config/types.tools.js";
+import type { PermissionTier, ToolLoopDetectionConfig } from "../config/types.tools.js";
 import { resolveMergedSafeBinProfileFixtures } from "../infra/exec-safe-bin-runtime-policy.js";
 import { logWarn } from "../logger.js";
 import { getPluginToolMeta } from "../plugins/tools.js";
@@ -24,6 +24,7 @@ import { wrapToolWithAbortSignal } from "./pi-tools.abort.js";
 import { wrapToolWithBeforeToolCallHook } from "./pi-tools.before-tool-call.js";
 import {
   isToolAllowedByPolicies,
+  resolveEffectivePermissionTier,
   resolveEffectiveToolPolicy,
   resolveGroupToolPolicy,
   resolveSubagentToolPolicyForSession,
@@ -47,6 +48,7 @@ import { cleanToolSchemaForGemini, normalizeToolParameters } from "./pi-tools.sc
 import type { AnyAgentTool } from "./pi-tools.types.js";
 import type { SandboxContext } from "./sandbox.js";
 import { createToolFsPolicy, resolveToolFsConfig } from "./tool-fs-policy.js";
+import { filterToolsByPermissionTier } from "./tool-permission-tier.js";
 import {
   applyToolPolicyPipeline,
   buildDefaultToolPolicyPipelineSteps,
@@ -205,6 +207,7 @@ export function createOpenClawCodingTools(options?: {
   messageThreadId?: string | number;
   sandbox?: SandboxContext | null;
   sessionKey?: string;
+  sessionPermissionTier?: PermissionTier;
   /** Ephemeral session UUID — regenerated on /new and /reset. */
   sessionId?: string;
   /** Stable run identifier for this agent invocation. */
@@ -272,8 +275,6 @@ export function createOpenClawCodingTools(options?: {
   disableMessageTool?: boolean;
   /** Whether the sender is an owner (required for owner-only tools). */
   senderIsOwner?: boolean;
-  /** Latest inbound request text for security-firewall matching/audit. */
-  requestText?: string;
   /** Callback invoked when sessions_yield tool is called. */
   onYield?: (message: string) => Promise<void> | void;
 }): AnyAgentTool[] {
@@ -577,8 +578,25 @@ export function createOpenClawCodingTools(options?: {
   // Security: treat unknown/undefined as unauthorized (opt-in, not opt-out)
   const senderIsOwner = options?.senderIsOwner === true;
   const toolsByAuthorization = applyOwnerOnlyToolPolicy(toolsForModelProvider, senderIsOwner);
-  const subagentFiltered = applyToolPolicyPipeline({
+  const effectivePermissionTier = resolveEffectivePermissionTier({
+    globalPolicy,
+    globalProviderPolicy,
+    agentPolicy,
+    agentProviderPolicy,
+    sessionPolicy: options?.sessionPermissionTier
+      ? { permissionTier: options.sessionPermissionTier }
+      : undefined,
+    groupPolicy,
+    sandboxPolicy: sandbox?.tools,
+    subagentPolicy,
+  });
+  const toolsByPermissionTier = filterToolsByPermissionTier({
     tools: toolsByAuthorization,
+    allowedTier: effectivePermissionTier,
+    toolMeta: (tool) => getPluginToolMeta(tool),
+  });
+  const subagentFiltered = applyToolPolicyPipeline({
+    tools: toolsByPermissionTier,
     toolMeta: (tool) => getPluginToolMeta(tool),
     warn: logWarn,
     steps: [
@@ -610,19 +628,12 @@ export function createOpenClawCodingTools(options?: {
   );
   const withHooks = normalized.map((tool) =>
     wrapToolWithBeforeToolCallHook(tool, {
-      config: options?.config,
       agentId,
       sessionKey: options?.sessionKey,
       sessionId: options?.sessionId,
       runId: options?.runId,
-      senderId: options?.senderId,
-      senderName: options?.senderName,
-      senderUsername: options?.senderUsername,
-      senderE164: options?.senderE164,
-      senderIsOwner: options?.senderIsOwner,
-      workspaceDir: options?.workspaceDir,
-      requestText: options?.requestText,
       loopDetection: resolveToolLoopDetectionConfig({ cfg: options?.config, agentId }),
+      permissionTier: effectivePermissionTier,
     }),
   );
   const withAbort = options?.abortSignal

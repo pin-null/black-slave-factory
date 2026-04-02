@@ -80,18 +80,18 @@ export async function promptIMessageAllowFrom(params: {
     accountId: params.accountId,
     defaultAccountId: resolveDefaultIMessageAccountId(params.cfg),
     prompter: params.prompter,
-    noteTitle: "iMessage legacy allowlist",
+    noteTitle: "iMessage allowlist",
     noteLines: [
-      "Allowlist legacy iMessage DMs by handle or chat target.",
+      "Allowlist iMessage DMs by handle or chat target.",
       "Examples:",
       "- +15555550123",
       "- user@example.com",
       "- chat_id:123",
       "- chat_guid:... or chat_identifier:...",
       "Multiple entries: comma-separated.",
-      `Docs: ${formatDocsLink("/gateway/configuration-reference#imessage", "imessage")}`,
+      `Docs: ${formatDocsLink("/imessage", "imessage")}`,
     ],
-    message: "iMessage legacy allowFrom (handle or chat_id)",
+    message: "iMessage allowFrom (handle or chat_id)",
     placeholder: "+15555550123, user@example.com, chat_id:123",
     parseEntries: parseIMessageAllowFromEntries,
     getExistingAllowFrom: ({ cfg, accountId }) =>
@@ -107,7 +107,7 @@ export async function promptIMessageAllowFrom(params: {
 }
 
 export const imessageDmPolicy: ChannelSetupDmPolicy = {
-  label: "iMessage (Legacy)",
+  label: "iMessage",
   channel,
   policyKey: "channels.imessage.dmPolicy",
   allowFromKey: "channels.imessage.allowFrom",
@@ -133,19 +133,19 @@ export function createIMessageCliPathTextInput(
     message: "imsg CLI path",
     resolvePath: ({ cfg, accountId }) => resolveIMessageCliPath({ cfg, accountId }),
     shouldPrompt,
-    helpTitle: "iMessage (Legacy)",
-    helpLines: ["imsg CLI path required to enable legacy iMessage compatibility."],
+    helpTitle: "iMessage",
+    helpLines: ["imsg CLI path required to enable iMessage."],
   });
 }
 
 export const imessageCompletionNote = {
-  title: "iMessage legacy next steps",
+  title: "iMessage next steps",
   lines: [
-    "This legacy compatibility path is still a work in progress.",
-    "Ensure OpenClaw has Full Disk Access to the Messages database.",
+    "This is still a work in progress.",
+    "Ensure OpenClaw has Full Disk Access to Messages DB.",
     "Grant Automation permission for Messages when prompted.",
     "List chats with: imsg chats --limit 20",
-    `Docs: ${formatDocsLink("/gateway/configuration-reference#imessage", "imessage")}`,
+    `Docs: ${formatDocsLink("/imessage", "imessage")}`,
   ],
 };
 
@@ -157,8 +157,8 @@ export const imessageSetupAdapter: ChannelSetupAdapter = createPatchedAccountSet
 export const imessageSetupStatusBase = {
   configuredLabel: "configured",
   unconfiguredLabel: "needs setup",
-  configuredHint: "legacy imsg found",
-  unconfiguredHint: "legacy imsg missing",
+  configuredHint: "imsg found",
+  unconfiguredHint: "imsg missing",
   configuredScore: 1,
   unconfiguredScore: 0,
   resolveConfigured: ({ cfg }: { cfg: OpenClawConfig }) =>

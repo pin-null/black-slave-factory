@@ -116,7 +116,7 @@ const createStubPluginRegistry = (): PluginRegistry => ({
     {
       pluginId: "imessage",
       source: "test",
-      plugin: createStubChannelPlugin({ id: "imessage", label: "iMessage (Legacy)" }),
+      plugin: createStubChannelPlugin({ id: "imessage", label: "iMessage" }),
     },
     {
       pluginId: "msteams",
@@ -141,7 +141,7 @@ const createStubPluginRegistry = (): PluginRegistry => ({
     {
       pluginId: "bluebubbles",
       source: "test",
-      plugin: createStubChannelPlugin({ id: "bluebubbles", label: "BlueBubbles (Legacy)" }),
+      plugin: createStubChannelPlugin({ id: "bluebubbles", label: "BlueBubbles" }),
     },
   ],
   channelSetups: [],

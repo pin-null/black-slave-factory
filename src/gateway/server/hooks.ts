@@ -65,6 +65,7 @@ export function createGatewayHooksRequestHandler(params: {
         model: value.model,
         thinking: value.thinking,
         timeoutSeconds: value.timeoutSeconds,
+        permissionTier: value.permissionTier,
         deliver: value.deliver,
         channel: value.channel,
         to: value.to,

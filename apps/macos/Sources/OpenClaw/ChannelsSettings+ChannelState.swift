@@ -124,6 +124,16 @@ extension ChannelsSettings {
             probeOk: status.probe?.ok)
     }
 
+    var googlechatTint: Color {
+        guard let status = self.channelStatus("googlechat", as: ChannelsStatusSnapshot.GoogleChatStatus.self)
+        else { return .secondary }
+        return self.configuredChannelTint(
+            configured: status.configured,
+            running: status.running,
+            hasError: status.lastError != nil,
+            probeOk: status.probe?.ok)
+    }
+
     var signalTint: Color {
         guard let status = self.channelStatus("signal", as: ChannelsStatusSnapshot.SignalStatus.self)
         else { return .secondary }
@@ -161,6 +171,12 @@ extension ChannelsSettings {
 
     var discordSummary: String {
         guard let status = self.channelStatus("discord", as: ChannelsStatusSnapshot.DiscordStatus.self)
+        else { return "Checking…" }
+        return self.configuredChannelSummary(configured: status.configured, running: status.running)
+    }
+
+    var googlechatSummary: String {
+        guard let status = self.channelStatus("googlechat", as: ChannelsStatusSnapshot.GoogleChatStatus.self)
         else { return "Checking…" }
         return self.configuredChannelSummary(configured: status.configured, running: status.running)
     }
@@ -257,6 +273,28 @@ extension ChannelsSettings {
             lastError: status.lastError)
     }
 
+    var googlechatDetails: String? {
+        guard let status = self.channelStatus("googlechat", as: ChannelsStatusSnapshot.GoogleChatStatus.self)
+        else { return nil }
+        var lines: [String] = []
+        if let source = status.credentialSource {
+            lines.append("Credential: \(source)")
+        }
+        if let audienceType = status.audienceType {
+            let audience = status.audience ?? ""
+            let label = audience.isEmpty ? audienceType : "\(audienceType) \(audience)"
+            lines.append("Audience: \(label)")
+        }
+        return self.finishProbeDetails(
+            lines: &lines,
+            probe: (
+                ok: status.probe?.ok,
+                status: status.probe?.status,
+                elapsedMs: status.probe?.elapsedMs),
+            lastProbeAtMs: status.lastProbeAt,
+            lastError: status.lastError)
+    }
+
     var signalDetails: String? {
         guard let status = self.channelStatus("signal", as: ChannelsStatusSnapshot.SignalStatus.self)
         else { return nil }
@@ -293,7 +331,7 @@ extension ChannelsSettings {
     }
 
     var orderedChannels: [ChannelItem] {
-        let fallback: [String] = []
+        let fallback = ["whatsapp", "telegram", "discord", "googlechat", "slack", "signal", "imessage"]
         let order = self.store.snapshot?.channelOrder ?? fallback
         let channels = order.enumerated().map { index, id in
             ChannelItem(
@@ -356,6 +394,8 @@ extension ChannelsSettings {
             return self.telegramTint
         case "discord":
             return self.discordTint
+        case "googlechat":
+            return self.googlechatTint
         case "signal":
             return self.signalTint
         case "imessage":
@@ -375,6 +415,8 @@ extension ChannelsSettings {
             return self.telegramSummary
         case "discord":
             return self.discordSummary
+        case "googlechat":
+            return self.googlechatSummary
         case "signal":
             return self.signalSummary
         case "imessage":
@@ -394,6 +436,8 @@ extension ChannelsSettings {
             return self.telegramDetails
         case "discord":
             return self.discordDetails
+        case "googlechat":
+            return self.googlechatDetails
         case "signal":
             return self.signalDetails
         case "imessage":
@@ -425,6 +469,10 @@ extension ChannelsSettings {
         case "discord":
             return self
                 .date(fromMs: self.channelStatus("discord", as: ChannelsStatusSnapshot.DiscordStatus.self)?
+                    .lastProbeAt)
+        case "googlechat":
+            return self
+                .date(fromMs: self.channelStatus("googlechat", as: ChannelsStatusSnapshot.GoogleChatStatus.self)?
                     .lastProbeAt)
         case "signal":
             return self
@@ -458,6 +506,10 @@ extension ChannelsSettings {
             return status.lastError?.isEmpty == false || status.probe?.ok == false
         case "discord":
             guard let status = self.channelStatus("discord", as: ChannelsStatusSnapshot.DiscordStatus.self)
+            else { return false }
+            return status.lastError?.isEmpty == false || status.probe?.ok == false
+        case "googlechat":
+            guard let status = self.channelStatus("googlechat", as: ChannelsStatusSnapshot.GoogleChatStatus.self)
             else { return false }
             return status.lastError?.isEmpty == false || status.probe?.ok == false
         case "signal":

@@ -122,11 +122,11 @@ export async function editBlueBubblesMessage(
 ): Promise<void> {
   const trimmedGuid = messageGuid.trim();
   if (!trimmedGuid) {
-    throw new Error("BlueBubbles (Legacy) edit requires messageGuid");
+    throw new Error("BlueBubbles edit requires messageGuid");
   }
   const trimmedText = newText.trim();
   if (!trimmedText) {
-    throw new Error("BlueBubbles (Legacy) edit requires newText");
+    throw new Error("BlueBubbles edit requires newText");
   }
 
   await sendPrivateApiJsonRequest({
@@ -153,7 +153,7 @@ export async function unsendBlueBubblesMessage(
 ): Promise<void> {
   const trimmedGuid = messageGuid.trim();
   if (!trimmedGuid) {
-    throw new Error("BlueBubbles (Legacy) unsend requires messageGuid");
+    throw new Error("BlueBubbles unsend requires messageGuid");
   }
 
   await sendPrivateApiJsonRequest({
@@ -176,7 +176,7 @@ export async function renameBlueBubblesChat(
 ): Promise<void> {
   const trimmedGuid = chatGuid.trim();
   if (!trimmedGuid) {
-    throw new Error("BlueBubbles (Legacy) rename requires chatGuid");
+    throw new Error("BlueBubbles rename requires chatGuid");
   }
 
   await sendPrivateApiJsonRequest({
@@ -199,11 +199,11 @@ export async function addBlueBubblesParticipant(
 ): Promise<void> {
   const trimmedGuid = chatGuid.trim();
   if (!trimmedGuid) {
-    throw new Error("BlueBubbles (Legacy) addParticipant requires chatGuid");
+    throw new Error("BlueBubbles addParticipant requires chatGuid");
   }
   const trimmedAddress = address.trim();
   if (!trimmedAddress) {
-    throw new Error("BlueBubbles (Legacy) addParticipant requires address");
+    throw new Error("BlueBubbles addParticipant requires address");
   }
 
   await sendPrivateApiJsonRequest({
@@ -226,11 +226,11 @@ export async function removeBlueBubblesParticipant(
 ): Promise<void> {
   const trimmedGuid = chatGuid.trim();
   if (!trimmedGuid) {
-    throw new Error("BlueBubbles (Legacy) removeParticipant requires chatGuid");
+    throw new Error("BlueBubbles removeParticipant requires chatGuid");
   }
   const trimmedAddress = address.trim();
   if (!trimmedAddress) {
-    throw new Error("BlueBubbles (Legacy) removeParticipant requires address");
+    throw new Error("BlueBubbles removeParticipant requires address");
   }
 
   await sendPrivateApiJsonRequest({
@@ -252,7 +252,7 @@ export async function leaveBlueBubblesChat(
 ): Promise<void> {
   const trimmedGuid = chatGuid.trim();
   if (!trimmedGuid) {
-    throw new Error("BlueBubbles (Legacy) leaveChat requires chatGuid");
+    throw new Error("BlueBubbles leaveChat requires chatGuid");
   }
 
   await sendPrivateApiJsonRequest({
@@ -276,10 +276,10 @@ export async function setGroupIconBlueBubbles(
 ): Promise<void> {
   const trimmedGuid = chatGuid.trim();
   if (!trimmedGuid) {
-    throw new Error("BlueBubbles (Legacy) setGroupIcon requires chatGuid");
+    throw new Error("BlueBubbles setGroupIcon requires chatGuid");
   }
   if (!buffer || buffer.length === 0) {
-    throw new Error("BlueBubbles (Legacy) setGroupIcon requires image buffer");
+    throw new Error("BlueBubbles setGroupIcon requires image buffer");
   }
 
   const { baseUrl, password, accountId } = resolveAccount(opts);

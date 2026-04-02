@@ -44,6 +44,7 @@ import {
 } from "../model-auth.js";
 import { normalizeProviderId } from "../model-selection.js";
 import { ensureOpenClawModelsJson } from "../models-config.js";
+import { buildPermissionSnapshot } from "../permission-snapshot.js";
 import {
   formatBillingErrorMessage,
   classifyFailoverReason,
@@ -331,6 +332,9 @@ export async function runEmbeddedPiAgent(
         sessionId: params.sessionId,
         workspaceDir: resolvedWorkspace,
         messageProvider: params.messageProvider ?? undefined,
+        permissionSnapshot: buildPermissionSnapshot({
+          configuredTier: params.sessionPermissionTier,
+        }),
         trigger: params.trigger,
         channelId: params.messageChannel ?? params.messageProvider ?? undefined,
       };

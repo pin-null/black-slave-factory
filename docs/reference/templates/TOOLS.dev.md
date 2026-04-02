@@ -12,9 +12,9 @@ It does not define which tools exist; OpenClaw provides built-in tools internall
 
 ## Examples
 
-### Legacy Apple Messaging
+### imsg
 
-- If you maintain a legacy macOS bridge, describe who/what before sending and confirm before using Apple messaging tooling.
+- Send an iMessage/SMS: describe who/what, confirm before sending.
 - Prefer short messages; avoid sending secrets.
 
 ### sag

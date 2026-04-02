@@ -521,6 +521,17 @@ export async function spawnAcpDirect(
 
   const sessionKey = `agent:${targetAgentId}:acp:${crypto.randomUUID()}`;
   const runtimeMode = resolveAcpSessionMode(spawnMode);
+  const requesterPermissionTier = (() => {
+    try {
+      const requesterStorePath = resolveStorePath(cfg.session?.store, {
+        agentId: parseAgentSessionKey(requesterInternalKey)?.agentId,
+      });
+      const requesterStore = loadSessionStore(requesterStorePath);
+      return requesterStore[requesterInternalKey]?.permissionTier;
+    } catch {
+      return undefined;
+    }
+  })();
 
   let preparedBinding: PreparedAcpThreadBinding | null = null;
   if (requestThreadBinding) {
@@ -550,6 +561,7 @@ export async function spawnAcpDirect(
       params: {
         key: sessionKey,
         spawnedBy: requesterInternalKey,
+        ...(requesterPermissionTier ? { permissionTier: requesterPermissionTier } : {}),
         ...(params.label ? { label: params.label } : {}),
       },
       timeoutMs: 10_000,

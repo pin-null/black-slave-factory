@@ -208,6 +208,61 @@ describe("gateway server hooks", () => {
     });
   });
 
+  test("forwards hooks.permissionTier to direct agent dispatch", async () => {
+    testState.hooksConfig = {
+      enabled: true,
+      token: HOOK_TOKEN,
+      permissionTier: "readonly",
+    };
+    await withGatewayServer(async ({ port }) => {
+      mockIsolatedRunOkOnce();
+
+      const resAgent = await postHook(port, "/hooks/agent", {
+        message: "Do it",
+        name: "Email",
+      });
+      expect(resAgent.status).toBe(200);
+      await waitForSystemEvent();
+
+      const directCall = (cronIsolatedRun.mock.calls[0] as unknown[] | undefined)?.[0] as
+        | { job?: { payload?: { permissionTier?: string } } }
+        | undefined;
+      expect(directCall?.job?.payload?.permissionTier).toBe("readonly");
+      drainSystemEvents(resolveMainKey());
+    });
+  });
+
+  test("caps mapped hook permission tiers by hooks.permissionTier", async () => {
+    testState.hooksConfig = {
+      enabled: true,
+      token: HOOK_TOKEN,
+      permissionTier: "readonly",
+      mappings: [
+        {
+          match: { path: "mapped-tier" },
+          action: "agent",
+          messageTemplate: "Mapped: {{payload.subject}}",
+          permissionTier: "dangerous",
+        },
+      ],
+    };
+    await withGatewayServer(async ({ port }) => {
+      mockIsolatedRunOkOnce();
+
+      const resMapped = await postHook(port, "/hooks/mapped-tier", {
+        subject: "hello",
+      });
+      expect(resMapped.status).toBe(200);
+      await waitForSystemEvent();
+
+      const mappedCall = (cronIsolatedRun.mock.calls[0] as unknown[] | undefined)?.[0] as
+        | { job?: { payload?: { permissionTier?: string } } }
+        | undefined;
+      expect(mappedCall?.job?.payload?.permissionTier).toBe("readonly");
+      drainSystemEvents(resolveMainKey());
+    });
+  });
+
   test("rejects request sessionKey unless hooks.allowRequestSessionKey is enabled", async () => {
     testState.hooksConfig = { enabled: true, token: HOOK_TOKEN };
     await withGatewayServer(async ({ port }) => {

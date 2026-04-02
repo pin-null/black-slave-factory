@@ -163,7 +163,7 @@ export const bluebubblesMessageActions: ChannelMessageActionAdapter = {
 
       const resolved = await runtime.resolveChatGuidForTarget({ baseUrl, password, target });
       if (!resolved) {
-        throw new Error(`BlueBubbles (Legacy) ${action} failed: chatGuid not found for target.`);
+        throw new Error(`BlueBubbles ${action} failed: chatGuid not found for target.`);
       }
       return resolved;
     };
@@ -349,7 +349,7 @@ export const bluebubblesMessageActions: ChannelMessageActionAdapter = {
       const resolvedChatGuid = await resolveChatGuid();
       const displayName = readStringParam(params, "displayName") ?? readStringParam(params, "name");
       if (!displayName) {
-        throw new Error("BlueBubbles (Legacy) renameGroup requires displayName or name parameter.");
+        throw new Error("BlueBubbles renameGroup requires displayName or name parameter.");
       }
 
       await runtime.renameBlueBubblesChat(resolvedChatGuid, displayName, opts);
@@ -391,9 +391,7 @@ export const bluebubblesMessageActions: ChannelMessageActionAdapter = {
       const resolvedChatGuid = await resolveChatGuid();
       const address = readStringParam(params, "address") ?? readStringParam(params, "participant");
       if (!address) {
-        throw new Error(
-          "BlueBubbles (Legacy) addParticipant requires address or participant parameter.",
-        );
+        throw new Error("BlueBubbles addParticipant requires address or participant parameter.");
       }
 
       await runtime.addBlueBubblesParticipant(resolvedChatGuid, address, opts);
@@ -407,9 +405,7 @@ export const bluebubblesMessageActions: ChannelMessageActionAdapter = {
       const resolvedChatGuid = await resolveChatGuid();
       const address = readStringParam(params, "address") ?? readStringParam(params, "participant");
       if (!address) {
-        throw new Error(
-          "BlueBubbles (Legacy) removeParticipant requires address or participant parameter.",
-        );
+        throw new Error("BlueBubbles removeParticipant requires address or participant parameter.");
       }
 
       await runtime.removeBlueBubblesParticipant(resolvedChatGuid, address, opts);
@@ -450,7 +446,7 @@ export const bluebubblesMessageActions: ChannelMessageActionAdapter = {
           "BlueBubbles sendAttachment: filePath not supported in action, provide buffer as base64.",
         );
       } else {
-        throw new Error("BlueBubbles (Legacy) sendAttachment requires buffer (base64) parameter.");
+        throw new Error("BlueBubbles sendAttachment requires buffer (base64) parameter.");
       }
 
       const result = await runtime.sendBlueBubblesAttachment({

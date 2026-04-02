@@ -1,6 +1,9 @@
+import { bluebubblesPlugin } from "../../../extensions/bluebubbles/index.js";
 import { discordPlugin, setDiscordRuntime } from "../../../extensions/discord/index.js";
 import { discordSetupPlugin } from "../../../extensions/discord/setup-entry.js";
 import { feishuPlugin } from "../../../extensions/feishu/index.js";
+import { imessagePlugin } from "../../../extensions/imessage/index.js";
+import { imessageSetupPlugin } from "../../../extensions/imessage/setup-entry.js";
 import { ircPlugin } from "../../../extensions/irc/index.js";
 import { linePlugin, setLineRuntime } from "../../../extensions/line/index.js";
 import { lineSetupPlugin } from "../../../extensions/line/setup-entry.js";
@@ -16,12 +19,11 @@ import { telegramSetupPlugin } from "../../../extensions/telegram/setup-entry.js
 import { zaloPlugin } from "../../../extensions/zalo/index.js";
 import type { ChannelId, ChannelPlugin } from "./types.js";
 
-// Keep only the non-macOS bundled channel runtimes available in the active
-// Windows-first product surface. Legacy macOS channel sources remain in the
-// repo for compatibility and migration work, but are no longer registered here.
 export const bundledChannelPlugins = [
+  bluebubblesPlugin,
   discordPlugin,
   feishuPlugin,
+  imessagePlugin,
   ircPlugin,
   linePlugin,
   mattermostPlugin,
@@ -39,6 +41,7 @@ export const bundledChannelSetupPlugins = [
   ircPlugin,
   slackSetupPlugin,
   signalSetupPlugin,
+  imessageSetupPlugin,
   lineSetupPlugin,
 ] as ChannelPlugin[];
 

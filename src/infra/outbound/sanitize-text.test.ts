@@ -6,7 +6,7 @@ import { isPlainTextSurface, sanitizeForPlainText } from "./sanitize-text.js";
 // ---------------------------------------------------------------------------
 
 describe("isPlainTextSurface", () => {
-  it.each(["whatsapp", "signal", "sms", "irc", "telegram", "imessage"])(
+  it.each(["whatsapp", "signal", "sms", "irc", "telegram", "imessage", "googlechat"])(
     "returns true for %s",
     (channel) => {
       expect(isPlainTextSurface(channel)).toBe(true);

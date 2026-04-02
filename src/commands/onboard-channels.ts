@@ -1,5 +1,4 @@
 import { resolveAgentWorkspaceDir, resolveDefaultAgentId } from "../agents/agent-scope.js";
-import { shouldExposeChannelInEntryPoints } from "../channels/entry-point-visibility.js";
 import { listChannelPluginCatalogEntries } from "../channels/plugins/catalog.js";
 import { resolveChannelDefaultAccountId } from "../channels/plugins/helpers.js";
 import {
@@ -154,11 +153,7 @@ async function collectChannelStatus(params: {
   installedPlugins?: ChannelSetupPlugin[];
   resolveAdapter?: (channel: ChannelChoice) => ChannelSetupWizardAdapter | undefined;
 }): Promise<ChannelStatusSummary> {
-  const installedPlugins =
-    params.installedPlugins ??
-    listChannelSetupPlugins().filter((plugin) =>
-      shouldExposeChannelInEntryPoints({ cfg: params.cfg, meta: plugin.meta }),
-    );
+  const installedPlugins = params.installedPlugins ?? listChannelSetupPlugins();
   const workspaceDir = resolveAgentWorkspaceDir(params.cfg, resolveDefaultAgentId(params.cfg));
   const { installedCatalogEntries, installableCatalogEntries } = resolveChannelSetupEntries({
     cfg: params.cfg,
@@ -186,11 +181,7 @@ async function collectChannelStatus(params: {
   );
   const statusByChannel = new Map(statusEntries.map((entry) => [entry.channel, entry]));
   const fallbackStatuses = listChatChannels()
-    .filter(
-      (meta) =>
-        shouldExposeChannelInEntryPoints({ cfg: params.cfg, meta }) &&
-        !statusByChannel.has(meta.id),
-    )
+    .filter((meta) => !statusByChannel.has(meta.id))
     .map((meta) => {
       const configured = isChannelConfigured(params.cfg, meta.id);
       const statusLabel = configured ? "configured (plugin disabled)" : "not configured";
@@ -408,14 +399,10 @@ export async function setupChannels(
   const listVisibleInstalledPlugins = (): ChannelSetupPlugin[] => {
     const merged = new Map<string, ChannelSetupPlugin>();
     for (const plugin of listChannelSetupPlugins()) {
-      if (shouldExposeChannelInEntryPoints({ cfg: next, meta: plugin.meta })) {
-        merged.set(plugin.id, plugin);
-      }
+      merged.set(plugin.id, plugin);
     }
     for (const plugin of scopedPluginsById.values()) {
-      if (shouldExposeChannelInEntryPoints({ cfg: next, meta: plugin.meta })) {
-        merged.set(plugin.id, plugin);
-      }
+      merged.set(plugin.id, plugin);
     }
     return Array.from(merged.values());
   };
@@ -488,26 +475,6 @@ export async function setupChannels(
     await prompter.note(statusLines.join("\n"), "Channel status");
   }
 
-  const visibleCoreChannels = listChatChannels().filter((meta) =>
-    shouldExposeChannelInEntryPoints({ cfg: next, meta }),
-  );
-
-  if (
-    installedPlugins.length === 0 &&
-    catalogEntries.length === 0 &&
-    installedCatalogEntries.length === 0 &&
-    visibleCoreChannels.length === 0
-  ) {
-    await prompter.note(
-      [
-        "External chat channels are not part of this build.",
-        "The only retained chat surface is the internal webchat UI.",
-      ].join("\n"),
-      "WebChat only",
-    );
-    return next;
-  }
-
   const shouldConfigure = options?.skipConfirm
     ? true
     : await prompter.confirm({
@@ -518,7 +485,7 @@ export async function setupChannels(
     return cfg;
   }
 
-  const corePrimer = visibleCoreChannels.map((meta) => ({
+  const corePrimer = listChatChannels().map((meta) => ({
     id: meta.id,
     label: meta.label,
     blurb: meta.blurb,

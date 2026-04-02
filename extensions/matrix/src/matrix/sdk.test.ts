@@ -229,10 +229,8 @@ describe("MatrixClient request hardening", () => {
     await expect(client.downloadContent("mxc://example.org/media")).resolves.toEqual(payload);
 
     expect(fetchMock).toHaveBeenCalledTimes(1);
-    const firstFetchCall = fetchMock.mock.calls[0] as unknown as
-      | [RequestInfo | URL, ...unknown[]]
-      | undefined;
-    const firstUrl = String(firstFetchCall?.[0]);
+    const firstCall = fetchMock.mock.calls.at(0) as [unknown, ...unknown[]] | undefined;
+    const firstUrl = String(firstCall?.[0]);
     expect(firstUrl).toContain("/_matrix/client/v1/media/download/example.org/media");
   });
 
@@ -260,8 +258,10 @@ describe("MatrixClient request hardening", () => {
     await expect(client.downloadContent("mxc://example.org/media")).resolves.toEqual(payload);
 
     expect(fetchMock).toHaveBeenCalledTimes(2);
-    const firstUrl = String(fetchMock.mock.calls[0]?.[0]);
-    const secondUrl = String(fetchMock.mock.calls[1]?.[0]);
+    const firstCall = fetchMock.mock.calls.at(0) as [unknown, ...unknown[]] | undefined;
+    const secondCall = fetchMock.mock.calls.at(1) as [unknown, ...unknown[]] | undefined;
+    const firstUrl = String(firstCall?.[0]);
+    const secondUrl = String(secondCall?.[0]);
     expect(firstUrl).toContain("/_matrix/client/v1/media/download/example.org/media");
     expect(secondUrl).toContain("/_matrix/media/v3/download/example.org/media");
   });

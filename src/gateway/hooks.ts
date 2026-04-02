@@ -4,6 +4,7 @@ import { listAgentIds, resolveDefaultAgentId } from "../agents/agent-scope.js";
 import { listChannelPlugins } from "../channels/plugins/index.js";
 import type { ChannelId } from "../channels/plugins/types.js";
 import type { OpenClawConfig } from "../config/config.js";
+import type { PermissionTier } from "../config/types.tools.js";
 import { readJsonBodyWithLimit, requestBodyErrorToText } from "../infra/http-body.js";
 import { normalizeAgentId, parseAgentSessionKey } from "../routing/session-key.js";
 import { normalizeMessageChannel } from "../utils/message-channel.js";
@@ -18,6 +19,7 @@ export type HooksConfigResolved = {
   basePath: string;
   token: string;
   maxBodyBytes: number;
+  permissionTier?: PermissionTier;
   mappings: HookMappingResolved[];
   agentPolicy: HookAgentPolicyResolved;
   sessionPolicy: HookSessionPolicyResolved;
@@ -81,6 +83,7 @@ export function resolveHooksConfig(cfg: OpenClawConfig): HooksConfigResolved | n
     basePath: trimmed,
     token,
     maxBodyBytes,
+    permissionTier: cfg.hooks?.permissionTier,
     mappings,
     agentPolicy: {
       defaultAgentId,
@@ -211,6 +214,7 @@ export type HookAgentPayload = {
   model?: string;
   thinking?: string;
   timeoutSeconds?: number;
+  permissionTier?: PermissionTier;
 };
 
 export type HookAgentDispatchPayload = Omit<HookAgentPayload, "sessionKey"> & {

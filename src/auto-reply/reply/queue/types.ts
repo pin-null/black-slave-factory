@@ -57,7 +57,6 @@ export type FollowupRun = {
     senderUsername?: string;
     senderE164?: string;
     senderIsOwner?: boolean;
-    requestText?: string;
     sessionFile: string;
     workspaceDir: string;
     config: OpenClawConfig;

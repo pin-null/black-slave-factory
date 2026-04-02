@@ -6,6 +6,19 @@ import * as noteModule from "../terminal/note.js";
 import { loadAndMaybeMigrateDoctorConfig } from "./doctor-config-flow.js";
 import { runDoctorConfigWithInput } from "./doctor-config-flow.test-utils.js";
 
+function expectGoogleChatDmAllowFromRepaired(cfg: unknown) {
+  const typed = cfg as {
+    channels: {
+      googlechat: {
+        dm: { allowFrom: string[] };
+        allowFrom?: string[];
+      };
+    };
+  };
+  expect(typed.channels.googlechat.dm.allowFrom).toEqual(["*"]);
+  expect(typed.channels.googlechat.allowFrom).toBeUndefined();
+}
+
 async function collectDoctorWarnings(config: Record<string, unknown>): Promise<string[]> {
   const noteSpy = vi.spyOn(noteModule, "note").mockImplementation(() => {});
   try {
@@ -73,10 +86,10 @@ describe("doctor config flow", () => {
     expect(doctorWarnings.some((line) => line.includes("mutable allowlist"))).toBe(false);
   });
 
-  it("does not warn about sender-based group allowlist for discord", async () => {
+  it("does not warn about sender-based group allowlist for googlechat", async () => {
     const doctorWarnings = await collectDoctorWarnings({
       channels: {
-        discord: {
+        googlechat: {
           groupPolicy: "allowlist",
           accounts: {
             work: {
@@ -760,28 +773,22 @@ describe("doctor config flow", () => {
     expect(toolsBySender["*"]).toEqual({ deny: ["exec"] });
   });
 
-  it("repairs discord dm.policy open by setting allowFrom on repair", async () => {
+  it("repairs googlechat dm.policy open by setting dm.allowFrom on repair", async () => {
     const result = await runDoctorConfigWithInput({
       repair: true,
       config: {
         channels: {
-          discord: {
-            dmPolicy: "open",
+          googlechat: {
+            dm: {
+              policy: "open",
+            },
           },
         },
       },
       run: loadAndMaybeMigrateDoctorConfig,
     });
 
-    const cfg = result.cfg as {
-      channels: {
-        discord: {
-          allowFrom: string[];
-        };
-      };
-    };
-
-    expect(cfg.channels.discord.allowFrom).toEqual(["*"]);
+    expectGoogleChatDmAllowFromRepaired(result.cfg);
   });
 
   it("migrates top-level heartbeat into agents.defaults.heartbeat on repair", async () => {
@@ -845,15 +852,17 @@ describe("doctor config flow", () => {
     });
   });
 
-  it("repairs discord account dm.policy open by setting allowFrom on repair", async () => {
+  it("repairs googlechat account dm.policy open by setting dm.allowFrom on repair", async () => {
     const result = await runDoctorConfigWithInput({
       repair: true,
       config: {
         channels: {
-          discord: {
+          googlechat: {
             accounts: {
               work: {
-                dmPolicy: "open",
+                dm: {
+                  policy: "open",
+                },
               },
             },
           },
@@ -864,25 +873,31 @@ describe("doctor config flow", () => {
 
     const cfg = result.cfg as unknown as {
       channels: {
-        discord: {
+        googlechat: {
           accounts: {
             work: {
-              allowFrom: string[];
+              dm: {
+                policy: string;
+                allowFrom: string[];
+              };
+              allowFrom?: string[];
             };
           };
         };
       };
     };
 
-    expect(cfg.channels.discord.accounts.work.allowFrom).toEqual(["*"]);
+    expect(cfg.channels.googlechat.accounts.work.dm.allowFrom).toEqual(["*"]);
+    expect(cfg.channels.googlechat.accounts.work.allowFrom).toBeUndefined();
   });
 
-  it("recovers from stale discord nested allowFrom by repairing top-level allowFrom", async () => {
+  it("recovers from stale googlechat top-level allowFrom by repairing dm.allowFrom", async () => {
     const result = await runDoctorConfigWithInput({
       repair: true,
       config: {
         channels: {
-          discord: {
+          googlechat: {
+            allowFrom: ["*"],
             dm: {
               policy: "open",
             },
@@ -892,16 +907,6 @@ describe("doctor config flow", () => {
       run: loadAndMaybeMigrateDoctorConfig,
     });
 
-    const cfg = result.cfg as {
-      channels: {
-        discord: {
-          allowFrom: string[];
-          dm?: { allowFrom?: string[] };
-        };
-      };
-    };
-
-    expect(cfg.channels.discord.allowFrom).toEqual(["*"]);
-    expect(cfg.channels.discord.dm?.allowFrom).toBeUndefined();
+    expectGoogleChatDmAllowFromRepaired(result.cfg);
   });
 });

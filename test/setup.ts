@@ -169,7 +169,7 @@ const createDefaultRegistry = () =>
     },
     {
       pluginId: "imessage",
-      plugin: createStubPlugin({ id: "imessage", label: "iMessage (Legacy)" }),
+      plugin: createStubPlugin({ id: "imessage", label: "iMessage", aliases: ["imsg"] }),
       source: "test",
     },
   ]);

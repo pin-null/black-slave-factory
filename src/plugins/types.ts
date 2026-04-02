@@ -11,6 +11,7 @@ import type {
   AuthProfileStore,
 } from "../agents/auth-profiles/types.js";
 import type { ModelCatalogEntry } from "../agents/model-catalog.js";
+import type { PermissionSnapshot } from "../agents/permission-snapshot.js";
 import type { ProviderCapabilities } from "../agents/provider-capabilities.js";
 import type { AnyAgentTool } from "../agents/tools/common.js";
 import type { ThinkLevel } from "../auto-reply/thinking.js";
@@ -1451,6 +1452,7 @@ export type PluginHookAgentContext = {
   sessionId?: string;
   workspaceDir?: string;
   messageProvider?: string;
+  permissionSnapshot?: PermissionSnapshot;
   /** What initiated this agent run: "user", "heartbeat", "cron", or "memory". */
   trigger?: string;
   /** Channel identifier (e.g. "telegram", "discord", "whatsapp"). */
@@ -1611,6 +1613,7 @@ export type PluginHookMessageContext = {
   channelId: string;
   accountId?: string;
   conversationId?: string;
+  permissionSnapshot?: PermissionSnapshot;
 };
 
 export type PluginHookInboundClaimContext = PluginHookMessageContext & {
@@ -1680,6 +1683,7 @@ export type PluginHookToolContext = {
   sessionId?: string;
   /** Stable run identifier for this agent invocation. */
   runId?: string;
+  permissionSnapshot?: PermissionSnapshot;
   toolName: string;
   /** Provider-specific tool call ID when available. */
   toolCallId?: string;

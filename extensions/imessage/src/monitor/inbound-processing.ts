@@ -417,7 +417,7 @@ export function buildIMessageInboundContext(params: {
   });
 
   const body = formatInboundEnvelope({
-    channel: "iMessage (Legacy)",
+    channel: "iMessage",
     from: fromLabel,
     timestamp: decision.createdAt,
     body: `${decision.bodyText}${replySuffix}`,
@@ -436,7 +436,7 @@ export function buildIMessageInboundContext(params: {
       currentMessage: combinedBody,
       formatEntry: (entry) =>
         formatInboundEnvelope({
-          channel: "iMessage (Legacy)",
+          channel: "iMessage",
           from: fromLabel,
           timestamp: entry.timestamp,
           body: `${entry.body}${entry.messageId ? ` [id:${entry.messageId}]` : ""}`,

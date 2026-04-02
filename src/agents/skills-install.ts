@@ -9,7 +9,6 @@ import { installDownloadSpec } from "./skills-install-download.js";
 import { formatInstallFailureMessage } from "./skills-install-output.js";
 import {
   hasBinary,
-  isSkillAllowedByCategoryPolicy,
   loadWorkspaceSkillEntries,
   resolveSkillsInstallPreferences,
   type SkillEntry,
@@ -393,23 +392,12 @@ async function executeInstallCommand(params: {
 export async function installSkill(params: SkillInstallRequest): Promise<SkillInstallResult> {
   const timeoutMs = Math.min(Math.max(params.timeoutMs ?? 300_000, 1_000), 900_000);
   const workspaceDir = resolveUserPath(params.workspaceDir);
-  const entries = loadWorkspaceSkillEntries(workspaceDir, {
-    config: params.config,
-  });
+  const entries = loadWorkspaceSkillEntries(workspaceDir);
   const entry = entries.find((item) => item.skill.name === params.skillName);
   if (!entry) {
     return {
       ok: false,
       message: `Skill not found: ${params.skillName}`,
-      stdout: "",
-      stderr: "",
-      code: null,
-    };
-  }
-  if (!isSkillAllowedByCategoryPolicy({ entry, config: params.config })) {
-    return {
-      ok: false,
-      message: `Skill blocked by category policy: ${params.skillName}`,
       stdout: "",
       stderr: "",
       code: null,

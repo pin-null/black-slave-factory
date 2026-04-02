@@ -1,5 +1,5 @@
 import crypto from "node:crypto";
-import { CHANNEL_IDS, REMOVED_CHAT_CHANNEL_IDS } from "../channels/registry.js";
+import { CHANNEL_IDS } from "../channels/registry.js";
 import { VERSION } from "../version.js";
 import type { ConfigUiHint, ConfigUiHints } from "./schema.hints.js";
 import { applySensitiveHints, buildBaseHints, mapSensitivePaths } from "./schema.hints.js";
@@ -244,10 +244,9 @@ function applyChannelHints(hints: ConfigUiHints, channels: ChannelUiMetadata[]):
 function listHeartbeatTargetChannels(channels: ChannelUiMetadata[]): string[] {
   const seen = new Set<string>();
   const ordered: string[] = [];
-  const removed = new Set<string>(REMOVED_CHAT_CHANNEL_IDS);
   for (const id of CHANNEL_IDS) {
     const normalized = id.trim().toLowerCase();
-    if (!normalized || seen.has(normalized) || removed.has(normalized)) {
+    if (!normalized || seen.has(normalized)) {
       continue;
     }
     seen.add(normalized);

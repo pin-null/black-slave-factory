@@ -19,6 +19,11 @@
           - "src/feishu/**"
           - "extensions/feishu/**"
           - "docs/channels/feishu.md"
+"channel: googlechat":
+  - changed-files:
+      - any-glob-to-any-file:
+          - "extensions/googlechat/**"
+          - "docs/channels/googlechat.md"
 "channel: imessage":
   - changed-files:
       - any-glob-to-any-file:

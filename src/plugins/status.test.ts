@@ -493,45 +493,6 @@ describe("buildPluginStatusReport", () => {
     expect(buildPluginCompatibilityWarnings()).toEqual([]);
   });
 
-  it("adds a compatibility warning for removed Google Chat channel configs", () => {
-    loadConfigMock.mockReturnValue({
-      channels: {
-        googlechat: {
-          serviceAccountFile: "/tmp/googlechat-service-account.json",
-        },
-      },
-    });
-    loadOpenClawPluginsMock.mockReturnValue({
-      plugins: [],
-      diagnostics: [],
-      channels: [],
-      channelSetups: [],
-      providers: [],
-      speechProviders: [],
-      mediaUnderstandingProviders: [],
-      imageGenerationProviders: [],
-      webSearchProviders: [],
-      tools: [],
-      hooks: [],
-      typedHooks: [],
-      httpRoutes: [],
-      gatewayHandlers: {},
-      cliRegistrars: [],
-      services: [],
-      commands: [],
-    });
-
-    expect(buildPluginCompatibilityNotices()).toEqual([
-      {
-        pluginId: "googlechat",
-        code: "removed-channel-config",
-        severity: "warn",
-        message:
-          "Google Chat channel support has been removed. Remove channels.googlechat from config and migrate to another channel.",
-      },
-    ]);
-  });
-
   it("populates bundleCapabilities from plugin record", () => {
     loadOpenClawPluginsMock.mockReturnValue({
       plugins: [

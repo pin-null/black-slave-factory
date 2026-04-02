@@ -19,7 +19,7 @@ const channel = "imessage" as const;
 export const imessageSetupWizard: ChannelSetupWizard = {
   channel,
   status: createDetectedBinaryStatus({
-    channelLabel: "iMessage (Legacy)",
+    channelLabel: "iMessage",
     binaryLabel: "imsg",
     configuredLabel: imessageSetupStatusBase.configuredLabel,
     unconfiguredLabel: imessageSetupStatusBase.unconfiguredLabel,

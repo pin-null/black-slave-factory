@@ -50,7 +50,11 @@ const TAG_OVERRIDES: Record<string, ConfigTag[]> = {
   ],
   "gateway.controlUi.dangerouslyDisableDeviceAuth": ["security", "access", "network", "advanced"],
   "gateway.controlUi.allowInsecureAuth": ["security", "access", "network", "advanced"],
+  "tools.permissionTier": ["tools", "security", "access", "advanced"],
   "tools.exec.applyPatch.workspaceOnly": ["tools", "security", "access", "advanced"],
+  "agents.list[].tools.permissionTier": ["tools", "security", "access", "advanced"],
+  "hooks.permissionTier": ["security", "access", "network", "advanced"],
+  "hooks.mappings[].permissionTier": ["security", "access", "network", "advanced"],
 };
 
 const PREFIX_RULES: Array<{ prefix: string; tags: ConfigTag[] }> = [

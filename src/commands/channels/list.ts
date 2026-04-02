@@ -132,9 +132,6 @@ export async function channelsListCommand(
 
   const lines: string[] = [];
   lines.push(theme.heading("Chat channels:"));
-  if (plugins.length === 0) {
-    lines.push(theme.muted("- none (internal webchat only)"));
-  }
 
   for (const plugin of plugins) {
     const accounts = plugin.config.listAccountIds(cfg);

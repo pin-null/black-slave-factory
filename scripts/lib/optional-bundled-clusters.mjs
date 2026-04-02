@@ -2,6 +2,7 @@ export const optionalBundledClusters = [
   "acpx",
   "diagnostics-otel",
   "diffs",
+  "googlechat",
   "matrix",
   "memory-lancedb",
   "msteams",

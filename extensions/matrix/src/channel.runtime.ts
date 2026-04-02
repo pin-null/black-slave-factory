@@ -8,9 +8,9 @@ import { resolveMatrixTargets } from "./resolve-targets.js";
 export const matrixChannelRuntime = {
   listMatrixDirectoryGroupsLive,
   listMatrixDirectoryPeersLive,
+  matrixOutbound,
   probeMatrix,
   resolveMatrixAuth,
   resolveMatrixTargets,
   sendMessageMatrix,
-  matrixOutbound,
 };

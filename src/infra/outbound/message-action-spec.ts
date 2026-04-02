@@ -26,7 +26,6 @@ export const MESSAGE_ACTION_TARGET_MODE: Record<ChannelMessageActionName, Messag
     unpin: "to",
     "list-pins": "to",
     permissions: "to",
-    "set-profile": "none",
     "thread-create": "to",
     "thread-list": "none",
     "thread-reply": "to",
@@ -57,6 +56,7 @@ export const MESSAGE_ACTION_TARGET_MODE: Record<ChannelMessageActionName, Messag
     timeout: "none",
     kick: "none",
     ban: "none",
+    "set-profile": "none",
     "set-presence": "none",
     "download-file": "none",
   };

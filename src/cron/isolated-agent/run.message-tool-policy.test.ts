@@ -8,6 +8,7 @@ import {
   resolveDeliveryTargetMock,
   restoreFastTestEnv,
   runEmbeddedPiAgentMock,
+  runWithModelFallbackMock,
 } from "./run.test-harness.js";
 
 const runCronIsolatedAgentTurn = await loadRunCronIsolatedAgentTurn();
@@ -91,5 +92,35 @@ describe("runCronIsolatedAgentTurn message tool policy", () => {
 
     expect(runEmbeddedPiAgentMock).toHaveBeenCalledTimes(1);
     expect(runEmbeddedPiAgentMock.mock.calls[0]?.[0]?.disableMessageTool).toBe(false);
+  });
+
+  it("caps the cron run config with payload.permissionTier", async () => {
+    mockRunCronFallbackPassthrough();
+    resolveCronDeliveryPlanMock.mockReturnValue({
+      requested: false,
+      mode: "none",
+    });
+    const params = makeParams();
+    const baseJob = params.job as Record<string, unknown>;
+
+    await runCronIsolatedAgentTurn({
+      ...params,
+      cfg: {
+        tools: { permissionTier: "dangerous" },
+      },
+      job: {
+        ...baseJob,
+        payload: {
+          kind: "agentTurn",
+          message: "send a message",
+          permissionTier: "readonly",
+        },
+      } as never,
+    });
+
+    expect(runWithModelFallbackMock).toHaveBeenCalledTimes(1);
+    expect(runWithModelFallbackMock.mock.calls[0]?.[0]?.cfg?.tools?.permissionTier).toBe(
+      "readonly",
+    );
   });
 });

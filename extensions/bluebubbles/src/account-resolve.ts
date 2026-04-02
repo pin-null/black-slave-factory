@@ -38,10 +38,10 @@ export function resolveBlueBubblesServerAccount(params: BlueBubblesAccountResolv
       path: `channels.bluebubbles.accounts.${account.accountId}.password`,
     });
   if (!baseUrl) {
-    throw new Error("BlueBubbles (Legacy) serverUrl is required");
+    throw new Error("BlueBubbles serverUrl is required");
   }
   if (!password) {
-    throw new Error("BlueBubbles (Legacy) password is required");
+    throw new Error("BlueBubbles password is required");
   }
   return {
     baseUrl,

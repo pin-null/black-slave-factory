@@ -261,7 +261,7 @@ Isolated jobs (`agentTurn`) can set `lightContext: true` to run with lightweight
 Isolated jobs can deliver output to a channel via the top-level `delivery` config:
 
 - `delivery.mode`: `announce` (channel delivery), `webhook` (HTTP POST), or `none`.
-- `delivery.channel`: `whatsapp` / `telegram` / `discord` / `slack` / `mattermost` (plugin) / `signal` / `last`.
+- `delivery.channel`: `whatsapp` / `telegram` / `discord` / `slack` / `mattermost` (plugin) / `signal` / `imessage` / `last`.
 - `delivery.to`: channel-specific recipient target.
 
 `announce` delivery is only valid for isolated jobs (`sessionTarget: "isolated"`).

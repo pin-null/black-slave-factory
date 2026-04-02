@@ -5,6 +5,8 @@ import type {
   ChannelUiMetaEntry,
   ChannelsStatusSnapshot,
   DiscordStatus,
+  GoogleChatStatus,
+  IMessageStatus,
   NostrProfile,
   NostrStatus,
   SignalStatus,
@@ -14,6 +16,8 @@ import type {
 } from "../types.ts";
 import { renderChannelConfigSection } from "./channels.config.ts";
 import { renderDiscordCard } from "./channels.discord.ts";
+import { renderGoogleChatCard } from "./channels.googlechat.ts";
+import { renderIMessageCard } from "./channels.imessage.ts";
 import { renderNostrCard } from "./channels.nostr.ts";
 import { channelEnabled, renderChannelAccountCount } from "./channels.shared.ts";
 import { renderSignalCard } from "./channels.signal.ts";
@@ -27,8 +31,10 @@ export function renderChannels(props: ChannelsProps) {
   const whatsapp = (channels?.whatsapp ?? undefined) as WhatsAppStatus | undefined;
   const telegram = (channels?.telegram ?? undefined) as TelegramStatus | undefined;
   const discord = (channels?.discord ?? null) as DiscordStatus | null;
+  const googlechat = (channels?.googlechat ?? null) as GoogleChatStatus | null;
   const slack = (channels?.slack ?? null) as SlackStatus | null;
   const signal = (channels?.signal ?? null) as SignalStatus | null;
+  const imessage = (channels?.imessage ?? null) as IMessageStatus | null;
   const nostr = (channels?.nostr ?? null) as NostrStatus | null;
   const channelOrder = resolveChannelOrder(props.snapshot);
   const orderedChannels = channelOrder
@@ -46,26 +52,15 @@ export function renderChannels(props: ChannelsProps) {
 
   return html`
     <section class="grid grid-cols-2">
-      ${
-        orderedChannels.length === 0
-          ? html`
-              <div class="card">
-                <div class="card-title">WebChat only</div>
-                <div class="card-sub">
-                  External channel integrations are removed in this build. Use the internal webchat surface to
-                  chat with the gateway.
-                </div>
-              </div>
-            `
-          : nothing
-      }
       ${orderedChannels.map((channel) =>
         renderChannel(channel.key, props, {
           whatsapp,
           telegram,
           discord,
+          googlechat,
           slack,
           signal,
+          imessage,
           nostr,
           channelAccounts: props.snapshot?.channelAccounts ?? null,
         }),
@@ -101,7 +96,7 @@ function resolveChannelOrder(snapshot: ChannelsStatusSnapshot | null): ChannelKe
   if (snapshot?.channelOrder?.length) {
     return snapshot.channelOrder;
   }
-  return [];
+  return ["whatsapp", "telegram", "discord", "googlechat", "slack", "signal", "imessage", "nostr"];
 }
 
 function renderChannel(key: ChannelKey, props: ChannelsProps, data: ChannelsChannelData) {
@@ -126,6 +121,12 @@ function renderChannel(key: ChannelKey, props: ChannelsProps, data: ChannelsChan
         discord: data.discord,
         accountCountLabel,
       });
+    case "googlechat":
+      return renderGoogleChatCard({
+        props,
+        googleChat: data.googlechat,
+        accountCountLabel,
+      });
     case "slack":
       return renderSlackCard({
         props,
@@ -136,6 +137,12 @@ function renderChannel(key: ChannelKey, props: ChannelsProps, data: ChannelsChan
       return renderSignalCard({
         props,
         signal: data.signal,
+        accountCountLabel,
+      });
+    case "imessage":
+      return renderIMessageCard({
+        props,
+        imessage: data.imessage,
         accountCountLabel,
       });
     case "nostr": {

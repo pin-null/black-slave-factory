@@ -49,7 +49,7 @@ describe("parseSessionKey", () => {
   it("identifies direct chat with known channel", () => {
     expect(parseSessionKey("agent:main:bluebubbles:direct:+19257864429")).toEqual({
       prefix: "",
-      fallbackName: "BlueBubbles (Legacy) · +19257864429",
+      fallbackName: "iMessage · +19257864429",
     });
   });
 
@@ -77,18 +77,11 @@ describe("parseSessionKey", () => {
   it("identifies channel-prefixed legacy keys", () => {
     expect(parseSessionKey("bluebubbles:g-agent-main-bluebubbles-direct-+19257864429")).toEqual({
       prefix: "",
-      fallbackName: "BlueBubbles (Legacy) Session",
+      fallbackName: "iMessage Session",
     });
     expect(parseSessionKey("discord:123:456")).toEqual({
       prefix: "",
       fallbackName: "Discord Session",
-    });
-  });
-
-  it("identifies legacy imessage sessions", () => {
-    expect(parseSessionKey("agent:main:imessage:direct:+15555550123")).toEqual({
-      prefix: "",
-      fallbackName: "iMessage (Legacy) · +15555550123",
     });
   });
 
@@ -132,7 +125,7 @@ describe("resolveSessionDisplayName", () => {
 
   it("parses direct chat key with channel", () => {
     expect(resolveSessionDisplayName("agent:main:bluebubbles:direct:+19257864429")).toBe(
-      "BlueBubbles (Legacy) · +19257864429",
+      "iMessage · +19257864429",
     );
   });
 

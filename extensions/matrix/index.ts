@@ -1,9 +1,11 @@
 import { defineChannelPluginEntry } from "openclaw/plugin-sdk/core";
 import { matrixPlugin } from "./src/channel.js";
 import { registerMatrixCli } from "./src/cli.js";
+import { createMatrixThreadBindingManager } from "./src/matrix/thread-bindings.js";
 import { setMatrixRuntime } from "./src/runtime.js";
 
 export { matrixPlugin } from "./src/channel.js";
+export { createMatrixThreadBindingManager } from "./src/matrix/thread-bindings.js";
 export { setMatrixRuntime } from "./src/runtime.js";
 
 export default defineChannelPluginEntry({

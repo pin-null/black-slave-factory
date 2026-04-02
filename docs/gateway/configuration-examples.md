@@ -124,6 +124,7 @@ Save to `~/.openclaw/openclaw.json` and you can DM the bot from that number.
         discord: "collect",
         slack: "collect",
         signal: "collect",
+        imessage: "collect",
         webchat: "collect",
       },
     },
@@ -320,6 +321,7 @@ Save to `~/.openclaw/openclaw.json` and you can DM the bot from that number.
         discord: ["123456789012345678"],
         slack: ["U123"],
         signal: ["+15555550123"],
+        imessage: ["user@example.com"],
         webchat: ["session:demo"],
       },
     },
@@ -492,7 +494,7 @@ If more than one person can DM your bot (multiple entries in `allowFrom`, pairin
 }
 ```
 
-For Discord/Slack/MS Teams/Mattermost/IRC, sender authorization is ID-first by default.
+For Discord/Slack/Google Chat/MS Teams/Mattermost/IRC, sender authorization is ID-first by default.
 Only enable direct mutable name/email/nick matching with each channel's `dangerouslyAllowNameMatching: true` if you explicitly accept that risk.
 
 ### OAuth with API key failover
@@ -631,5 +633,5 @@ terms before depending on subscription auth.
 
 - If you set `dmPolicy: "open"`, the matching `allowFrom` list must include `"*"`.
 - Provider IDs differ (phone numbers, user IDs, channel IDs). Use the provider docs to confirm the format.
-- Optional sections to add later: `web`, `browser`, `ui`, `discovery`, `canvasHost`, `talk`, `signal`.
+- Optional sections to add later: `web`, `browser`, `ui`, `discovery`, `canvasHost`, `talk`, `signal`, `imessage`.
 - See [Providers](/providers) and [Troubleshooting](/gateway/troubleshooting) for deeper setup notes.

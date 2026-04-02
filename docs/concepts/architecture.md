@@ -12,7 +12,7 @@ Last updated: 2026-01-22
 ## Overview
 
 - A single long‑lived **Gateway** owns all messaging surfaces (WhatsApp via
-  Baileys, Telegram via grammY, Slack, Discord, Signal, WebChat, plus legacy compatibility bridges when enabled).
+  Baileys, Telegram via grammY, Slack, Discord, Signal, iMessage, WebChat).
 - Control-plane clients (macOS app, CLI, web UI, automations) connect to the
   Gateway over **WebSocket** on the configured bind host (default
   `127.0.0.1:18789`).

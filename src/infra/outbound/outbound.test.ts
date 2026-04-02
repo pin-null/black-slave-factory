@@ -760,7 +760,7 @@ describe("formatOutboundDeliverySummary", () => {
         name: "fallback imessage",
         channel: "imessage" as const,
         result: undefined,
-        expected: "✅ Sent via iMessage (Legacy). Message ID: unknown",
+        expected: "✅ Sent via iMessage. Message ID: unknown",
       },
       {
         name: "telegram with chat detail",

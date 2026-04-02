@@ -41,21 +41,11 @@ export type SessionBindingUnbindInput = {
   reason: string;
 };
 
-export type SessionBindingSetIdleTimeoutInput = {
-  targetSessionKey: string;
-  idleTimeoutMs: number;
-};
-
-export type SessionBindingSetMaxAgeInput = {
-  targetSessionKey: string;
-  maxAgeMs: number;
-};
-
 export type SessionBindingCapabilities = {
   adapterAvailable: boolean;
   bindSupported: boolean;
   unbindSupported: boolean;
-  placements: readonly SessionBindingPlacement[];
+  placements: SessionBindingPlacement[];
 };
 
 export class SessionBindingError extends Error {
@@ -87,7 +77,7 @@ export type SessionBindingService = {
 };
 
 export type SessionBindingAdapterCapabilities = {
-  placements?: readonly SessionBindingPlacement[];
+  placements?: SessionBindingPlacement[];
   bindSupported?: boolean;
   unbindSupported?: boolean;
 };
@@ -99,8 +89,6 @@ export type SessionBindingAdapter = {
   bind?: (input: SessionBindingBindInput) => Promise<SessionBindingRecord | null>;
   listBySession: (targetSessionKey: string) => SessionBindingRecord[];
   resolveByConversation: (ref: ConversationRef) => SessionBindingRecord | null;
-  setIdleTimeoutBySession?: (input: SessionBindingSetIdleTimeoutInput) => SessionBindingRecord[];
-  setMaxAgeBySession?: (input: SessionBindingSetMaxAgeInput) => SessionBindingRecord[];
   touch?: (bindingId: string, at?: number) => void;
   unbind?: (input: SessionBindingUnbindInput) => Promise<SessionBindingRecord[]>;
 };

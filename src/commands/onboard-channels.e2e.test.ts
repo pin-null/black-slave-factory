@@ -1,5 +1,4 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { shouldExposeChannelInEntryPoints } from "../channels/entry-point-visibility.js";
 import type { ChannelPluginCatalogEntry } from "../channels/plugins/catalog.js";
 import type { OpenClawConfig } from "../config/config.js";
 import { createEmptyPluginRegistry } from "../plugins/registry.js";
@@ -24,11 +23,6 @@ const catalogMocks = vi.hoisted(() => ({
 const manifestRegistryMocks = vi.hoisted(() => ({
   loadPluginManifestRegistry: vi.fn(() => ({ plugins: [], diagnostics: [] })),
 }));
-
-const EXTERNAL_CHANNEL_SETUP_RETAINED = shouldExposeChannelInEntryPoints({
-  cfg: {},
-  meta: { id: "telegram", deprecated: false },
-});
 
 function createPrompter(overrides: Partial<WizardPrompter>): WizardPrompter {
   return createWizardPrompter(
@@ -234,7 +228,7 @@ vi.mock("./channel-setup/plugin-install.js", async (importOriginal) => {
   };
 });
 
-describe.skipIf(!EXTERNAL_CHANNEL_SETUP_RETAINED)("setupChannels", () => {
+describe("setupChannels", () => {
   beforeEach(() => {
     setDefaultChannelPluginRegistryForTests();
     catalogMocks.listChannelPluginCatalogEntries.mockReset();
@@ -902,29 +896,5 @@ describe.skipIf(!EXTERNAL_CHANNEL_SETUP_RETAINED)("setupChannels", () => {
     } finally {
       restore();
     }
-  });
-});
-
-describe.skipIf(EXTERNAL_CHANNEL_SETUP_RETAINED)("setupChannels webchat-only build", () => {
-  it("shows the webchat-only note and skips channel prompts when no external channels are exposed", async () => {
-    const note = vi.fn(async () => {});
-    const confirm = vi.fn(async () => {
-      throw new Error("confirm should not run when only webchat is retained");
-    });
-    const prompter = createPrompter({ note, confirm });
-
-    const cfg = await setupChannels({} as OpenClawConfig, createExitThrowingRuntime(), prompter, {
-      skipConfirm: false,
-    });
-
-    expect(cfg).toEqual({});
-    expect(note).toHaveBeenCalledWith(
-      [
-        "External chat channels are not part of this build.",
-        "The only retained chat surface is the internal webchat UI.",
-      ].join("\n"),
-      "WebChat only",
-    );
-    expect(confirm).not.toHaveBeenCalled();
   });
 });

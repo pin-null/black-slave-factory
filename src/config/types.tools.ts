@@ -139,6 +139,9 @@ export type MediaToolsConfig = {
   video?: MediaUnderstandingConfig;
 };
 
+export const PERMISSION_TIERS = ["chat", "readonly", "readwrite", "dangerous"] as const;
+export type PermissionTier = (typeof PERMISSION_TIERS)[number];
+
 export type ToolProfileId = "minimal" | "coding" | "messaging" | "full";
 
 export type ToolLoopDetectionDetectorConfig = {
@@ -168,6 +171,8 @@ export type ToolLoopDetectionConfig = {
 export type SessionsToolsVisibility = "self" | "tree" | "agent" | "all";
 
 export type ToolPolicyConfig = {
+  /** Hard upper bound for tool capability level. */
+  permissionTier?: PermissionTier;
   allow?: string[];
   /**
    * Additional allowlist entries merged into the effective allowlist.
@@ -181,6 +186,8 @@ export type ToolPolicyConfig = {
 };
 
 export type GroupToolPolicyConfig = {
+  /** Hard upper bound for group-facing tool capability level. */
+  permissionTier?: PermissionTier;
   allow?: string[];
   /** Additional allowlist entries merged into allow. */
   alsoAllow?: string[];
@@ -282,56 +289,9 @@ export type FsToolsConfig = {
   workspaceOnly?: boolean;
 };
 
-export type SecurityFirewallRuleAction = "block" | "approval" | "audit";
-
-export type SecurityFirewallRule = {
-  /** Stable rule id used in logs/debugging. */
-  id?: string;
-  /** What to do when the rule matches. */
-  action: SecurityFirewallRuleAction;
-  /** Optional tool-name glob(s) such as "read" or "web_*". */
-  tools?: string[];
-  /** Optional sender-id glob(s). */
-  senderIds?: string[];
-  /** Only match when the sender is an owner. */
-  ownerOnly?: boolean;
-  /** Match when the inbound request text contains one of these fragments. */
-  requestContains?: string[];
-  /** Match when extracted shell/command text contains one of these fragments. */
-  commandContains?: string[];
-  /** Match when extracted path params live under one of these prefixes. */
-  pathPrefixes?: string[];
-  /** Match when extracted paths resolve outside the agent workspace. */
-  outsideWorkspace?: boolean;
-  /** Match when extracted URL hosts are in this list. */
-  urlHosts?: string[];
-  /** Optional operator-facing reason included in block/audit output. */
-  reason?: string;
-};
-
-export type SecurityFirewallConfig = {
-  /** Enable the built-in pre-tool-call security firewall. */
-  enabled?: boolean;
-  /** Optional bundled baseline profile. */
-  profile?: "office";
-  /** Allow owners to bypass firewall matches. Default: false. */
-  ownerBypass?: boolean;
-  /**
-   * Extra system-prompt guidance appended on inbound runs to keep the model
-   * inside the approved office-task lane.
-   */
-  promptGuard?: string;
-  audit?: {
-    /** Write JSONL audit entries for matched rules. Default: true when enabled. */
-    enabled?: boolean;
-    /** Optional JSONL destination path. Defaults under ~/.openclaw/logs/. */
-    path?: string;
-  };
-  /** Operator-defined rule list evaluated before profile defaults. */
-  rules?: SecurityFirewallRule[];
-};
-
 export type AgentToolsConfig = {
+  /** Hard upper bound for tool capability level. */
+  permissionTier?: PermissionTier;
   /** Base tool profile applied before allow/deny lists. */
   profile?: ToolProfileId;
   allow?: string[];
@@ -355,6 +315,7 @@ export type AgentToolsConfig = {
   loopDetection?: ToolLoopDetectionConfig;
   sandbox?: {
     tools?: {
+      permissionTier?: PermissionTier;
       allow?: string[];
       deny?: string[];
     };
@@ -502,6 +463,8 @@ type WebSearchLegacyProviderConfig = {
 };
 
 export type ToolsConfig = {
+  /** Hard upper bound for tool capability level. */
+  permissionTier?: PermissionTier;
   /** Base tool profile applied before allow/deny lists. */
   profile?: ToolProfileId;
   allow?: string[];
@@ -631,8 +594,6 @@ export type ToolsConfig = {
   exec?: ExecToolConfig;
   /** Filesystem tool path guards. */
   fs?: FsToolsConfig;
-  /** Built-in pre-tool-call security firewall. */
-  securityFirewall?: SecurityFirewallConfig;
   /** Runtime loop detection for repetitive/ stuck tool-call patterns. */
   loopDetection?: ToolLoopDetectionConfig;
   /** Sub-agent tool policy defaults (deny wins). */
@@ -640,6 +601,8 @@ export type ToolsConfig = {
     /** Default model selection for spawned sub-agents (string or {primary,fallbacks}). */
     model?: string | { primary?: string; fallbacks?: string[] };
     tools?: {
+      /** Hard upper bound for child-session tool capability level. */
+      permissionTier?: PermissionTier;
       allow?: string[];
       /** Additional allowlist entries merged into allow and/or default sub-agent denylist. */
       alsoAllow?: string[];
@@ -649,6 +612,7 @@ export type ToolsConfig = {
   /** Sandbox tool policy defaults (deny wins). */
   sandbox?: {
     tools?: {
+      permissionTier?: PermissionTier;
       allow?: string[];
       deny?: string[];
     };

@@ -250,9 +250,7 @@ export async function sendBlueBubblesMedia(params: {
   } else {
     const source = mediaPath ?? mediaUrl;
     if (!source) {
-      throw new Error(
-        "BlueBubbles (Legacy) media delivery requires mediaUrl, mediaPath, or mediaBuffer.",
-      );
+      throw new Error("BlueBubbles media delivery requires mediaUrl, mediaPath, or mediaBuffer.");
     }
     if (HTTP_URL_RE.test(source)) {
       const fetched = await core.channel.media.fetchRemoteMedia({

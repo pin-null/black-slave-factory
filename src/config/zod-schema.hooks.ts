@@ -1,5 +1,6 @@
 import path from "node:path";
 import { z } from "zod";
+import { ToolPermissionTierSchema } from "./zod-schema.agent-runtime.js";
 import { InstallRecordShape } from "./zod-schema.installs.js";
 import { sensitive } from "./zod-schema.sensitive.js";
 
@@ -41,6 +42,7 @@ export const HookMappingSchema = z
       })
       .optional(),
     action: z.union([z.literal("wake"), z.literal("agent")]).optional(),
+    permissionTier: ToolPermissionTierSchema,
     wakeMode: z.union([z.literal("now"), z.literal("next-heartbeat")]).optional(),
     name: z.string().optional(),
     agentId: z.string().optional(),

@@ -14,6 +14,7 @@ import {
   resolveStoredSubagentCapabilities,
   type SubagentSessionRole,
 } from "./subagent-capabilities.js";
+import { minPermissionTier } from "./tool-permission-tier.js";
 import { isToolAllowedByPolicies, isToolAllowedByPolicyName } from "./tool-policy-match.js";
 import { normalizeToolName } from "./tool-policy.js";
 
@@ -89,7 +90,7 @@ export function resolveSubagentToolPolicy(cfg?: OpenClawConfig, depth?: number):
     ...(Array.isArray(configured?.deny) ? configured.deny : []),
   ];
   const mergedAllow = allow && alsoAllow ? Array.from(new Set([...allow, ...alsoAllow])) : allow;
-  return { allow: mergedAllow, deny };
+  return { permissionTier: configured?.permissionTier, allow: mergedAllow, deny };
 }
 
 export function resolveSubagentToolPolicyForSession(
@@ -110,7 +111,7 @@ export function resolveSubagentToolPolicyForSession(
     ...(Array.isArray(configured?.deny) ? configured.deny : []),
   ];
   const mergedAllow = allow && alsoAllow ? Array.from(new Set([...allow, ...alsoAllow])) : allow;
-  return { allow: mergedAllow, deny };
+  return { permissionTier: configured?.permissionTier, allow: mergedAllow, deny };
 }
 
 export function filterToolsByPolicy(tools: AnyAgentTool[], policy?: SandboxToolPolicy) {
@@ -285,6 +286,28 @@ export function resolveEffectiveToolPolicy(params: {
         ? providerPolicy?.alsoAllow
         : undefined,
   };
+}
+
+export function resolveEffectivePermissionTier(params: {
+  globalPolicy?: SandboxToolPolicy;
+  globalProviderPolicy?: SandboxToolPolicy;
+  agentPolicy?: SandboxToolPolicy;
+  agentProviderPolicy?: SandboxToolPolicy;
+  sessionPolicy?: SandboxToolPolicy;
+  groupPolicy?: SandboxToolPolicy;
+  sandboxPolicy?: SandboxToolPolicy;
+  subagentPolicy?: SandboxToolPolicy;
+}): import("../config/types.tools.js").PermissionTier | undefined {
+  return minPermissionTier(
+    params.globalPolicy?.permissionTier,
+    params.globalProviderPolicy?.permissionTier,
+    params.agentPolicy?.permissionTier,
+    params.agentProviderPolicy?.permissionTier,
+    params.sessionPolicy?.permissionTier,
+    params.groupPolicy?.permissionTier,
+    params.sandboxPolicy?.permissionTier,
+    params.subagentPolicy?.permissionTier,
+  );
 }
 
 export function resolveGroupToolPolicy(params: {

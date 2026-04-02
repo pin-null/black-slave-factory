@@ -10,7 +10,7 @@ private let channelLabels = [
     "whatsapp": "WhatsApp",
     "telegram": "Telegram",
     "signal": "Signal",
-    "imessage": "iMessage (Legacy)",
+    "imessage": "iMessage",
 ]
 private let channelDefaultAccountId = [
     "whatsapp": "default",

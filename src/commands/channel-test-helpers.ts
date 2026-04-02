@@ -2,10 +2,8 @@ import { matrixPlugin, setMatrixRuntime } from "../../extensions/matrix/index.js
 import { msteamsPlugin } from "../../extensions/msteams/index.js";
 import { nostrPlugin } from "../../extensions/nostr/index.js";
 import { tlonPlugin } from "../../extensions/tlon/index.js";
-import { whatsappPlugin, setWhatsAppRuntime } from "../../extensions/whatsapp/index.js";
 import { bundledChannelPlugins } from "../channels/plugins/bundled.js";
 import { setActivePluginRegistry } from "../plugins/runtime.js";
-import { createPluginRuntime } from "../plugins/runtime/index.js";
 import { createTestRegistry } from "../test-utils/channel-plugins.js";
 import { getChannelSetupWizardAdapter } from "./channel-setup/registry.js";
 import type { ChannelSetupWizardAdapter } from "./channel-setup/types.js";
@@ -31,24 +29,17 @@ type PatchedSetupAdapterFields = {
 };
 
 export function setDefaultChannelPluginRegistryForTests(): void {
-  const runtime = createPluginRuntime();
-  const runtimeWithTmpState = {
-    ...runtime,
+  setMatrixRuntime({
     state: {
-      ...runtime.state,
-      resolveStateDir: (_env: NodeJS.ProcessEnv | undefined, homeDir?: () => string) =>
-        (homeDir ?? (() => "/tmp"))(),
+      resolveStateDir: (_env, homeDir) => (homeDir ?? (() => "/tmp"))(),
     },
-  } as Parameters<typeof setMatrixRuntime>[0];
-  setMatrixRuntime(runtimeWithTmpState);
-  setWhatsAppRuntime(runtimeWithTmpState);
+  } as Parameters<typeof setMatrixRuntime>[0]);
   const channels = [
     ...bundledChannelPlugins,
     matrixPlugin,
     msteamsPlugin,
     nostrPlugin,
     tlonPlugin,
-    whatsappPlugin,
   ].map((plugin) => ({
     pluginId: plugin.id,
     plugin,

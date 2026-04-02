@@ -137,7 +137,7 @@ export async function sendMessageIMessage(
   }
 
   if (!message.trim() && !filePath) {
-    throw new Error("iMessage (Legacy) send requires text or media");
+    throw new Error("iMessage send requires text or media");
   }
   if (message.trim()) {
     const tableMode = resolveMarkdownTableMode({

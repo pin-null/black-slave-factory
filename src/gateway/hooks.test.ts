@@ -119,10 +119,10 @@ describe("gateway hooks helpers", () => {
         },
       ]),
     );
-    const imessage = normalizeAgentPayload({ message: "yo", channel: "imessage" });
-    expect(imessage.ok).toBe(true);
-    if (imessage.ok) {
-      expect(imessage.value.channel).toBe("imessage");
+    const imsg = normalizeAgentPayload({ message: "yo", channel: "imsg" });
+    expect(imsg.ok).toBe(true);
+    if (imsg.ok) {
+      expect(imsg.value.channel).toBe("imessage");
     }
 
     setActivePluginRegistry(

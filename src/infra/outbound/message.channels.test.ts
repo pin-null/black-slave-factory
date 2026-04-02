@@ -47,10 +47,11 @@ describe("sendMessage channel normalization", () => {
       id: "imessage",
       meta: {
         id: "imessage",
-        label: "iMessage (Legacy)",
-        selectionLabel: "iMessage (Legacy)",
-        docsPath: "/gateway/configuration-reference#imessage",
-        blurb: "Legacy iMessage test stub.",
+        label: "iMessage",
+        selectionLabel: "iMessage",
+        docsPath: "/channels/imessage",
+        blurb: "iMessage test stub.",
+        aliases: ["imsg"],
       },
       capabilities: { chatTypes: ["direct"] },
       config: {
@@ -93,7 +94,7 @@ describe("sendMessage channel normalization", () => {
       cfg: resolvedCfg,
       to: " imessage:+15551234567 ",
       content: "hi",
-      channel: "imessage",
+      channel: "imsg",
     });
 
     expect(result.channel).toBe("imessage");
@@ -131,7 +132,7 @@ describe("sendMessage channel normalization", () => {
       expectedChannel: "msteams",
     },
     {
-      name: "accepts explicit iMessage channel ids",
+      name: "normalizes iMessage aliases",
       registry: createTestRegistry([
         {
           pluginId: "imessage",
@@ -141,7 +142,7 @@ describe("sendMessage channel normalization", () => {
       ]),
       params: {
         to: "someone@example.com",
-        channel: "imessage",
+        channel: "imsg",
         deps: {
           sendIMessage: vi.fn(async () => ({ messageId: "i1" })),
         },

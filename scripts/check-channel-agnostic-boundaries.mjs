@@ -37,6 +37,7 @@ const systemMarkLiteralGuardSources = [
 const channelIds = [
   "bluebubbles",
   "discord",
+  "googlechat",
   "imessage",
   "irc",
   "line",

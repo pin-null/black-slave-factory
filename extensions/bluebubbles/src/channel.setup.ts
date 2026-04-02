@@ -15,17 +15,16 @@ import { normalizeBlueBubblesHandle } from "./targets.js";
 
 const meta = {
   id: "bluebubbles",
-  label: "BlueBubbles (Legacy)",
-  selectionLabel: "BlueBubbles (Legacy macOS app)",
-  detailLabel: "BlueBubbles (Legacy)",
-  docsPath: "/gateway/configuration-reference#bluebubbles",
+  label: "BlueBubbles",
+  selectionLabel: "BlueBubbles (macOS app)",
+  detailLabel: "BlueBubbles",
+  docsPath: "/channels/bluebubbles",
   docsLabel: "bluebubbles",
-  blurb: "Legacy macOS-only iMessage compatibility via the BlueBubbles app + REST API.",
+  blurb: "iMessage via the BlueBubbles mac app + REST API.",
   systemImage: "bubble.left.and.text.bubble.right",
   aliases: ["bb"],
   order: 75,
   preferOver: ["imessage"],
-  deprecated: true,
 } as const;
 
 const bluebubblesConfigAdapter = createScopedChannelConfigAdapter<ResolvedBlueBubblesAccount>({

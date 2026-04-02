@@ -1,3 +1,4 @@
+import * as bluebubblesSdk from "openclaw/plugin-sdk/bluebubbles";
 import * as channelPairingSdk from "openclaw/plugin-sdk/channel-pairing";
 import * as channelReplyPipelineSdk from "openclaw/plugin-sdk/channel-reply-pipeline";
 import * as channelRuntimeSdk from "openclaw/plugin-sdk/channel-runtime";
@@ -11,6 +12,7 @@ import type {
 } from "openclaw/plugin-sdk/core";
 import * as directoryRuntimeSdk from "openclaw/plugin-sdk/directory-runtime";
 import * as discordSdk from "openclaw/plugin-sdk/discord";
+import * as imessageSdk from "openclaw/plugin-sdk/imessage";
 import * as imessageCoreSdk from "openclaw/plugin-sdk/imessage-core";
 import * as lazyRuntimeSdk from "openclaw/plugin-sdk/lazy-runtime";
 import * as ollamaSetupSdk from "openclaw/plugin-sdk/ollama-setup";
@@ -228,13 +230,18 @@ describe("plugin-sdk subpath exports", () => {
     expect("resolveTelegramAccount" in asExports(telegramSdk)).toBe(false);
   });
 
+  it("exports iMessage helpers", () => {
+    expect(typeof imessageSdk.IMessageConfigSchema).toBe("object");
+    expect(typeof imessageSdk.resolveIMessageConfigAllowFrom).toBe("function");
+    expect(typeof imessageSdk.looksLikeIMessageTargetId).toBe("function");
+    expect("resolveIMessageAccount" in asExports(imessageSdk)).toBe(false);
+  });
+
   it("exports iMessage core helpers", () => {
     expect(typeof imessageCoreSdk.buildChannelConfigSchema).toBe("function");
     expect(typeof imessageCoreSdk.parseChatTargetPrefixesOrThrow).toBe("function");
     expect(typeof imessageCoreSdk.resolveServicePrefixedTarget).toBe("function");
     expect(typeof imessageCoreSdk.IMessageConfigSchema).toBe("object");
-    expect(typeof imessageCoreSdk.looksLikeIMessageTargetId).toBe("function");
-    expect("resolveIMessageAccount" in asExports(imessageCoreSdk)).toBe(false);
   });
 
   it("exports WhatsApp helpers", () => {
@@ -252,6 +259,10 @@ describe("plugin-sdk subpath exports", () => {
 
   it("exports WhatsApp action runtime helpers from the dedicated subpath", () => {
     expect(typeof whatsappActionRuntimeSdk.handleWhatsAppAction).toBe("function");
+  });
+
+  it("keeps the remaining bundled helper surface narrow", () => {
+    expect(typeof bluebubblesSdk.parseFiniteNumber).toBe("function");
   });
 
   it("resolves every curated public subpath", async () => {

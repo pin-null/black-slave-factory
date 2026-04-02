@@ -599,7 +599,7 @@ describe("message tool description", () => {
   const bluebubblesPlugin = createChannelPlugin({
     id: "bluebubbles",
     label: "BlueBubbles",
-    docsPath: "/gateway/configuration-reference#bluebubbles",
+    docsPath: "/channels/bluebubbles",
     blurb: "BlueBubbles test plugin.",
     describeMessageTool: ({ currentChannelId }) => {
       const all: ChannelMessageActionName[] = [

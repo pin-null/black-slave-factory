@@ -65,21 +65,3 @@ describe("resolveOpenClawMetadata install validation", () => {
     expect(install).toBeUndefined();
   });
 });
-
-describe("resolveOpenClawMetadata categories", () => {
-  it("parses category lists from metadata.openclaw.categories", () => {
-    const metadata = resolveOpenClawMetadata({
-      metadata: '{"openclaw":{"categories":["office","calendar"]}}',
-    });
-
-    expect(metadata?.categories).toEqual(["office", "calendar"]);
-  });
-
-  it("accepts a singular category field", () => {
-    const metadata = resolveOpenClawMetadata({
-      metadata: '{"openclaw":{"category":"office"}}',
-    });
-
-    expect(metadata?.categories).toEqual(["office"]);
-  });
-});

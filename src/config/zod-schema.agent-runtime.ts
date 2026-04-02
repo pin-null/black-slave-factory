@@ -244,6 +244,14 @@ export const SandboxPruneSchema = z
 
 const ToolPolicyBaseSchema = z
   .object({
+    permissionTier: z
+      .union([
+        z.literal("chat"),
+        z.literal("readonly"),
+        z.literal("readwrite"),
+        z.literal("dangerous"),
+      ])
+      .optional(),
     allow: z.array(z.string()).optional(),
     alsoAllow: z.array(z.string()).optional(),
     deny: z.array(z.string()).optional(),
@@ -359,6 +367,10 @@ export const ToolProfileSchema = z
   .union([z.literal("minimal"), z.literal("coding"), z.literal("messaging"), z.literal("full")])
   .optional();
 
+export const ToolPermissionTierSchema = z
+  .union([z.literal("chat"), z.literal("readonly"), z.literal("readwrite"), z.literal("dangerous")])
+  .optional();
+
 type AllowlistPolicy = {
   allow?: string[];
   alsoAllow?: string[];
@@ -379,6 +391,7 @@ function addAllowAlsoAllowConflictIssue(
 
 export const ToolPolicyWithProfileSchema = z
   .object({
+    permissionTier: ToolPermissionTierSchema,
     allow: z.array(z.string()).optional(),
     alsoAllow: z.array(z.string()).optional(),
     deny: z.array(z.string()).optional(),
@@ -546,46 +559,13 @@ export const AgentSandboxSchema = z
   .optional();
 
 const CommonToolPolicyFields = {
+  permissionTier: ToolPermissionTierSchema,
   profile: ToolProfileSchema,
   allow: z.array(z.string()).optional(),
   alsoAllow: z.array(z.string()).optional(),
   deny: z.array(z.string()).optional(),
   byProvider: z.record(z.string(), ToolPolicyWithProfileSchema).optional(),
 };
-
-const SecurityFirewallRuleSchema = z
-  .object({
-    id: z.string().optional(),
-    action: z.union([z.literal("block"), z.literal("approval"), z.literal("audit")]),
-    tools: z.array(z.string()).optional(),
-    senderIds: z.array(z.string()).optional(),
-    ownerOnly: z.boolean().optional(),
-    requestContains: z.array(z.string()).optional(),
-    commandContains: z.array(z.string()).optional(),
-    pathPrefixes: z.array(z.string()).optional(),
-    outsideWorkspace: z.boolean().optional(),
-    urlHosts: z.array(z.string()).optional(),
-    reason: z.string().optional(),
-  })
-  .strict();
-
-const SecurityFirewallSchema = z
-  .object({
-    enabled: z.boolean().optional(),
-    profile: z.literal("office").optional(),
-    ownerBypass: z.boolean().optional(),
-    promptGuard: z.string().optional(),
-    audit: z
-      .object({
-        enabled: z.boolean().optional(),
-        path: z.string().optional(),
-      })
-      .strict()
-      .optional(),
-    rules: z.array(SecurityFirewallRuleSchema).optional(),
-  })
-  .strict()
-  .optional();
 
 export const AgentToolsSchema = z
   .object({
@@ -888,7 +868,6 @@ export const ToolsSchema = z
       .optional(),
     exec: ToolExecSchema,
     fs: ToolFsSchema,
-    securityFirewall: SecurityFirewallSchema,
     subagents: z
       .object({
         tools: ToolPolicySchema,

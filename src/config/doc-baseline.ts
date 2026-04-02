@@ -1,9 +1,8 @@
-import { execFile } from "node:child_process";
+import { spawnSync } from "node:child_process";
 import fsSync from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { promisify } from "node:util";
 import type { ChannelPlugin } from "../channels/plugins/index.js";
 import { resolveOpenClawPackageRootSync } from "../infra/openclaw-root.js";
 import { loadPluginManifestRegistry } from "../plugins/manifest-registry.js";
@@ -81,10 +80,7 @@ export type ConfigDocBaselineStatefileWriteResult = {
 const GENERATED_BY = "scripts/generate-config-doc-baseline.ts" as const;
 const DEFAULT_JSON_OUTPUT = "docs/.generated/config-baseline.json";
 const DEFAULT_STATEFILE_OUTPUT = "docs/.generated/config-baseline.jsonl";
-const CHANNEL_CONFIG_SURFACE_TIMEOUT_MS = 15_000;
-const CHANNEL_CONFIG_SURFACE_MAX_BUFFER = 10 * 1024 * 1024;
 let cachedConfigDocBaselinePromise: Promise<ConfigDocBaseline> | null = null;
-const execFileAsync = promisify(execFile);
 
 function logConfigDocBaselineDebug(message: string): void {
   if (process.env.OPENCLAW_CONFIG_DOC_BASELINE_DEBUG === "1") {
@@ -403,7 +399,7 @@ async function importChannelSurfaceMetadata(
   logConfigDocBaselineDebug(`import channel config schema ${modulePath}`);
   try {
     logConfigDocBaselineDebug(`spawn channel config schema subprocess ${modulePath}`);
-    const result = await execFileAsync(
+    const result = spawnSync(
       process.execPath,
       [
         "--import",
@@ -415,10 +411,13 @@ async function importChannelSurfaceMetadata(
         cwd: repoRoot,
         encoding: "utf8",
         env,
-        timeout: CHANNEL_CONFIG_SURFACE_TIMEOUT_MS,
-        maxBuffer: CHANNEL_CONFIG_SURFACE_MAX_BUFFER,
+        timeout: 15_000,
+        maxBuffer: 10 * 1024 * 1024,
       },
     );
+    if (result.status !== 0 || result.error) {
+      throw result.error ?? new Error(result.stderr || `child exited with status ${result.status}`);
+    }
     logConfigDocBaselineDebug(`completed channel config schema subprocess ${modulePath}`);
     const configSchema = JSON.parse(result.stdout) as {
       schema: Record<string, unknown>;

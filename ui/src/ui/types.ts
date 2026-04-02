@@ -148,6 +148,28 @@ export type DiscordStatus = {
   lastProbeAt?: number | null;
 };
 
+export type GoogleChatProbe = {
+  ok: boolean;
+  status?: number | null;
+  error?: string | null;
+  elapsedMs?: number | null;
+};
+
+export type GoogleChatStatus = {
+  configured: boolean;
+  credentialSource?: string | null;
+  audienceType?: string | null;
+  audience?: string | null;
+  webhookPath?: string | null;
+  webhookUrl?: string | null;
+  running: boolean;
+  lastStartAt?: number | null;
+  lastStopAt?: number | null;
+  lastError?: string | null;
+  probe?: GoogleChatProbe | null;
+  lastProbeAt?: number | null;
+};
+
 export type SlackBot = {
   id?: string | null;
   name?: string | null;
@@ -195,6 +217,23 @@ export type SignalStatus = {
   lastStopAt?: number | null;
   lastError?: string | null;
   probe?: SignalProbe | null;
+  lastProbeAt?: number | null;
+};
+
+export type IMessageProbe = {
+  ok: boolean;
+  error?: string | null;
+};
+
+export type IMessageStatus = {
+  configured: boolean;
+  running: boolean;
+  lastStartAt?: number | null;
+  lastStopAt?: number | null;
+  lastError?: string | null;
+  cliPath?: string | null;
+  dbPath?: string | null;
+  probe?: IMessageProbe | null;
   lastProbeAt?: number | null;
 };
 

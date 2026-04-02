@@ -127,6 +127,35 @@ describe("gateway sessions patch", () => {
     expect(entry.thinkingLevel).toBeUndefined();
   });
 
+  test("persists permissionTier and clears it with null", async () => {
+    const entry = expectPatchOk(
+      await runPatch({
+        patch: { key: MAIN_SESSION_KEY, permissionTier: "readonly" },
+      }),
+    );
+    expect(entry.permissionTier).toBe("readonly");
+
+    const cleared = expectPatchOk(
+      await runPatch({
+        store: {
+          [MAIN_SESSION_KEY]: { permissionTier: "readonly" } as SessionEntry,
+        },
+        patch: { key: MAIN_SESSION_KEY, permissionTier: null },
+      }),
+    );
+    expect(cleared.permissionTier).toBeUndefined();
+  });
+
+  test("rejects invalid permissionTier values", async () => {
+    const result = await runPatch({
+      patch: {
+        key: MAIN_SESSION_KEY,
+        permissionTier: "admin" as unknown as NonNullable<SessionEntry["permissionTier"]>,
+      },
+    });
+    expectPatchError(result, "invalid permissionTier");
+  });
+
   test("persists reasoningLevel=off (does not clear)", async () => {
     const entry = expectPatchOk(
       await runPatch({

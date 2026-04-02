@@ -36,7 +36,5 @@ export async function assertMultipartActionOk(response: Response, action: string
     return;
   }
   const errorText = await response.text().catch(() => "");
-  throw new Error(
-    `BlueBubbles (Legacy) ${action} failed (${response.status}): ${errorText || "unknown"}`,
-  );
+  throw new Error(`BlueBubbles ${action} failed (${response.status}): ${errorText || "unknown"}`);
 }
